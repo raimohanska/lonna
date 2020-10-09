@@ -1,3 +1,4 @@
+"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -46,176 +47,165 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.atom = exports.view = exports.StatefulDependentAtom = void 0;
+var L = __importStar(require("./lens"));
+var abstractions_1 = require("./abstractions");
+var dispatcher_1 = require("./dispatcher");
+var scope_1 = require("./scope");
+var util_1 = require("./util");
+var RootAtom = /** @class */ (function (_super) {
+    __extends(RootAtom, _super);
+    function RootAtom(desc, initialValue) {
+        var _this = _super.call(this, desc) || this;
+        _this.dispatcher = new dispatcher_1.Dispatcher();
+        _this.value = initialValue;
+        return _this;
     }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./lens", "./abstractions", "./dispatcher", "./scope", "./util"], factory);
+    RootAtom.prototype.on = function (event, observer) {
+        var unsub = this.dispatcher.on(event, observer);
+        if (event === "value") {
+            observer(this.get());
+        }
+        return unsub;
+    };
+    RootAtom.prototype.get = function () {
+        return this.value;
+    };
+    RootAtom.prototype.set = function (newValue) {
+        this.value = newValue;
+        this.dispatcher.dispatch("value", newValue);
+        this.dispatcher.dispatch("change", newValue);
+    };
+    RootAtom.prototype.modify = function (fn) {
+        this.set(fn(this.value));
+    };
+    RootAtom.prototype.scope = function () {
+        return scope_1.globalScope;
+    };
+    return RootAtom;
+}(abstractions_1.Atom));
+var LensedAtom = /** @class */ (function (_super) {
+    __extends(LensedAtom, _super);
+    function LensedAtom(desc, root, view) {
+        var _this = _super.call(this, desc) || this;
+        _this.root = root;
+        _this.lens = view;
+        return _this;
     }
-})(function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.atom = exports.view = exports.StatefulDependentAtom = void 0;
-    var L = __importStar(require("./lens"));
-    var abstractions_1 = require("./abstractions");
-    var dispatcher_1 = require("./dispatcher");
-    var scope_1 = require("./scope");
-    var util_1 = require("./util");
-    var RootAtom = /** @class */ (function (_super) {
-        __extends(RootAtom, _super);
-        function RootAtom(desc, initialValue) {
-            var _this = _super.call(this, desc) || this;
-            _this.dispatcher = new dispatcher_1.Dispatcher();
-            _this.value = initialValue;
-            return _this;
+    LensedAtom.prototype.get = function () {
+        return this.lens.get(this.root.get());
+    };
+    LensedAtom.prototype.set = function (newValue) {
+        this.root.set(this.lens.set(this.root.get(), newValue));
+    };
+    LensedAtom.prototype.modify = function (fn) {
+        var _this = this;
+        this.root.modify(function (oldRoot) { return _this.lens.set(oldRoot, fn(_this.lens.get(oldRoot))); });
+    };
+    LensedAtom.prototype.on = function (event, observer) {
+        var _this = this;
+        var unsub = this.root.on("change", function (newRoot) {
+            statefulObserver(_this.lens.get(newRoot));
+        });
+        var initial = this.get();
+        var statefulObserver = util_1.duplicateSkippingObserver(initial, observer);
+        if (event === "value") {
+            observer(initial);
         }
-        RootAtom.prototype.on = function (event, observer) {
-            var unsub = this.dispatcher.on(event, observer);
-            if (event === "value") {
-                observer(this.get());
-            }
-            return unsub;
+        return unsub;
+    };
+    LensedAtom.prototype.scope = function () {
+        return this.root.scope();
+    };
+    return LensedAtom;
+}(abstractions_1.Atom));
+var DependentAtom = /** @class */ (function (_super) {
+    __extends(DependentAtom, _super);
+    function DependentAtom(desc, input, onChange) {
+        var _this = _super.call(this, desc) || this;
+        _this.input = input;
+        _this.onChange = onChange;
+        return _this;
+    }
+    DependentAtom.prototype.get = function () {
+        return this.input.get();
+    };
+    DependentAtom.prototype.set = function (newValue) {
+        this.onChange(newValue);
+    };
+    DependentAtom.prototype.modify = function (fn) {
+        this.set(fn(this.get()));
+    };
+    DependentAtom.prototype.on = function (event, observer) {
+        return this.input.on(event, observer);
+    };
+    DependentAtom.prototype.scope = function () {
+        return this.input.scope();
+    };
+    return DependentAtom;
+}(abstractions_1.Atom));
+var StatefulDependentAtom = /** @class */ (function (_super) {
+    __extends(StatefulDependentAtom, _super);
+    function StatefulDependentAtom(seed, scope) {
+        var _this = _super.call(this, seed.desc) || this;
+        _this.dispatcher = new dispatcher_1.Dispatcher();
+        _this.value = scope_1.beforeScope;
+        _this._scope = scope;
+        _this.set = seed.set;
+        var meAsObserver = function (newValue) {
+            _this.value = newValue;
+            _this.dispatcher.dispatch("change", newValue);
+            _this.dispatcher.dispatch("value", newValue);
         };
-        RootAtom.prototype.get = function () {
-            return this.value;
-        };
-        RootAtom.prototype.set = function (newValue) {
-            this.value = newValue;
-            this.dispatcher.dispatch("value", newValue);
-            this.dispatcher.dispatch("change", newValue);
-        };
-        RootAtom.prototype.modify = function (fn) {
-            this.set(fn(this.value));
-        };
-        RootAtom.prototype.scope = function () {
-            return scope_1.globalScope;
-        };
-        return RootAtom;
-    }(abstractions_1.Atom));
-    var LensedAtom = /** @class */ (function (_super) {
-        __extends(LensedAtom, _super);
-        function LensedAtom(desc, root, view) {
-            var _this = _super.call(this, desc) || this;
-            _this.root = root;
-            _this.lens = view;
-            return _this;
-        }
-        LensedAtom.prototype.get = function () {
-            return this.lens.get(this.root.get());
-        };
-        LensedAtom.prototype.set = function (newValue) {
-            this.root.set(this.lens.set(this.root.get(), newValue));
-        };
-        LensedAtom.prototype.modify = function (fn) {
-            var _this = this;
-            this.root.modify(function (oldRoot) { return _this.lens.set(oldRoot, fn(_this.lens.get(oldRoot))); });
-        };
-        LensedAtom.prototype.on = function (event, observer) {
-            var _this = this;
-            var unsub = this.root.on("change", function (newRoot) {
-                statefulObserver(_this.lens.get(newRoot));
-            });
-            var initial = this.get();
-            var statefulObserver = util_1.duplicateSkippingObserver(initial, observer);
-            if (event === "value") {
-                observer(initial);
-            }
-            return unsub;
-        };
-        LensedAtom.prototype.scope = function () {
-            return this.root.scope();
-        };
-        return LensedAtom;
-    }(abstractions_1.Atom));
-    var DependentAtom = /** @class */ (function (_super) {
-        __extends(DependentAtom, _super);
-        function DependentAtom(desc, input, onChange) {
-            var _this = _super.call(this, desc) || this;
-            _this.input = input;
-            _this.onChange = onChange;
-            return _this;
-        }
-        DependentAtom.prototype.get = function () {
-            return this.input.get();
-        };
-        DependentAtom.prototype.set = function (newValue) {
-            this.onChange(newValue);
-        };
-        DependentAtom.prototype.modify = function (fn) {
-            this.set(fn(this.get()));
-        };
-        DependentAtom.prototype.on = function (event, observer) {
-            return this.input.on(event, observer);
-        };
-        DependentAtom.prototype.scope = function () {
-            return this.input.scope();
-        };
-        return DependentAtom;
-    }(abstractions_1.Atom));
-    var StatefulDependentAtom = /** @class */ (function (_super) {
-        __extends(StatefulDependentAtom, _super);
-        function StatefulDependentAtom(seed, scope) {
-            var _this = _super.call(this, seed.desc) || this;
-            _this.dispatcher = new dispatcher_1.Dispatcher();
-            _this.value = scope_1.beforeScope;
-            _this._scope = scope;
-            _this.set = seed.set;
-            var meAsObserver = function (newValue) {
-                _this.value = newValue;
-                _this.dispatcher.dispatch("change", newValue);
-                _this.dispatcher.dispatch("value", newValue);
+        scope(function () {
+            var _a = __read(seed.subscribe(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
+            _this.value = newValue;
+            return function () {
+                _this.value = scope_1.afterScope;
+                unsub();
             };
-            scope(function () {
-                var _a = __read(seed.subscribe(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
-                _this.value = newValue;
-                return function () {
-                    _this.value = scope_1.afterScope;
-                    unsub();
-                };
-            }, _this.dispatcher);
-            return _this;
-        }
-        StatefulDependentAtom.prototype.get = function () {
-            return scope_1.checkScope(this, this.value);
-        };
-        StatefulDependentAtom.prototype.modify = function (fn) {
-            this.set(fn(this.get()));
-        };
-        StatefulDependentAtom.prototype.on = function (event, observer) {
-            var unsub = this.dispatcher.on(event, observer);
-            if (event === "value") {
-                observer(this.get());
-            }
-            return unsub;
-        };
-        StatefulDependentAtom.prototype.scope = function () {
-            return this._scope;
-        };
-        return StatefulDependentAtom;
-    }(abstractions_1.Atom));
-    exports.StatefulDependentAtom = StatefulDependentAtom;
-    function view(atom, view) {
-        if (typeof view === "string") {
-            return new LensedAtom(atom + "." + view, atom, L.prop(view));
-        }
-        else if (typeof view === "number") {
-            return new LensedAtom(atom + ("[" + view + "]"), atom, L.item(view));
-        }
-        else {
-            return new LensedAtom(atom + ".view(..)", atom, view);
-        }
+        }, _this.dispatcher);
+        return _this;
     }
-    exports.view = view;
-    function atom(x, y) {
-        if (arguments.length == 1) {
-            return new RootAtom("RootAtom", x);
+    StatefulDependentAtom.prototype.get = function () {
+        return scope_1.checkScope(this, this.value);
+    };
+    StatefulDependentAtom.prototype.modify = function (fn) {
+        this.set(fn(this.get()));
+    };
+    StatefulDependentAtom.prototype.on = function (event, observer) {
+        var unsub = this.dispatcher.on(event, observer);
+        if (event === "value") {
+            observer(this.get());
         }
-        else {
-            return new DependentAtom("DependentAtom(" + x + ")", x, y);
-        }
+        return unsub;
+    };
+    StatefulDependentAtom.prototype.scope = function () {
+        return this._scope;
+    };
+    return StatefulDependentAtom;
+}(abstractions_1.Atom));
+exports.StatefulDependentAtom = StatefulDependentAtom;
+function view(atom, view) {
+    if (typeof view === "string") {
+        return new LensedAtom(atom + "." + view, atom, L.prop(view));
     }
-    exports.atom = atom;
-});
+    else if (typeof view === "number") {
+        return new LensedAtom(atom + ("[" + view + "]"), atom, L.item(view));
+    }
+    else {
+        return new LensedAtom(atom + ".view(..)", atom, view);
+    }
+}
+exports.view = view;
+function atom(x, y) {
+    if (arguments.length == 1) {
+        return new RootAtom("RootAtom", x);
+    }
+    else {
+        return new DependentAtom("DependentAtom(" + x + ")", x, y);
+    }
+}
+exports.atom = atom;
 //# sourceMappingURL=atom.js.map

@@ -1,3 +1,4 @@
+"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -29,35 +30,24 @@ var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
-    }
-})(function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.item = exports.prop = void 0;
-    function prop(key) {
-        return {
-            get: function (root) { return root[key]; },
-            set: function (root, newValue) {
-                var _a;
-                return (__assign(__assign({}, root), (_a = {}, _a[key] = newValue, _a)));
-            }
-        };
-    }
-    exports.prop = prop;
-    function item(index) {
-        return {
-            get: function (root) { return root[index]; },
-            set: function (nums, newValue) { return newValue === undefined
-                ? __spread(nums.slice(0, index), nums.slice(index + 1)) : __spread(nums.slice(0, index), [newValue], nums.slice(index + 1)); }
-        };
-    }
-    exports.item = item;
-});
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.item = exports.prop = void 0;
+function prop(key) {
+    return {
+        get: function (root) { return root[key]; },
+        set: function (root, newValue) {
+            var _a;
+            return (__assign(__assign({}, root), (_a = {}, _a[key] = newValue, _a)));
+        }
+    };
+}
+exports.prop = prop;
+function item(index) {
+    return {
+        get: function (root) { return root[index]; },
+        set: function (nums, newValue) { return newValue === undefined
+            ? __spread(nums.slice(0, index), nums.slice(index + 1)) : __spread(nums.slice(0, index), [newValue], nums.slice(index + 1)); }
+    };
+}
+exports.item = item;
 //# sourceMappingURL=lens.js.map

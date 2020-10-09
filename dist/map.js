@@ -1,3 +1,4 @@
+"use strict";
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -14,40 +15,29 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.map = void 0;
+var abstractions_1 = require("./abstractions");
+var eventstream_1 = require("./eventstream");
+var property_1 = require("./property");
+function map(o, fn) {
+    var desc = o + ".map(fn)";
+    if (o instanceof abstractions_1.EventStream) {
+        return new eventstream_1.StatelessEventStream(desc, function (observer) { return o.forEach(function (v) { return observer(fn(v)); }); }, o.scope());
     }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./abstractions", "./eventstream", "./property"], factory);
+    else if (o instanceof abstractions_1.EventStreamSeed) {
+        return new abstractions_1.EventStreamSeed(desc, function (observer) { return o.forEach(function (v) { return observer(fn(v)); }); });
     }
-})(function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.map = void 0;
-    var abstractions_1 = require("./abstractions");
-    var eventstream_1 = require("./eventstream");
-    var property_1 = require("./property");
-    function map(o, fn) {
-        var desc = o + ".map(fn)";
-        if (o instanceof abstractions_1.EventStream) {
-            return new eventstream_1.StatelessEventStream(desc, function (observer) { return o.forEach(function (v) { return observer(fn(v)); }); }, o.scope());
-        }
-        else if (o instanceof abstractions_1.EventStreamSeed) {
-            return new abstractions_1.EventStreamSeed(desc, function (observer) { return o.forEach(function (v) { return observer(fn(v)); }); });
-        }
-        else if (o instanceof abstractions_1.Property) {
-            return new property_1.DerivedProperty(desc, [o], fn);
-        }
-        else if (o instanceof abstractions_1.PropertySeed) {
-            return new abstractions_1.PropertySeed(desc, function (observer) {
-                var _a = __read(o.subscribe(function (value) { return observer(fn(value)); }), 2), value = _a[0], unsub = _a[1];
-                return [fn(value), unsub];
-            });
-        }
-        throw Error("Unknown observable");
+    else if (o instanceof abstractions_1.Property) {
+        return new property_1.DerivedProperty(desc, [o], fn);
     }
-    exports.map = map;
-});
+    else if (o instanceof abstractions_1.PropertySeed) {
+        return new abstractions_1.PropertySeed(desc, function (observer) {
+            var _a = __read(o.subscribe(function (value) { return observer(fn(value)); }), 2), value = _a[0], unsub = _a[1];
+            return [fn(value), unsub];
+        });
+    }
+    throw Error("Unknown observable");
+}
+exports.map = map;
 //# sourceMappingURL=map.js.map
