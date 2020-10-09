@@ -31,3 +31,4 @@ Other stuff:
 
 - more decent testing. Bacon has a good foundation for that
 - make the API pipeable.
+- Stream end events. Without this, for instance, a never-ending flatMap with will just keep collecting more stream references. 
