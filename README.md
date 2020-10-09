@@ -1,4 +1,4 @@
-## Codename Eggs
+## Lonna
 
 Experimental FRP library for Graphical User Interfaces. To be used in my Harmaja project.
 
