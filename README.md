@@ -9,3 +9,15 @@ Compared to Bacon.js
 - `get()` method in Properties for reliable synchronous access to current value. Also, a Property *always* has a value
 - `EventStreamSeed` and `PropertySeed` abstractions for streams and properties that don't have a bound state. These can be mapped, filtered etc, but need to be scoped before accessing the value.
 - Atoms included for read-write state
+
+TODO list of Bacon.js methods for first real-life use case:
+
+- `sampledBy`
+- `map` variant that accepts a Property as value. Requires `sampledBy` first.
+- `throttle`
+- `changes`
+- `debounce`
+- `combineTemplate`
+- `fromPoll`
+
+Serious consideration: make the API pipeable.
