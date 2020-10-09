@@ -5,10 +5,13 @@ import { DerivedProperty } from "./property";
 export function map<A, B>(prop: Property<A>, fn: (value: A) => B): Property<B>;
 export function map<A, B>(prop: PropertySeed<A>, fn: (value: A) => B): PropertySeed<B>;
 export function map<A, B>(s: EventStream<A>, fn: (a: A) => B): EventStream<B>;
+export function map<A, B>(s: EventStream<A>, sampledProperty: Property<B>): EventStream<B>;
 export function map<A, B>(s: EventStreamSeed<A>, fn: (a: A) => B): EventStreamSeed<B>;
+export function map<A, B>(s: EventStreamSeed<A>, sampledProperty: Property<B>): EventStreamSeed<B>;
 
-export function map<A, B>(o: any, fn: (value: A) => B): any {
+export function map<A, B>(o: any, x: ((value: A) => B) | Property<B>): any {
     const desc = o + `.map(fn)`;
+    const fn = (x instanceof Property) ? () => x.get() : x
     if (o instanceof EventStream) {
         return new StatelessEventStream(desc, observer => o.forEach(v => observer(fn(v))), o.scope())
     } else if (o instanceof EventStreamSeed) {

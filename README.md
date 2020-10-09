@@ -12,8 +12,6 @@ Compared to Bacon.js
 
 TODO list of Bacon.js methods for first real-life use case:
 
-- `sampledBy`
-- `map` variant that accepts a Property as value. Requires `sampledBy` first.
 - `throttle`
 - `changes`
 - `debounce`
