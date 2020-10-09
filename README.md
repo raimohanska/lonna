@@ -20,4 +20,13 @@ TODO list of Bacon.js methods for first real-life use case:
 - `combineTemplate`
 - `fromPoll`
 
+To complete examples, we need
+
+- `repeat`: would require stream end event
+- `flatMapLatest`
+- `fromEvent`
+- `update`
+- `once`
+- `fromPromise` - needs to map into a tri-value thing: pending-error-value
+
 Serious consideration: make the API pipeable.
