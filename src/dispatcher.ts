@@ -1,15 +1,17 @@
-import { Observer, Unsub } from "./abstractions";
+import { Event, Observer, Unsub } from "./abstractions";
 
 const meta = "__meta"
 type META = typeof meta
 
 type Dict = { [key: string]: any }
 
+// TODO: keep "ended" state, dispatch EndEvent on subscribe
+
 export class Dispatcher<E extends Dict> {
     private observers: { [key: string] : Observer<any>[] | undefined } = {}
     private count = 0
 
-    dispatch<X extends keyof E & string>(key: X, value: E[X]) {
+    dispatch<X extends keyof E & string>(key: X, value: Event<E[X]>) {
         if (this.observers[key]) for (const s of this.observers[key]!) {
             s(value)
         }

@@ -7,6 +7,7 @@ export function merge<A>(a: EventStreamSeed<A>, b: EventStreamSeed<A>): EventStr
 export function merge<A, B>(a: EventStreamSeed<A>, b: EventStreamSeed<B>): EventStreamSeed<A | B>;
 export function merge<A>(...streams: (EventStream<any> | EventStreamSeed<any>)[]) {
     const seed = new EventStreamSeed<A>(`merge(${streams})`, observer => {
+        // TODO: count ends
         const unsubs = streams.map(s => s.forEach(observer))
         return () => unsubs.forEach(f => f())
     })

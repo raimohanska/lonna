@@ -1,7 +1,16 @@
 import { Scope } from "./scope";
 export type Callback = () => void
-export type Observer<V> = (value: V) => void
+export type Observer<V> = (value: Event<V>) => void
+export type Event<V> = Value<V> | End
+export type Value<V> = { type: "value", value: V }
+export type End = { type: "end" }
 export type Unsub = Callback
+
+export function valueEvent<V>(value: V): Value<V> {
+    return { type: "value", value }
+}
+
+export const endEvent: End = { type: "end" }
 
 // Abstract classes instead of interfaces for runtime type information and instanceof
 

@@ -1,10 +1,10 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
+import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
 import { applyScope } from "./applyscope"
 import { atom } from "./atom"
 import { Scope } from "./scope"
 
 export type Transformer<A, B> = {
-    changes: (value: A, observer: Observer<B>) => void;
+    changes: (value: Event<A>, observer: Observer<B>) => void;
     init: (value: A) => B;
 }
 
@@ -17,7 +17,7 @@ export function transform<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transfor
 export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B>, scope?: Scope): any {
     let seed: any
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
-        seed = new EventStreamSeed(desc, observer =>  seed.forEach((value: A) => transformer.changes(value, observer)))
+        seed = new EventStreamSeed(desc, observer => seed.on("value", (value: Event<A>) => transformer.changes(value, observer)))
     } else if (x instanceof Atom || x instanceof AtomSeed) {
         seed = new AtomSeed(desc, transformSubscribe(x, transformer), newValue => x.set(newValue))
     } else if (x instanceof Property || x instanceof PropertySeed) {

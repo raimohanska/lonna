@@ -1,5 +1,5 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property, PropertyEvents, PropertyEventType } from "./abstractions";
+import { Atom, AtomSeed, Observer, Property, PropertyEvents, PropertyEventType, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { duplicateSkippingObserver } from "./util";
@@ -16,7 +16,7 @@ class RootAtom<V> extends Atom<V> {
     on(event: PropertyEventType, observer: Observer<V>) {
         const unsub = this.dispatcher.on(event, observer)
         if (event === "value") {
-            observer(this.get())
+            observer(valueEvent(this.get()))
         }
         return unsub
     }
@@ -26,8 +26,8 @@ class RootAtom<V> extends Atom<V> {
     }
     set(newValue: V): void {
         this.value = newValue;
-        this.dispatcher.dispatch("value", newValue)
-        this.dispatcher.dispatch("change", newValue)
+        this.dispatcher.dispatch("value", valueEvent(newValue))
+        this.dispatcher.dispatch("change", valueEvent(newValue))
     }
     modify(fn: (old: V) => V): void {
         this.set(fn(this.value))

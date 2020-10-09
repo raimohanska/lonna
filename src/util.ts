@@ -9,3 +9,6 @@ export function duplicateSkippingObserver<V>(initial: V, observer: Observer<V>) 
         }
     }
 }
+
+export function nop() {
+}
