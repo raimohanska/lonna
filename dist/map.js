@@ -20,8 +20,9 @@ exports.map = void 0;
 var abstractions_1 = require("./abstractions");
 var eventstream_1 = require("./eventstream");
 var property_1 = require("./property");
-function map(o, fn) {
+function map(o, x) {
     var desc = o + ".map(fn)";
+    var fn = (x instanceof abstractions_1.Property) ? function () { return x.get(); } : x;
     if (o instanceof abstractions_1.EventStream) {
         return new eventstream_1.StatelessEventStream(desc, function (observer) { return o.forEach(function (v) { return observer(fn(v)); }); }, o.scope());
     }
