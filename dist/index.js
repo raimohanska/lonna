@@ -14,12 +14,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "path", "./abstractions", "./atom", "./bus", "./boolean", "./combine", "./dispatcher", "./eventstream", "./filter", "./interval", "./later", "./map", "./merge", "./never", "./property", "./scan", "./scope"], factory);
+        define(["require", "exports", "./abstractions", "./atom", "./bus", "./boolean", "./combine", "./dispatcher", "./eventstream", "./filter", "./interval", "./later", "./map", "./merge", "./never", "./property", "./scan", "./scope"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    require("path");
     __exportStar(require("./abstractions"), exports);
     __exportStar(require("./atom"), exports);
     __exportStar(require("./bus"), exports);

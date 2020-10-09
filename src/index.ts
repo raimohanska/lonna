@@ -1,4 +1,3 @@
-import "path"
 export * from "./abstractions"
 export * from "./atom"
 export * from "./bus"
