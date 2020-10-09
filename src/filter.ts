@@ -1,5 +1,5 @@
 import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed } from "./abstractions";
-import { applyScope } from "./applyscope";
+import { applyScope, applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { transform, Transformer } from "./transform";
 
@@ -13,11 +13,7 @@ export function filter<A>(s: EventStream<A>, fn: Predicate<A>): EventStream<A>;
 export function filter<A>(s: EventStreamSeed<A>, fn: Predicate<A>): EventStreamSeed<A>;
 
 export function filter<A>(s: any, fn: Predicate<A>, scope?: Scope): any {
-    const seed = transform(s + `.map(fn)`, s, filterT(fn))
-    if (scope !== undefined) {
-        return applyScope(scope, seed)
-    }
-    return seed;
+    return applyScopeMaybe(transform(s + `.map(fn)`, s, filterT(fn)), scope)
 }
 
 function filterT<A>(fn: Predicate<A>): Transformer<A, A> {

@@ -1,5 +1,5 @@
 import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
-import { applyScope } from "./applyscope"
+import { applyScope, applyScopeMaybe } from "./applyscope"
 import { atom } from "./atom"
 import { Scope } from "./scope"
 
@@ -25,10 +25,7 @@ export function transform<A, B>(desc: string, x: any, transformer: Transformer<A
     } else {
         throw Error("Unknown observable " + x)
     }
-    if (scope !== undefined) {
-        return applyScope(scope, seed)
-    }
-    return seed
+    return applyScopeMaybe(seed)
 }
 
 function transformSubscribe<A, B>(src: { subscribe: PropertySubscribe<A> }, transformer: Transformer<A, B>): PropertySubscribe<B> {

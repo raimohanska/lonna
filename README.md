@@ -27,4 +27,7 @@ To complete examples, we need
 - `once`
 - `fromPromise` - needs to map into a tri-value thing: pending-error-value
 
-Serious consideration: make the API pipeable.
+Other stuff:
+
+- more decent testing. Bacon has a good foundation for that
+- make the API pipeable.

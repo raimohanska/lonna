@@ -19,6 +19,14 @@ export function applyScope<T>(scope: Scope, seed: any): any {
     throw Error("Unknown seed")
 }
 
+/** @hidden */
+export function applyScopeMaybe<A>(seed: any, scope?: Scope): any {
+    if (scope !== undefined) {
+        return applyScope(scope, seed)
+    }
+    return seed
+}
+
 class SeedToStream<V> extends StatefulEventStream<V> {
     constructor(seed: EventStreamSeed<V>, scope: Scope) { 
         super(seed.desc, scope)                 
