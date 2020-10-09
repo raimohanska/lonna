@@ -1,6 +1,6 @@
 ## Lonna
 
-Experimental FRP library for Graphical User Interfaces. To be used in my Harmaja project.
+Experimental FRP library for Graphical User Interfaces. To be used in my [Harmaja](https://github.com/raimohanska/harmaja) project.
 
 Compared to Bacon.js
 
