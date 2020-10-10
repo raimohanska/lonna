@@ -48,13 +48,19 @@ export abstract class Property<V> extends MulticastObservable<V, PropertyEventTy
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class PropertySeed<V> {
+export class PropertySeed<V> implements Observable<V> {
     subscribe: PropertySubscribe<V>
     desc: string;
 
     constructor(desc: string, forEach: (observer: Observer<V>) => [V, Unsub]) {
         this.subscribe = forEach
         this.desc = desc
+    }
+
+    forEach(observer: Observer<V>): Unsub {
+        const [init, unsub] = this.subscribe(observer)
+        observer(init)
+        return unsub
     }
 }
 

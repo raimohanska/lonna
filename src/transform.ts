@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
+import { Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
 import { applyScope, applyScopeMaybe } from "./applyscope"
 import { atom } from "./atom"
 import { Scope } from "./scope"
@@ -13,6 +13,7 @@ export function transform<A, B>(desc: string, seed: PropertySeed<A> | Property<A
 export function transform<A, B>(desc: string, seed: EventStreamSeed<A> | EventStream<A>, transformer: Transformer<A, B>, scope: Scope): EventStream<B>
 export function transform<A, B>(desc: string, seed: PropertySeed<A> | Property<A>, transformer: Transformer<A, B>, scope: Scope): Property<B>
 export function transform<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transformer: Transformer<A, A>): AtomSeed<A>
+export function transform<A, B>(desc: string, o: Observable<A>, transformer: Transformer<A, B>): Observable<B> // A generic signature. Note that the implementation is defined for the above cases only.
 
 export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B>, scope?: Scope): any {
     let seed: any

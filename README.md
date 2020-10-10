@@ -24,7 +24,7 @@ Current prioritized goals:
 
 TODO list of Bacon.js methods for first real-life use case:
 
-- `throttle`
+- `throttle` WIP: buffer implemented for it!
 - `changes`
 - `debounce`
 - `combineTemplate`
