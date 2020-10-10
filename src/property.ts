@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, Event, isValue } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
 import { beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
@@ -8,20 +8,29 @@ type PropertyEvents<V> = { "change": V }
 
 export class StatelessProperty<V> extends Property<V> {
     get: () => V;
-    private _onChange: (observer: Observer<V>) => Unsub;
+    private _onChange: (observer: Observer<Event<V>>) => Unsub;
     private _scope: Scope
 
-    constructor(desc: string, get: () => V, onChange: (observer: Observer<V>) => Unsub, scope: Scope) {
+    constructor(desc: string, get: () => V, onChange: (observer: Observer<Event<V>>) => Unsub, scope: Scope) {
         super(desc)
         this.get = get
         this._onChange = onChange
         this._scope = scope
     }
 
-    onChange(observer: Observer<V>) {
-        const initial = this.get()
-        const dso = duplicateSkippingObserver(initial, observer)
-        return this._onChange(dso)
+    onChange(observer: Observer<Event<V>>) {
+        const unsub = this._onChange(event => {
+            if (isValue(event)) {
+                if (event.value !== current) {
+                    current = event.value
+                    observer(event)
+                }
+            } else {
+                observer(event)
+            }
+        })
+        let current = this.get()
+        return unsub
     }
 
     getScope() {
@@ -33,20 +42,24 @@ export class StatefulProperty<V> extends Property<V> {
     private _dispatcher = new Dispatcher<PropertyEvents<V>>();
     private _scope: Scope
     private _value: V | OutOfScope  = beforeScope
-    
+
     constructor(seed: PropertySeed<V>, scope: Scope) {
         super(seed.desc)
         this._scope = scope
         
-        const meAsObserver = (newValue: V) => {
-            if (newValue !== this._value) {
-                this._value = newValue
-                this._dispatcher.dispatch("change", newValue)
+        const meAsObserver = (event: Event<V>) => {
+            if (isValue(event)) {
+                if (event.value !== this._value) {
+                    this._value = event.value
+                    this._dispatcher.dispatch("change", event)
+                }
+            } else {
+                this._dispatcher.dispatch("change", event)
             }
         }
         scope(
             () => {
-                const [newValue, unsub] = seed.subscribe(meAsObserver)
+                const [newValue, unsub] = seed.subscribeWithInitial(meAsObserver)
                 this._value = newValue
                 return unsub
             },
@@ -54,7 +67,7 @@ export class StatefulProperty<V> extends Property<V> {
         );
     }
 
-    onChange(observer: Observer<V>) {
+    onChange(observer: Observer<Event<V>>) {
         return this._dispatcher.on("change", observer)
     }
     
@@ -70,10 +83,10 @@ export class StatefulProperty<V> extends Property<V> {
 export function toPropertySeed<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
 export function toPropertySeed<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
 export function toPropertySeed(stream: EventStream<any> | EventStreamSeed<any>, initial: any): PropertySeed<any> {
-    const forEach = (observer: Observer<any>): [any, Unsub] => {        
-        return [initial, stream.forEach(observer)]
+    const subscribeWithInitial = (observer: Observer<any>): [any, Unsub] => {        
+        return [initial, stream.subscribe(observer)]
     }    
-    return new PropertySeed(stream + `.toProperty(${initial})`, forEach)
+    return new PropertySeed(stream + `.toProperty(${initial})`, subscribeWithInitial)
 }
 
 export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;

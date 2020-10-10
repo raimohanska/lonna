@@ -31,7 +31,7 @@ class SeedToStream<V> extends StatefulEventStream<V> {
     constructor(seed: EventStreamSeed<V>, scope: Scope) { 
         super(seed.desc, scope)                 
         scope(
-            () => seed.forEach(v => this.dispatcher.dispatch("value", v)),
+            () => seed.subscribe(v => this.dispatcher.dispatch("value", v)),
             this.dispatcher            
         )
     }

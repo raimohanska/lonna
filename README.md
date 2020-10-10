@@ -32,7 +32,7 @@ TODO list of Bacon.js methods for first real-life use case:
 
 To complete Harmaja examples, we also need
 
-- `repeat`: would require stream end event
+- `repeat`
 - `flatMapLatest`
 - `fromEvent`
 - `update`
@@ -41,7 +41,6 @@ To complete Harmaja examples, we also need
 
 Other stuff:
 
-- Stream end events may be in order, for a more complete/general-purpose FRP library. Without this, for instance, a never-ending flatMap with will just keep collecting more stream references. 
 - More decent testing framework and proper coverage. Bacon has a good foundation for this stuff. At the moment this is more an experiment than a library for production use.
 - Make the API pipeable
 - Bus should probably buffer pushes while dispatching. Subscriptions while dispatching should not be a major problem because of scoping and stateless composition. (to be proven)

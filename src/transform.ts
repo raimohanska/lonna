@@ -1,10 +1,10 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
+import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
 import { applyScope, applyScopeMaybe } from "./applyscope"
 import { atom } from "./atom"
 import { Scope } from "./scope"
 
 export type Transformer<A, B> = {
-    changes: (value: A, observer: Observer<B>) => void;
+    changes: (event: Event<A>, observer: Observer<Event<B>>) => void;
     init: (value: A) => B;
 }
 
@@ -18,7 +18,7 @@ export function transform<A, B>(desc: string, o: Observable<A>, transformer: Tra
 export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B>, scope?: Scope): any {
     let seed: any
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
-        seed = new EventStreamSeed(desc, observer =>  seed.forEach((value: A) => transformer.changes(value, observer)))
+        seed = new EventStreamSeed(desc, observer => seed.on("value", (value: Event<A>) => transformer.changes(value, observer)))
     } else if (x instanceof Atom || x instanceof AtomSeed) {
         seed = new AtomSeed(desc, transformSubscribe(x, transformer), newValue => x.set(newValue))
     } else if (x instanceof Property || x instanceof PropertySeed) {
@@ -29,10 +29,10 @@ export function transform<A, B>(desc: string, x: any, transformer: Transformer<A
     return applyScopeMaybe(seed)
 }
 
-function transformSubscribe<A, B>(src: { subscribe: PropertySubscribe<A> }, transformer: Transformer<A, B>): PropertySubscribe<B> {
+function transformSubscribe<A, B>(src: { subscribeWithInitial: PropertySubscribe<A> }, transformer: Transformer<A, B>): PropertySubscribe<B> {
     if (src === undefined) throw Error("Assertion failed")
-    return (observer: Observer<B>) => {
-        const [initial, unsub] = src.subscribe(value => transformer.changes(value, observer))
+    return (observer: Observer<Event<B>>) => {
+        const [initial, unsub] = src.subscribeWithInitial(value => transformer.changes(value, observer))
         return [transformer.init(initial), unsub]
     }
 }

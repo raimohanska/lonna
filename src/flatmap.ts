@@ -1,7 +1,8 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
+import { Atom, AtomSeed, endEvent, EventStream, EventStreamSeed, isValue, Observer, Property, PropertySeed, Unsub } from "./abstractions";
 import { applyScope, applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { transform, Transformer } from "./transform";
+import { remove } from "./util";
 
 export type Spawner<A, B> = (value: A) => (EventStreamSeed<B> | EventStream<B>)
 export function flatMap<A, B>(s: EventStream<A>, fn: Spawner<A, B>): EventStream<B>;
@@ -13,9 +14,27 @@ export function flatMap<A, B>(s: EventStreamSeed<A> | EventStreamSeed<A>, fn: (v
     }
     return applyScopeMaybe(new EventStreamSeed<B>(`${s}.flatMap(fn)`, observer => {
         const children: Unsub[] = []
-        const unsubThis = s.forEach(value => {
-            const child = fn(value)
-            children.push(child.forEach(observer))
+        let rootEnded = false
+        const unsubThis = s.subscribe(event => {
+            if (isValue(event)) {
+                const child = fn(event.value)
+                const unsubChild = child.subscribe(event => {
+                    if (isValue(event)) {
+                        observer(event)
+                    } else {
+                        remove(children, unsubChild)
+                        if (children.length === 0 && rootEnded) {
+                            observer(endEvent)
+                        }
+                    }
+                })
+                children.push(unsubChild)
+            } else {
+                rootEnded = true
+                if (children.length === 0) {
+                    observer(endEvent)
+                }
+            }
         })
         return () => {
             unsubThis()

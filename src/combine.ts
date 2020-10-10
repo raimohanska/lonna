@@ -1,4 +1,4 @@
-import { Observer, Property } from "./abstractions";
+import { Observer, Property, Event, isValue, valueEvent, endEvent } from "./abstractions";
 import { StatelessProperty } from "./property";
 import { globalScope } from "./scope";
 
@@ -40,18 +40,26 @@ export function combine<V, V2, V3, V4, V5, V6, R>(fn: Function6<V, V2, V3, V4, V
 export function combine<R>(fn: Function, Propertys: Property<any>[]): Property<R>
 
 export function combine<Out>(...args: any[]): Property<Out> {
-  const properties = args.slice(0, args.length - 1)
+  const properties: Property<any>[] = args.slice(0, args.length - 1)
   const combinator: (...inputs: any[]) => Out = args[args.length - 1]
   function getCurrentArray(): any[] {
     return properties.map(s => s.get())
   }
   const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
   const get = () => combinator(...getCurrentArray())
-  function onChange(observer: Observer<Out>) {
+  function onChange(observer: Observer<Event<Out>>) {
+    let endCount = 0
     const unsubs = properties.map((src, i) => {
-      return src.on("change", (newValue: Out) => {
-          currentArray[i] = newValue
-          observer(combinator(...currentArray))
+      return src.onChange((event: Event<any>) => {
+          if (isValue(event)) {
+            currentArray[i] = event.value
+            observer(valueEvent(combinator(...currentArray)))
+          } else {
+            endCount++
+            if (endCount == properties.length) {
+              observer(endEvent)
+            }
+          }
       })
     })        
     let currentArray = getCurrentArray()

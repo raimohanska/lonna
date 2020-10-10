@@ -29,12 +29,29 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = void 0;
+exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isValue = exports.valueEvent = void 0;
+function valueEvent(value) {
+    return { type: "value", value: value };
+}
+exports.valueEvent = valueEvent;
+function isValue(event) {
+    return event.type === "value";
+}
+exports.isValue = isValue;
+function valueObserver(observer) {
+    return function (event) { if (isValue(event))
+        observer(event.value); };
+}
+exports.valueObserver = valueObserver;
+exports.endEvent = { type: "end" };
 // Abstract classes instead of interfaces for runtime type information and instanceof
 var Observable = /** @class */ (function () {
     function Observable(desc) {
         this.desc = desc;
     }
+    Observable.prototype.forEach = function (observer) {
+        return this.subscribe(valueObserver(observer));
+    };
     Observable.prototype.log = function (message) {
         this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
     };
@@ -44,6 +61,7 @@ var Observable = /** @class */ (function () {
     return Observable;
 }());
 exports.Observable = Observable;
+// TODO: all scoped observables must maintain "ended" state and dispatch that also immediately on subscribe
 var ScopedObservable = /** @class */ (function (_super) {
     __extends(ScopedObservable, _super);
     function ScopedObservable(desc) {
@@ -57,13 +75,14 @@ var Property = /** @class */ (function (_super) {
     function Property(desc) {
         return _super.call(this, desc) || this;
     }
-    Property.prototype.subscribe = function (observer) {
+    Property.prototype.subscribeWithInitial = function (observer) {
         var unsub = this.onChange(observer);
         return [this.get(), unsub];
     };
-    Property.prototype.forEach = function (observer) {
-        observer(this.get());
-        return this.onChange(observer);
+    Property.prototype.subscribe = function (observer) {
+        var unsub = this.onChange(observer);
+        observer(valueEvent(this.get()));
+        return unsub;
     };
     return Property;
 }(ScopedObservable));
@@ -74,14 +93,14 @@ exports.Property = Property;
  **/
 var PropertySeed = /** @class */ (function (_super) {
     __extends(PropertySeed, _super);
-    function PropertySeed(desc, subscribe) {
+    function PropertySeed(desc, subscribeWithInitial) {
         var _this = _super.call(this, desc) || this;
-        _this.subscribe = subscribe;
+        _this.subscribeWithInitial = subscribeWithInitial;
         return _this;
     }
-    PropertySeed.prototype.forEach = function (observer) {
-        var _a = __read(this.subscribe(observer), 2), init = _a[0], unsub = _a[1];
-        observer(init);
+    PropertySeed.prototype.subscribe = function (observer) {
+        var _a = __read(this.subscribeWithInitial(observer), 2), init = _a[0], unsub = _a[1];
+        observer(valueEvent(init));
         return unsub;
     };
     return PropertySeed;
@@ -97,9 +116,9 @@ var EventStream = /** @class */ (function (_super) {
 exports.EventStream = EventStream;
 var EventStreamSeed = /** @class */ (function (_super) {
     __extends(EventStreamSeed, _super);
-    function EventStreamSeed(desc, forEach) {
+    function EventStreamSeed(desc, subscribe) {
         var _this = _super.call(this, desc) || this;
-        _this.forEach = forEach;
+        _this.subscribe = subscribe;
         return _this;
     }
     return EventStreamSeed;
@@ -119,8 +138,8 @@ exports.Atom = Atom;
  **/
 var AtomSeed = /** @class */ (function (_super) {
     __extends(AtomSeed, _super);
-    function AtomSeed(desc, forEach, set) {
-        var _this = _super.call(this, desc, forEach) || this;
+    function AtomSeed(desc, subscribe, set) {
+        var _this = _super.call(this, desc, subscribe) || this;
         _this.set = set;
         return _this;
     }

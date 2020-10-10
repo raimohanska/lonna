@@ -1,4 +1,4 @@
-import { Bus } from "./abstractions"
+import { Bus, endEvent, valueEvent } from "./abstractions"
 import { StatefulEventStream } from "./eventstream"
 import { globalScope } from "./scope"
 
@@ -14,6 +14,10 @@ class BusImpl<V> extends StatefulEventStream<V> implements Bus<V> {
     }
 
     push(newValue: V) {
-        this.dispatcher.dispatch("value", newValue)
+        this.dispatcher.dispatch("value", valueEvent(newValue))
+    }
+
+    end() {
+        this.dispatcher.dispatch("value", endEvent)
     }
 }

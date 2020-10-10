@@ -1,7 +1,7 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed } from "./abstractions";
+import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed } from "./abstractions";
 import { Scope } from "./scope";
 export declare type Transformer<A, B> = {
-    changes: (value: A, observer: Observer<B>) => void;
+    changes: (event: Event<A>, observer: Observer<Event<B>>) => void;
     init: (value: A) => B;
 };
 export declare function transform<A, B>(desc: string, seed: EventStreamSeed<A> | EventStream<A>, transformer: Transformer<A, B>): EventStreamSeed<B>;

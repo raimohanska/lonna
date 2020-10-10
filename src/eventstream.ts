@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Unsub } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Unsub, Event } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { Scope } from "./scope";
 
@@ -13,7 +13,7 @@ export class StatefulEventStream<V> extends EventStream<V> {
         this._scope = scope
     }
 
-    forEach(observer: Observer<V>) {
+    subscribe(observer: Observer<Event<V>>) {
         return this.dispatcher.on("value", observer)
     }
     getScope() {
@@ -23,26 +23,26 @@ export class StatefulEventStream<V> extends EventStream<V> {
 
 export class StatelessEventStream<V> extends EventStream<V> {
     private _scope: Scope;
-    forEach: (observer: Observer<V>) => Unsub;
+    subscribe: (observer: Observer<Event<V>>) => Unsub;
 
-    constructor(desc: string, forEach: (observer: Observer<V>) => Unsub, scope: Scope);
+    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope);
     constructor(seed: EventStreamSeed<V>, scope: Scope);
 
     constructor() { 
-        let desc: string, forEach: (observer: Observer<V>) => Unsub, scope: Scope
+        let desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope
         if (arguments[0] instanceof EventStreamSeed) {
             const seed = arguments[0]
             desc = seed.desc
-            forEach = seed.forEach
+            subscribe = seed.subscribe
             scope = arguments[1]
         } else {
             desc = arguments[0]
-            forEach = arguments[1]
+            subscribe = arguments[1]
             scope = arguments[2]
         }
         super(desc) 
         this._scope = scope
-        this.forEach = forEach
+        this.subscribe = subscribe
     }
 
     getScope() {

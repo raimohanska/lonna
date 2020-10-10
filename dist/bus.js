@@ -14,6 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bus = void 0;
+var abstractions_1 = require("./abstractions");
 var eventstream_1 = require("./eventstream");
 var scope_1 = require("./scope");
 function bus() {
@@ -29,7 +30,10 @@ var BusImpl = /** @class */ (function (_super) {
         return _this;
     }
     BusImpl.prototype.push = function (newValue) {
-        this.dispatcher.dispatch("value", newValue);
+        this.dispatcher.dispatch("value", abstractions_1.valueEvent(newValue));
+    };
+    BusImpl.prototype.end = function () {
+        this.dispatcher.dispatch("value", abstractions_1.endEvent);
     };
     return BusImpl;
 }(eventstream_1.StatefulEventStream));

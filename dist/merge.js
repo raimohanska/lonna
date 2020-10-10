@@ -9,7 +9,8 @@ function merge() {
         streams[_i] = arguments[_i];
     }
     var seed = new abstractions_1.EventStreamSeed("merge(" + streams + ")", function (observer) {
-        var unsubs = streams.map(function (s) { return s.forEach(observer); });
+        // TODO: count ends
+        var unsubs = streams.map(function (s) { return s.subscribe(observer); });
         return function () { return unsubs.forEach(function (f) { return f(); }); };
     });
     if (streams[0] instanceof abstractions_1.EventStream) {

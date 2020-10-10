@@ -21,6 +21,7 @@ var __spread = (this && this.__spread) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.combine = void 0;
+var abstractions_1 = require("./abstractions");
 var property_1 = require("./property");
 var scope_1 = require("./scope");
 function combine() {
@@ -36,10 +37,19 @@ function combine() {
     var scope = (properties.length === 0) ? scope_1.globalScope : properties[0].getScope();
     var get = function () { return combinator.apply(void 0, __spread(getCurrentArray())); };
     function onChange(observer) {
+        var endCount = 0;
         var unsubs = properties.map(function (src, i) {
-            return src.on("change", function (newValue) {
-                currentArray[i] = newValue;
-                observer(combinator.apply(void 0, __spread(currentArray)));
+            return src.onChange(function (event) {
+                if (abstractions_1.isValue(event)) {
+                    currentArray[i] = event.value;
+                    observer(abstractions_1.valueEvent(combinator.apply(void 0, __spread(currentArray))));
+                }
+                else {
+                    endCount++;
+                    if (endCount == properties.length) {
+                        observer(abstractions_1.endEvent);
+                    }
+                }
             });
         });
         var currentArray = getCurrentArray();

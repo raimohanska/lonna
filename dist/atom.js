@@ -53,7 +53,6 @@ var L = __importStar(require("./lens"));
 var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 var scope_1 = require("./scope");
-var util_1 = require("./util");
 var RootAtom = /** @class */ (function (_super) {
     __extends(RootAtom, _super);
     function RootAtom(desc, initialValue) {
@@ -70,7 +69,7 @@ var RootAtom = /** @class */ (function (_super) {
     };
     RootAtom.prototype.set = function (newValue) {
         this._value = newValue;
-        this._dispatcher.dispatch("change", newValue);
+        this._dispatcher.dispatch("change", abstractions_1.valueEvent(newValue));
     };
     RootAtom.prototype.modify = function (fn) {
         this.set(fn(this._value));
@@ -100,11 +99,19 @@ var LensedAtom = /** @class */ (function (_super) {
     };
     LensedAtom.prototype.onChange = function (observer) {
         var _this = this;
-        var unsub = this._root.onChange(function (newRoot) {
-            statefulObserver(_this._lens.get(newRoot));
+        var unsub = this._root.onChange(function (event) {
+            if (abstractions_1.isValue(event)) {
+                var value = _this._lens.get(event.value);
+                if (value !== current) {
+                    current = value;
+                    observer(abstractions_1.valueEvent(value));
+                }
+            }
+            else {
+                observer(event);
+            }
         });
-        var initial = this.get();
-        var statefulObserver = util_1.duplicateSkippingObserver(initial, observer);
+        var current = this.get();
         return unsub;
     };
     LensedAtom.prototype.getScope = function () {
@@ -142,12 +149,19 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
         _this._value = scope_1.beforeScope;
         _this._scope = scope;
         _this.set = seed.set;
-        var meAsObserver = function (newValue) {
-            _this._value = newValue;
-            _this._dispatcher.dispatch("change", newValue);
+        var meAsObserver = function (event) {
+            if (abstractions_1.isValue(event)) {
+                if (event.value !== _this._value) {
+                    _this._value = event.value;
+                    _this._dispatcher.dispatch("change", event);
+                }
+            }
+            else {
+                _this._dispatcher.dispatch("change", event);
+            }
         };
         scope(function () {
-            var _a = __read(seed.subscribe(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
+            var _a = __read(seed.subscribeWithInitial(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
             _this._value = newValue;
             return function () {
                 _this._value = scope_1.afterScope;

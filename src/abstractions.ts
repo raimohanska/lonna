@@ -1,7 +1,24 @@
 import { Scope } from "./scope";
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
+export type Event<V> = Value<V> | End
+export type Value<V> = { type: "value", value: V }
+export type End = { type: "end" }
 export type Unsub = Callback
+
+export function valueEvent<V>(value: V): Value<V> {
+    return { type: "value", value }
+}
+
+export function isValue<V>(event: Event<V>): event is Value<V> {
+    return event.type === "value"
+}
+
+export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
+    return event => { if (isValue(event)) observer(event.value) }
+}
+
+export const endEvent: End = { type: "end" }
 
 // Abstract classes instead of interfaces for runtime type information and instanceof
 
@@ -12,7 +29,11 @@ export abstract class Observable<V> {
         this.desc = desc;
     }
 
-    abstract forEach(observer: Observer<V>): Unsub;
+    abstract subscribe(observer: Observer<Event<V>>): Unsub;
+
+    forEach(observer: Observer<V>): Unsub {
+        return this.subscribe(valueObserver(observer))
+    }
 
     log(message?: string) {
         this.forEach(v => message === undefined ? console.log(v) : console.log(message, v))
@@ -22,6 +43,7 @@ export abstract class Observable<V> {
     }
 }
 
+// TODO: all scoped observables must maintain "ended" state and dispatch that also immediately on subscribe
 export abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string) {
         super(desc)
@@ -29,7 +51,7 @@ export abstract class ScopedObservable<V> extends Observable<V> {
     abstract getScope(): Scope;    
 }
 
-export type PropertySubscribe<V> = (observer: Observer<V>) => [V, Unsub]
+export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
 
 export abstract class Property<V> extends ScopedObservable<V> {
     constructor(desc: string) {
@@ -38,16 +60,17 @@ export abstract class Property<V> extends ScopedObservable<V> {
 
     abstract get(): V
 
-    abstract onChange(observer: Observer<V>): Unsub;
+    abstract onChange(observer: Observer<Event<V>>): Unsub;
 
-    subscribe(observer: Observer<V>): [V, Unsub] {
+    subscribeWithInitial(observer: Observer<Event<V>>): [V, Unsub] {
         const unsub = this.onChange(observer)
         return [this.get(), unsub]
     }
 
-    forEach(observer: Observer<V>): Unsub {
-        observer(this.get())
-        return this.onChange(observer)
+    subscribe(observer: Observer<Event<V>>): Unsub {        
+        const unsub = this.onChange(observer)
+        observer(valueEvent(this.get()))
+        return unsub
     }    
 }
 
@@ -56,16 +79,16 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Must skip duplicates!
  **/
 export class PropertySeed<V> extends Observable<V> {
-    subscribe: PropertySubscribe<V>
+    subscribeWithInitial: PropertySubscribe<V>
 
-    constructor(desc: string, subscribe: (observer: Observer<V>) => [V, Unsub]) {
+    constructor(desc: string, subscribeWithInitial: (observer: Observer<Event<V>>) => [V, Unsub]) {
         super(desc)
-        this.subscribe = subscribe
+        this.subscribeWithInitial = subscribeWithInitial
     }
 
-    forEach(observer: Observer<V>): Unsub {
-        const [init, unsub] = this.subscribe(observer)
-        observer(init)
+    subscribe(observer: Observer<Event<V>>): Unsub {
+        const [init, unsub] = this.subscribeWithInitial(observer)
+        observer(valueEvent(init))
         return unsub
     }
 }
@@ -77,11 +100,11 @@ export abstract class EventStream<V> extends ScopedObservable<V> {
 }
 
 export class EventStreamSeed<V> extends Observable<V> {
-    forEach: (observer: Observer<V>) => Unsub
+    subscribe: (observer: Observer<Event<V>>) => Unsub
 
-    constructor(desc: string, forEach: (observer: Observer<V>) => Unsub) {
+    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub) {
         super(desc)
-        this.forEach = forEach
+        this.subscribe = subscribe
     }
 }
 
@@ -99,8 +122,8 @@ export abstract class Atom<V> extends Property<V> {
  **/
 export class AtomSeed<V> extends PropertySeed<V> {
     set: (updatedValue: V) => void;
-    constructor(desc: string, forEach: (observer: Observer<V>) => [V, Unsub], set: (updatedValue: V) => void) {
-        super(desc, forEach)
+    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => [V, Unsub], set: (updatedValue: V) => void) {
+        super(desc, subscribe)
         this.set = set
     }
 }

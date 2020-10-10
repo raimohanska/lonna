@@ -1,11 +1,11 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, Event } from "./abstractions";
 import { Scope } from "./scope";
 export declare class StatelessProperty<V> extends Property<V> {
     get: () => V;
     private _onChange;
     private _scope;
-    constructor(desc: string, get: () => V, onChange: (observer: Observer<V>) => Unsub, scope: Scope);
-    onChange(observer: Observer<V>): import("./abstractions").Callback;
+    constructor(desc: string, get: () => V, onChange: (observer: Observer<Event<V>>) => Unsub, scope: Scope);
+    onChange(observer: Observer<Event<V>>): import("./abstractions").Callback;
     getScope(): Scope;
 }
 export declare class StatefulProperty<V> extends Property<V> {
@@ -13,7 +13,7 @@ export declare class StatefulProperty<V> extends Property<V> {
     private _scope;
     private _value;
     constructor(seed: PropertySeed<V>, scope: Scope);
-    onChange(observer: Observer<V>): import("./abstractions").Callback;
+    onChange(observer: Observer<Event<V>>): import("./abstractions").Callback;
     get(): V;
     getScope(): Scope;
 }

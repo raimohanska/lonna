@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkScope = exports.afterScope = exports.beforeScope = exports.autoScope = exports.scope = exports.globalScope = void 0;
+var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 exports.globalScope = function (onIn, dispatcher) {
     onIn();
@@ -21,11 +22,11 @@ function scope() {
         },
         start: function () {
             started = true;
-            scopeDispatcher.dispatch("in", undefined);
+            scopeDispatcher.dispatch("in", abstractions_1.valueEvent(undefined));
         },
         end: function () {
             started = false;
-            scopeDispatcher.dispatch("out", undefined);
+            scopeDispatcher.dispatch("out", abstractions_1.valueEvent(undefined));
         }
     };
 }

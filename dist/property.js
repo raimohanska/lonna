@@ -34,7 +34,6 @@ var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
-var util_1 = require("./util");
 var StatelessProperty = /** @class */ (function (_super) {
     __extends(StatelessProperty, _super);
     function StatelessProperty(desc, get, onChange, scope) {
@@ -45,9 +44,19 @@ var StatelessProperty = /** @class */ (function (_super) {
         return _this;
     }
     StatelessProperty.prototype.onChange = function (observer) {
-        var initial = this.get();
-        var dso = util_1.duplicateSkippingObserver(initial, observer);
-        return this._onChange(dso);
+        var unsub = this._onChange(function (event) {
+            if (abstractions_1.isValue(event)) {
+                if (event.value !== current) {
+                    current = event.value;
+                    observer(event);
+                }
+            }
+            else {
+                observer(event);
+            }
+        });
+        var current = this.get();
+        return unsub;
     };
     StatelessProperty.prototype.getScope = function () {
         return this._scope;
@@ -62,14 +71,19 @@ var StatefulProperty = /** @class */ (function (_super) {
         _this._dispatcher = new dispatcher_1.Dispatcher();
         _this._value = scope_1.beforeScope;
         _this._scope = scope;
-        var meAsObserver = function (newValue) {
-            if (newValue !== _this._value) {
-                _this._value = newValue;
-                _this._dispatcher.dispatch("change", newValue);
+        var meAsObserver = function (event) {
+            if (abstractions_1.isValue(event)) {
+                if (event.value !== _this._value) {
+                    _this._value = event.value;
+                    _this._dispatcher.dispatch("change", event);
+                }
+            }
+            else {
+                _this._dispatcher.dispatch("change", event);
             }
         };
         scope(function () {
-            var _a = __read(seed.subscribe(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
+            var _a = __read(seed.subscribeWithInitial(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
             _this._value = newValue;
             return unsub;
         }, _this._dispatcher);
@@ -88,10 +102,10 @@ var StatefulProperty = /** @class */ (function (_super) {
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
 function toPropertySeed(stream, initial) {
-    var forEach = function (observer) {
-        return [initial, stream.forEach(observer)];
+    var subscribeWithInitial = function (observer) {
+        return [initial, stream.subscribe(observer)];
     };
-    return new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), forEach);
+    return new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), subscribeWithInitial);
 }
 exports.toPropertySeed = toPropertySeed;
 function toProperty(stream, initial, scope) {

@@ -1,8 +1,9 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property } from "./abstractions";
+import { Atom, AtomSeed, Observer, Property, Event, valueEvent, isValue } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { duplicateSkippingObserver } from "./util";
+import { mapObserver } from "./map";
 
 type AtomEvents<V> = { "change": V }
 
@@ -15,7 +16,7 @@ class RootAtom<V> extends Atom<V> {
         this._value = initialValue        
     }
 
-    onChange(observer: Observer<V>) {
+    onChange(observer: Observer<Event<V>>) {
         return this._dispatcher.on("change", observer)        
     }
 
@@ -24,7 +25,7 @@ class RootAtom<V> extends Atom<V> {
     }
     set(newValue: V): void {
         this._value = newValue;
-        this._dispatcher.dispatch("change", newValue)
+        this._dispatcher.dispatch("change", valueEvent(newValue))
     }
 
     modify(fn: (old: V) => V): void {
@@ -57,13 +58,20 @@ class LensedAtom<R, V> extends Atom<V> {
         this._root.modify(oldRoot => this._lens.set(oldRoot, fn(this._lens.get(oldRoot))))
     }
 
-    onChange(observer: Observer<V>) {
-        const unsub = this._root.onChange(newRoot => {
-            statefulObserver(this._lens.get(newRoot))
-        })     
-        let initial = this.get()
-        const statefulObserver = duplicateSkippingObserver(initial, observer)
-        return unsub  
+    onChange(observer: Observer<Event<V>>) {
+        const unsub = this._root.onChange(event => {
+            if (isValue(event)) {
+                const value = this._lens.get(event.value)
+                if (value !== current) {
+                    current = value
+                    observer(valueEvent(value))
+                }
+            } else {
+                observer(event)
+            }
+        })
+        let current = this.get()
+        return unsub
     }
 
     getScope() {
@@ -81,7 +89,7 @@ class DependentAtom<V> extends Atom<V> {
         this.set = set
     }
 
-    onChange(observer: Observer<V>) {
+    onChange(observer: Observer<Event<V>>) {
         return this._input.onChange(observer)
     }
 
@@ -109,13 +117,19 @@ export class StatefulDependentAtom<V> extends Atom<V> {
         this._scope = scope;
         this.set = seed.set;
         
-        const meAsObserver = (newValue: V) => {
-            this._value = newValue
-            this._dispatcher.dispatch("change", newValue)
+        const meAsObserver = (event: Event<V>) => {
+            if (isValue(event)) {
+                if (event.value !== this._value) {
+                    this._value = event.value
+                    this._dispatcher.dispatch("change", event)
+                }
+            } else {
+                this._dispatcher.dispatch("change", event)
+            }
         }
         scope(
             () => {
-                const [newValue, unsub] = seed.subscribe(meAsObserver);
+                const [newValue, unsub] = seed.subscribeWithInitial(meAsObserver);
                 this._value = newValue;
                 return () => {
                     this._value = afterScope; 
@@ -134,7 +148,7 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     modify(fn: (old: V) => V) {
         this.set(fn(this.get()))
     }
-    onChange(observer: Observer<V>) {
+    onChange(observer: Observer<Event<V>>) {
         return this._dispatcher.on("change", observer)
     }    
     getScope() {

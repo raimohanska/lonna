@@ -1,1 +1,1 @@
-{"version":3,"file":"never.js","sourceRoot":"","sources":["../src/never.ts"],"names":[],"mappings":";;;AACA,6CAAoD;AACpD,iCAAsC;AACtC,SAAgB,KAAK;IACjB,OAAO,IAAI,iCAAmB,CAAC,OAAO,EAAE,mBAAW,CAAC,CAAA;AACxD,CAAC;AAFD,sBAEC"}
+{"version":3,"file":"never.js","sourceRoot":"","sources":["../src/never.ts"],"names":[],"mappings":";;;AAAA,+CAAuD;AACvD,6CAAqD;AACrD,iCAAsC;AACtC,+BAA6B;AAE7B,SAAgB,KAAK;IACjB,OAAO,IAAI,kCAAoB,CAAI,OAAO,EAAE,UAAA,QAAQ;QAChD,QAAQ,CAAC,uBAAQ,CAAC,CAAA;QAClB,OAAO,UAAG,CAAA;IACd,CAAC,EAAE,mBAAW,CAAC,CAAA;AACnB,CAAC;AALD,sBAKC"}

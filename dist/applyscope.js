@@ -43,7 +43,7 @@ var SeedToStream = /** @class */ (function (_super) {
     __extends(SeedToStream, _super);
     function SeedToStream(seed, scope) {
         var _this = _super.call(this, seed.desc, scope) || this;
-        scope(function () { return seed.forEach(function (v) { return _this.dispatcher.dispatch("value", v); }); }, _this.dispatcher);
+        scope(function () { return seed.subscribe(function (v) { return _this.dispatcher.dispatch("value", v); }); }, _this.dispatcher);
         return _this;
     }
     return SeedToStream;

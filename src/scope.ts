@@ -1,4 +1,4 @@
-import { Unsub } from "./abstractions"
+import { Unsub, valueEvent } from "./abstractions"
 import { Dispatcher } from "./dispatcher"
 
 /**
@@ -37,11 +37,11 @@ export function scope(): MutableScope {
         },        
         start() {
             started = true
-            scopeDispatcher.dispatch("in", undefined)
+            scopeDispatcher.dispatch("in", valueEvent(undefined))
         },
         end() {
             started = false
-            scopeDispatcher.dispatch("out", undefined)
+            scopeDispatcher.dispatch("out", valueEvent(undefined))
         }
     }
 }

@@ -1,5 +1,5 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property } from "./abstractions";
+import { Atom, AtomSeed, Observer, Property, Event } from "./abstractions";
 import { Scope } from "./scope";
 export declare class StatefulDependentAtom<V> extends Atom<V> {
     private _scope;
@@ -9,7 +9,7 @@ export declare class StatefulDependentAtom<V> extends Atom<V> {
     get(): V;
     set: (updatedValue: V) => void;
     modify(fn: (old: V) => V): void;
-    onChange(observer: Observer<V>): import("./abstractions").Callback;
+    onChange(observer: Observer<Event<V>>): import("./abstractions").Callback;
     getScope(): Scope;
 }
 export declare function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;

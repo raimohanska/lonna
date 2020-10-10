@@ -12,7 +12,9 @@ var __values = (this && this.__values) || function(o) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dispatcher = void 0;
+var abstractions_1 = require("./abstractions");
 var meta = "__meta";
+// TODO: keep "ended" state, dispatch EndEvent on subscribe?
 var Dispatcher = /** @class */ (function () {
     function Dispatcher() {
         this._observers = {};
@@ -71,7 +73,7 @@ var Dispatcher = /** @class */ (function () {
         }
     };
     Dispatcher.prototype.onObserverCount = function (subscriber) {
-        return this.on(meta, subscriber);
+        return this.on(meta, abstractions_1.valueObserver(subscriber));
     };
     Dispatcher.prototype.hasObservers = function () {
         return this._count > 0;

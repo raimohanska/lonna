@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.filter = void 0;
+var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var transform_1 = require("./transform");
 function filter(s, fn, scope) {
@@ -9,9 +10,14 @@ function filter(s, fn, scope) {
 exports.filter = filter;
 function filterT(fn) {
     return {
-        changes: function (value, observer) {
-            if (fn(value)) {
-                observer(value);
+        changes: function (event, observer) {
+            if (abstractions_1.isValue(event)) {
+                if (fn(event.value)) {
+                    observer(event);
+                }
+            }
+            else {
+                observer(event);
             }
         },
         init: function (value) {

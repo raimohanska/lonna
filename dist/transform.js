@@ -22,7 +22,7 @@ var applyscope_1 = require("./applyscope");
 function transform(desc, x, transformer, scope) {
     var seed;
     if (x instanceof abstractions_1.EventStream || x instanceof abstractions_1.EventStreamSeed) {
-        seed = new abstractions_1.EventStreamSeed(desc, function (observer) { return seed.forEach(function (value) { return transformer.changes(value, observer); }); });
+        seed = new abstractions_1.EventStreamSeed(desc, function (observer) { return seed.on("value", function (value) { return transformer.changes(value, observer); }); });
     }
     else if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
         seed = new abstractions_1.AtomSeed(desc, transformSubscribe(x, transformer), function (newValue) { return x.set(newValue); });
@@ -40,7 +40,7 @@ function transformSubscribe(src, transformer) {
     if (src === undefined)
         throw Error("Assertion failed");
     return function (observer) {
-        var _a = __read(src.subscribe(function (value) { return transformer.changes(value, observer); }), 2), initial = _a[0], unsub = _a[1];
+        var _a = __read(src.subscribeWithInitial(function (value) { return transformer.changes(value, observer); }), 2), initial = _a[0], unsub = _a[1];
         return [transformer.init(initial), unsub];
     };
 }

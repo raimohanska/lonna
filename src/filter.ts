@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed } from "./abstractions";
+import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, isValue } from "./abstractions";
 import { applyScope, applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { transform, Transformer } from "./transform";
@@ -18,9 +18,13 @@ export function filter<A>(s: any, fn: Predicate<A>, scope?: Scope): any {
 
 function filterT<A>(fn: Predicate<A>): Transformer<A, A> {
     return {
-        changes: (value: A, observer: Observer<A>) => {
-            if (fn(value)) {
-                observer(value)
+        changes: (event: Event<A>, observer: Observer<Event<A>>) => {
+            if (isValue(event)) {
+                if (fn(event.value)) {
+                    observer(event)
+                }
+            } else {
+                observer(event)
             }
         },
         init: (value: A) => {
