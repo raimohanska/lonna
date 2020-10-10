@@ -14,6 +14,10 @@ export function isValue<V>(event: Event<V>): event is Value<V> {
     return event.type === "value"
 }
 
+export function isEnd<V>(event: Event<V>): event is End {
+    return event.type === "end"
+}
+
 export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
     return event => { if (isValue(event)) observer(event.value) }
 }
@@ -43,7 +47,6 @@ export abstract class Observable<V> {
     }
 }
 
-// TODO: all scoped observables must maintain "ended" state and dispatch that also immediately on subscribe
 export abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string) {
         super(desc)

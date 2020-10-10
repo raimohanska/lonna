@@ -29,7 +29,7 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isValue = exports.valueEvent = void 0;
+exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = void 0;
 function valueEvent(value) {
     return { type: "value", value: value };
 }
@@ -38,6 +38,10 @@ function isValue(event) {
     return event.type === "value";
 }
 exports.isValue = isValue;
+function isEnd(event) {
+    return event.type === "end";
+}
+exports.isEnd = isEnd;
 function valueObserver(observer) {
     return function (event) { if (isValue(event))
         observer(event.value); };
@@ -61,7 +65,6 @@ var Observable = /** @class */ (function () {
     return Observable;
 }());
 exports.Observable = Observable;
-// TODO: all scoped observables must maintain "ended" state and dispatch that also immediately on subscribe
 var ScopedObservable = /** @class */ (function (_super) {
     __extends(ScopedObservable, _super);
     function ScopedObservable(desc) {

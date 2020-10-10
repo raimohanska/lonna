@@ -13,12 +13,13 @@ var __values = (this && this.__values) || function(o) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Dispatcher = void 0;
 var abstractions_1 = require("./abstractions");
+var util_1 = require("./util");
 var meta = "__meta";
-// TODO: keep "ended" state, dispatch EndEvent on subscribe?
 var Dispatcher = /** @class */ (function () {
     function Dispatcher() {
         this._observers = {};
         this._count = 0;
+        this._ended = false;
     }
     Dispatcher.prototype.dispatch = function (key, value) {
         var e_1, _a;
@@ -36,6 +37,9 @@ var Dispatcher = /** @class */ (function () {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
+        if (abstractions_1.isEnd(value)) {
+            this._ended = true;
+        }
     };
     Dispatcher.prototype.on = function (key, subscriber) {
         var _this = this;
@@ -45,14 +49,20 @@ var Dispatcher = /** @class */ (function () {
         if ((_a = this._observers[key]) === null || _a === void 0 ? void 0 : _a.includes(subscriber)) {
             console.warn("Already subscribed");
         }
-        this._observers[key].push(subscriber);
-        if (key !== meta) {
-            this._count++;
-            if (this._count == 1) {
-                this.dispatch(meta, 1);
-            }
+        if (this._ended) {
+            subscriber(abstractions_1.endEvent);
+            return util_1.nop;
         }
-        return function () { return _this.off(key, subscriber); };
+        else {
+            this._observers[key].push(subscriber);
+            if (key !== meta) {
+                this._count++;
+                if (this._count == 1) {
+                    this.dispatch(meta, 1);
+                }
+            }
+            return function () { return _this.off(key, subscriber); };
+        }
     };
     Dispatcher.prototype.off = function (key, subscriber) {
         var _a;

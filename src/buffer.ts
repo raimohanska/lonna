@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observable, Observer } from "./abstractions";
+import { Event, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
 import GlobalScheduler from "./scheduler";
 import { transform, Transformer } from "./transform";
 import { nop } from "./util";
@@ -42,9 +42,9 @@ class Buffer<V> {
   delay?: DelayFunction
   onInput: BufferHandler<V>
   onFlush: BufferHandler<V>
-  push: Observer<V[]> = (e) => undefined
+  push: Observer<Event<V[]>> = (e) => undefined
   scheduled: number | null = null
-  //end: End | undefined = undefined
+  end: Event<V[]> | undefined = undefined
   values: V[] = []
   flush() {
     if (this.scheduled) {
@@ -55,14 +55,14 @@ class Buffer<V> {
       //console.log Bacon.scheduler.now() + ": flush " + @values
       var valuesToPush = this.values;
       this.values = [];
-      var reply = this.push(valuesToPush);
-      //if ((this.end != null)) {
-      //  return this.push(this.end);
-      //} else {
+      this.push(valueEvent(valuesToPush));
+      if ((this.end != null)) {
+        return this.push(this.end);
+      } else {
         return this.onFlush(this);
-      //}
+      }
     } else {
-      //if ((this.end != null)) { return this.push(this.end); }
+      if ((this.end != null)) { return this.push(this.end); }
     }
   }
   schedule(delay: DelayFunction) {
@@ -97,22 +97,19 @@ function buffer<V>(desc: string, src: EventStreamSeed<V>, onInput: BufferHandler
   //var reply = more;
   var buffer = new Buffer<V>(onFlush, onInput)
   const transformer: Transformer<V, V[]> = {
-      changes: (event: V, sink: Observer<V[]>) => {
+      changes: (event: Event<V>, sink: Observer<Event<V[]>>) => {
         buffer.push = sink
-        //if (hasValue(event)) {
-          buffer.values.push(event);
+        if (isValue(event)) {
+          buffer.values.push(event.value);
           //console.log Bacon.scheduler.now() + ": input " + event.value
           onInput(buffer);
-        //}
-        /*
-        } else if (isEnd(event)) {
+        } else {
           buffer.end = event;
           if (!buffer.scheduled) {
             //console.log Bacon.scheduler.now() + ": end-flush"
             buffer.flush();
           }
         }
-        */
       },
       init: v => {
           throw Error("TODO: this branch is not valid when handling EventStreams only")

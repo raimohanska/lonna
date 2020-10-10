@@ -12,6 +12,7 @@ export declare type End = {
 export declare type Unsub = Callback;
 export declare function valueEvent<V>(value: V): Value<V>;
 export declare function isValue<V>(event: Event<V>): event is Value<V>;
+export declare function isEnd<V>(event: Event<V>): event is End;
 export declare function valueObserver<V>(observer: Observer<V>): Observer<Event<V>>;
 export declare const endEvent: End;
 export declare abstract class Observable<V> {

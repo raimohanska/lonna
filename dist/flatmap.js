@@ -14,18 +14,25 @@ function flatMap(s, fn, scope) {
         var unsubThis = s.subscribe(function (event) {
             if (abstractions_1.isValue(event)) {
                 var child = fn(event.value);
+                var ended_1 = false;
                 var unsubChild_1 = child.subscribe(function (event) {
                     if (abstractions_1.isValue(event)) {
                         observer(event);
                     }
                     else {
-                        util_1.remove(children, unsubChild_1);
+                        if (unsubChild_1) {
+                            util_1.remove(children, unsubChild_1);
+                        }
+                        else {
+                            ended_1 = true;
+                        }
                         if (children.length === 0 && rootEnded) {
                             observer(abstractions_1.endEvent);
                         }
                     }
                 });
-                children.push(unsubChild_1);
+                if (!ended_1)
+                    children.push(unsubChild_1);
             }
             else {
                 rootEnded = true;

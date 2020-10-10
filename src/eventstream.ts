@@ -25,21 +25,7 @@ export class StatelessEventStream<V> extends EventStream<V> {
     private _scope: Scope;
     subscribe: (observer: Observer<Event<V>>) => Unsub;
 
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope);
-    constructor(seed: EventStreamSeed<V>, scope: Scope);
-
-    constructor() { 
-        let desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope
-        if (arguments[0] instanceof EventStreamSeed) {
-            const seed = arguments[0]
-            desc = seed.desc
-            subscribe = seed.subscribe
-            scope = arguments[1]
-        } else {
-            desc = arguments[0]
-            subscribe = arguments[1]
-            scope = arguments[2]
-        }
+    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope) {
         super(desc) 
         this._scope = scope
         this.subscribe = subscribe

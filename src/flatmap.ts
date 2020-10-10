@@ -18,17 +18,22 @@ export function flatMap<A, B>(s: EventStreamSeed<A> | EventStreamSeed<A>, fn: (v
         const unsubThis = s.subscribe(event => {
             if (isValue(event)) {
                 const child = fn(event.value)
+                let ended = false
                 const unsubChild = child.subscribe(event => {
                     if (isValue(event)) {
                         observer(event)
                     } else {
-                        remove(children, unsubChild)
+                        if (unsubChild) {
+                            remove(children, unsubChild)
+                        } else {
+                            ended = true
+                        }
                         if (children.length === 0 && rootEnded) {
                             observer(endEvent)
                         }
                     }
                 })
-                children.push(unsubChild)
+                if (!ended) children.push(unsubChild)
             } else {
                 rootEnded = true
                 if (children.length === 0) {

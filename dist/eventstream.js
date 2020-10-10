@@ -36,21 +36,8 @@ var StatefulEventStream = /** @class */ (function (_super) {
 exports.StatefulEventStream = StatefulEventStream;
 var StatelessEventStream = /** @class */ (function (_super) {
     __extends(StatelessEventStream, _super);
-    function StatelessEventStream() {
-        var _this = this;
-        var desc, subscribe, scope;
-        if (arguments[0] instanceof abstractions_1.EventStreamSeed) {
-            var seed = arguments[0];
-            desc = seed.desc;
-            subscribe = seed.subscribe;
-            scope = arguments[1];
-        }
-        else {
-            desc = arguments[0];
-            subscribe = arguments[1];
-            scope = arguments[2];
-        }
-        _this = _super.call(this, desc) || this;
+    function StatelessEventStream(desc, subscribe, scope) {
+        var _this = _super.call(this, desc) || this;
         _this._scope = scope;
         _this.subscribe = subscribe;
         return _this;

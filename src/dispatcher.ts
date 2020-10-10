@@ -1,19 +1,21 @@
-import { Event, Observer, Unsub, valueObserver } from "./abstractions";
+import { endEvent, Event, isEnd, Observer, Unsub, valueObserver } from "./abstractions";
+import { nop } from "./util";
 
 const meta = "__meta"
-type META = typeof meta
 
 type Dict = { [key: string]: any }
-
-// TODO: keep "ended" state, dispatch EndEvent on subscribe?
 
 export class Dispatcher<E extends Dict> {
     private _observers: { [key: string] : Observer<any>[] | undefined } = {}
     private _count = 0
+    private _ended = false
 
     dispatch<X extends keyof E & string>(key: X, value: Event<E[X]>) {
         if (this._observers[key]) for (const s of this._observers[key]!) {
             s(value)
+        }
+        if (isEnd(value)) {
+            this._ended = true
         }
     }
 
@@ -22,14 +24,19 @@ export class Dispatcher<E extends Dict> {
         if (this._observers[key]?.includes(subscriber)) {
             console.warn("Already subscribed")
         }
-        this._observers[key]!.push(subscriber)
-        if (key !== meta) {
-            this._count++
-            if (this._count == 1) {
-                this.dispatch(meta, 1 as any)
+        if (this._ended) {
+            subscriber(endEvent)
+            return nop
+        } else {
+            this._observers[key]!.push(subscriber)
+            if (key !== meta) {
+                this._count++
+                if (this._count == 1) {
+                    this.dispatch(meta, 1 as any)
+                }
             }
+            return () => this.off(key, subscriber)
         }
-        return () => this.off(key, subscriber)
     }
 
     off<X extends keyof E & string>(key: X, subscriber: Observer<Event<E[X]>>) {
