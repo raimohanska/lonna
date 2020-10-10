@@ -15,6 +15,13 @@ Compared to Bacon.js
 - Atoms included for read-write state, similarly Bus for read-write streams. Rudimentary lens system included for decomposing state.
 - API consists of static methods instead of prototype methods. Is tree-shakable and easier to extend.
 
+Current prioritized goals:
+
+- Implement just enough operators for applying in real-life projects
+- Validate / improve API ergonomy based on the above
+- Decide on whether to make this an actual library
+- After that there will be technical debt to pay, to get to a reasonable level of quality
+
 TODO list of Bacon.js methods for first real-life use case:
 
 - `throttle`
