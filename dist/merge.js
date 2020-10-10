@@ -13,7 +13,7 @@ function merge() {
         return function () { return unsubs.forEach(function (f) { return f(); }); };
     });
     if (streams[0] instanceof abstractions_1.EventStream) {
-        return new eventstream_1.StatelessEventStream(seed, streams[0].scope);
+        return new eventstream_1.StatelessEventStream(seed, streams[0].getScope());
     }
     return seed;
 }

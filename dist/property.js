@@ -28,102 +28,64 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.constant = exports.toProperty = exports.toPropertySeed = exports.StatefulProperty = exports.DerivedProperty = exports.StatefulPropertyBase = void 0;
+exports.constant = exports.toProperty = exports.toPropertySeed = exports.StatefulProperty = exports.StatelessProperty = void 0;
 var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
 var util_1 = require("./util");
-var StatefulPropertyBase = /** @class */ (function (_super) {
-    __extends(StatefulPropertyBase, _super);
-    function StatefulPropertyBase(desc) {
+var StatelessProperty = /** @class */ (function (_super) {
+    __extends(StatelessProperty, _super);
+    function StatelessProperty(desc, get, onChange, scope) {
         var _this = _super.call(this, desc) || this;
-        _this.dispatcher = new dispatcher_1.Dispatcher();
+        _this.get = get;
+        _this._onChange = onChange;
+        _this._scope = scope;
         return _this;
     }
-    StatefulPropertyBase.prototype.on = function (event, observer) {
-        var unsub = this.dispatcher.on(event, observer);
-        if (event === "value") {
-            observer(this.get());
-        }
-        return unsub;
+    StatelessProperty.prototype.onChange = function (observer) {
+        var initial = this.get();
+        var dso = util_1.duplicateSkippingObserver(initial, observer);
+        return this._onChange(dso);
     };
-    return StatefulPropertyBase;
+    StatelessProperty.prototype.getScope = function () {
+        return this._scope;
+    };
+    return StatelessProperty;
 }(abstractions_1.Property));
-exports.StatefulPropertyBase = StatefulPropertyBase;
-var DerivedProperty = /** @class */ (function (_super) {
-    __extends(DerivedProperty, _super);
-    function DerivedProperty(desc, sources, combinator) {
-        var _this = _super.call(this, desc) || this;
-        _this.sources = sources;
-        _this.combinator = combinator;
-        return _this;
-    }
-    DerivedProperty.prototype.get = function () {
-        return this.combinator.apply(this, __spread(this.getCurrentArray()));
-    };
-    DerivedProperty.prototype.getCurrentArray = function () {
-        return this.sources.map(function (s) { return s.get(); });
-    };
-    DerivedProperty.prototype.on = function (event, observer) {
-        var _this = this;
-        var unsubs = this.sources.map(function (src, i) {
-            return src.on("change", function (newValue) {
-                currentArray[i] = newValue;
-                statefulObserver(_this.combinator.apply(_this, __spread(currentArray)));
-            });
-        });
-        var currentArray = this.getCurrentArray();
-        var initial = this.combinator.apply(this, __spread(currentArray));
-        var statefulObserver = util_1.duplicateSkippingObserver(initial, observer);
-        if (event === "value") {
-            observer(initial);
-        }
-        return function () {
-            unsubs.forEach(function (f) { return f(); });
-        };
-    };
-    DerivedProperty.prototype.scope = function () {
-        if (this.sources.length === 0)
-            return scope_1.globalScope;
-        return this.sources[0].scope();
-    };
-    return DerivedProperty;
-}(abstractions_1.Property));
-exports.DerivedProperty = DerivedProperty;
+exports.StatelessProperty = StatelessProperty;
 var StatefulProperty = /** @class */ (function (_super) {
     __extends(StatefulProperty, _super);
     function StatefulProperty(seed, scope) {
         var _this = _super.call(this, seed.desc) || this;
-        _this.value = scope_1.beforeScope;
+        _this._dispatcher = new dispatcher_1.Dispatcher();
+        _this._value = scope_1.beforeScope;
         _this._scope = scope;
         var meAsObserver = function (newValue) {
-            if (newValue !== _this.value) {
-                _this.value = newValue;
-                _this.dispatcher.dispatch("change", newValue);
-                _this.dispatcher.dispatch("value", newValue);
+            if (newValue !== _this._value) {
+                _this._value = newValue;
+                _this._dispatcher.dispatch("change", newValue);
             }
         };
         scope(function () {
             var _a = __read(seed.subscribe(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
-            _this.value = newValue;
+            _this._value = newValue;
             return unsub;
-        }, _this.dispatcher);
+        }, _this._dispatcher);
         return _this;
     }
-    StatefulProperty.prototype.get = function () {
-        return scope_1.checkScope(this, this.value);
+    StatefulProperty.prototype.onChange = function (observer) {
+        return this._dispatcher.on("change", observer);
     };
-    StatefulProperty.prototype.scope = function () {
+    StatefulProperty.prototype.get = function () {
+        return scope_1.checkScope(this, this._value);
+    };
+    StatefulProperty.prototype.getScope = function () {
         return this._scope;
     };
     return StatefulProperty;
-}(StatefulPropertyBase));
+}(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
 function toPropertySeed(stream, initial) {
     var forEach = function (observer) {

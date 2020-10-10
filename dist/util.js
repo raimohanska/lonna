@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicateSkippingObserver = void 0;
+exports.duplicateSkippingObserver = exports.nop = void 0;
+function nop() { }
+exports.nop = nop;
 function duplicateSkippingObserver(initial, observer) {
     var current = initial;
     return function (newValue) {

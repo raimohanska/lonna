@@ -18,12 +18,14 @@ __exportStar(require("./combine"), exports);
 __exportStar(require("./dispatcher"), exports);
 __exportStar(require("./eventstream"), exports);
 __exportStar(require("./filter"), exports);
+__exportStar(require("./flatmap"), exports);
 __exportStar(require("./interval"), exports);
 __exportStar(require("./later"), exports);
 __exportStar(require("./map"), exports);
 __exportStar(require("./merge"), exports);
 __exportStar(require("./never"), exports);
 __exportStar(require("./property"), exports);
+__exportStar(require("./sampledby"), exports);
 __exportStar(require("./scan"), exports);
 __exportStar(require("./scope"), exports);
 //# sourceMappingURL=index.js.map

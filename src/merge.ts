@@ -11,7 +11,7 @@ export function merge<A>(...streams: (EventStream<any> | EventStreamSeed<any>)[]
         return () => unsubs.forEach(f => f())
     })
     if (streams[0] instanceof EventStream) {
-        return new StatelessEventStream(seed, streams[0].scope)
+        return new StatelessEventStream(seed, streams[0].getScope())
     }
     return seed
 }

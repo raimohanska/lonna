@@ -7,7 +7,7 @@ describe("Property", () => {
         const values: number[] = []
         const valuesChange: number[] = []
         prop.forEach(v => values.push(v))
-        prop.on("change", v => valuesChange.push(v))
+        prop.onChange(v => valuesChange.push(v))
         expect(values).toEqual([0])
         expect(valuesChange).toEqual([])
         b.push(1)

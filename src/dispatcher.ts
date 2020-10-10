@@ -6,24 +6,24 @@ type META = typeof meta
 type Dict = { [key: string]: any }
 
 export class Dispatcher<E extends Dict> {
-    private observers: { [key: string] : Observer<any>[] | undefined } = {}
-    private count = 0
+    private _observers: { [key: string] : Observer<any>[] | undefined } = {}
+    private _count = 0
 
     dispatch<X extends keyof E & string>(key: X, value: E[X]) {
-        if (this.observers[key]) for (const s of this.observers[key]!) {
+        if (this._observers[key]) for (const s of this._observers[key]!) {
             s(value)
         }
     }
 
     on<X extends keyof E & string>(key: X, subscriber: Observer<E[X]>): Unsub {
-        if (!this.observers[key]) this.observers[key] = [];
-        if (this.observers[key]?.includes(subscriber)) {
+        if (!this._observers[key]) this._observers[key] = [];
+        if (this._observers[key]?.includes(subscriber)) {
             console.warn("Already subscribed")
         }
-        this.observers[key]!.push(subscriber)
+        this._observers[key]!.push(subscriber)
         if (key !== meta) {
-            this.count++
-            if (this.count == 1) {
+            this._count++
+            if (this._count == 1) {
                 this.dispatch(meta, 1 as any)
             }
         }
@@ -31,16 +31,16 @@ export class Dispatcher<E extends Dict> {
     }
 
     off<X extends keyof E & string>(key: X, subscriber: Observer<E[X]>) {
-        if (!this.observers[key]) return;
-        const index = this.observers[key]!.indexOf(subscriber);
+        if (!this._observers[key]) return;
+        const index = this._observers[key]!.indexOf(subscriber);
         if (index >= 0) {
-            this.observers[key]!.splice(index, 1);
-            if (this.observers.key?.length === 0) {
-                delete this.observers[key]
+            this._observers[key]!.splice(index, 1);
+            if (this._observers.key?.length === 0) {
+                delete this._observers[key]
             }
             if (key !== meta) {
-                this.count--
-                if (this.count == 0) {
+                this._count--
+                if (this._count == 0) {
                     this.dispatch(meta, 0 as any)
                 }
             }
@@ -52,6 +52,6 @@ export class Dispatcher<E extends Dict> {
     }
 
     hasObservers(): boolean {
-        return this.count > 0
+        return this._count > 0
     }
 }

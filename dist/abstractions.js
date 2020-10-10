@@ -12,57 +12,80 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.MulticastObservable = exports.Observable = void 0;
+exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = void 0;
 // Abstract classes instead of interfaces for runtime type information and instanceof
 var Observable = /** @class */ (function () {
-    function Observable() {
+    function Observable(desc) {
+        this.desc = desc;
     }
+    Observable.prototype.log = function (message) {
+        this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
+    };
+    Observable.prototype.toString = function () {
+        return this.desc;
+    };
     return Observable;
 }());
 exports.Observable = Observable;
-var MulticastObservable = /** @class */ (function (_super) {
-    __extends(MulticastObservable, _super);
-    function MulticastObservable(desc) {
-        var _this = _super.call(this) || this;
-        _this.desc = desc;
-        return _this;
+var ScopedObservable = /** @class */ (function (_super) {
+    __extends(ScopedObservable, _super);
+    function ScopedObservable(desc) {
+        return _super.call(this, desc) || this;
     }
-    MulticastObservable.prototype.forEach = function (observer) {
-        return this.on("value", observer);
-    };
-    MulticastObservable.prototype.log = function (message) {
-        this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
-    };
-    MulticastObservable.prototype.toString = function () {
-        return this.desc;
-    };
-    return MulticastObservable;
+    return ScopedObservable;
 }(Observable));
-exports.MulticastObservable = MulticastObservable;
+exports.ScopedObservable = ScopedObservable;
 var Property = /** @class */ (function (_super) {
     __extends(Property, _super);
     function Property(desc) {
         return _super.call(this, desc) || this;
     }
     Property.prototype.subscribe = function (observer) {
-        var unsub = this.on("change", observer);
+        var unsub = this.onChange(observer);
         return [this.get(), unsub];
     };
+    Property.prototype.forEach = function (observer) {
+        observer(this.get());
+        return this.onChange(observer);
+    };
     return Property;
-}(MulticastObservable));
+}(ScopedObservable));
 exports.Property = Property;
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-var PropertySeed = /** @class */ (function () {
-    function PropertySeed(desc, forEach) {
-        this.subscribe = forEach;
-        this.desc = desc;
+var PropertySeed = /** @class */ (function (_super) {
+    __extends(PropertySeed, _super);
+    function PropertySeed(desc, subscribe) {
+        var _this = _super.call(this, desc) || this;
+        _this.subscribe = subscribe;
+        return _this;
     }
+    PropertySeed.prototype.forEach = function (observer) {
+        var _a = __read(this.subscribe(observer), 2), init = _a[0], unsub = _a[1];
+        observer(init);
+        return unsub;
+    };
     return PropertySeed;
-}());
+}(Observable));
 exports.PropertySeed = PropertySeed;
 var EventStream = /** @class */ (function (_super) {
     __extends(EventStream, _super);
@@ -70,14 +93,13 @@ var EventStream = /** @class */ (function (_super) {
         return _super.call(this, desc) || this;
     }
     return EventStream;
-}(MulticastObservable));
+}(ScopedObservable));
 exports.EventStream = EventStream;
 var EventStreamSeed = /** @class */ (function (_super) {
     __extends(EventStreamSeed, _super);
     function EventStreamSeed(desc, forEach) {
-        var _this = _super.call(this) || this;
+        var _this = _super.call(this, desc) || this;
         _this.forEach = forEach;
-        _this.desc = desc;
         return _this;
     }
     return EventStreamSeed;

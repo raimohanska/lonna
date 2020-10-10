@@ -1,5 +1,6 @@
-import { Property } from "./abstractions"
-import { DerivedProperty } from "./property";
+import { Observer, Property } from "./abstractions";
+import { StatelessProperty } from "./property";
+import { globalScope } from "./scope";
 
 export type Function0<R> = () => R;
 export type Function1<T1, R> = (t1: T1) => R;
@@ -40,6 +41,25 @@ export function combine<R>(fn: Function, Propertys: Property<any>[]): Property<R
 
 export function combine<Out>(...args: any[]): Property<Out> {
   const properties = args.slice(0, args.length - 1)
-  const f = args[args.length - 1]
-  return new DerivedProperty<Out>(`combine(${properties}, fn)`, properties, f);
+  const combinator: (...inputs: any[]) => Out = args[args.length - 1]
+  function getCurrentArray(): any[] {
+    return properties.map(s => s.get())
+  }
+  const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
+  const get = () => combinator(...getCurrentArray())
+  function onChange(observer: Observer<Out>) {
+    const unsubs = properties.map((src, i) => {
+      return src.on("change", (newValue: Out) => {
+          currentArray[i] = newValue
+          observer(combinator(...currentArray))
+      })
+    })        
+    let currentArray = getCurrentArray()
+    
+    return () => {
+        unsubs.forEach(f => f())
+    }    
+  }
+
+  return new StatelessProperty<Out>(`combine(${properties}, fn)`, get, onChange, scope);
 };

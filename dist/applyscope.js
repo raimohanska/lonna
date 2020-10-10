@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.applyScope = void 0;
+exports.applyScopeMaybe = exports.applyScope = void 0;
 var abstractions_1 = require("./abstractions");
 var eventstream_1 = require("./eventstream");
 var atom_1 = require("./atom");
@@ -31,6 +31,14 @@ function applyScope(scope, seed) {
     throw Error("Unknown seed");
 }
 exports.applyScope = applyScope;
+/** @hidden */
+function applyScopeMaybe(seed, scope) {
+    if (scope !== undefined) {
+        return applyScope(scope, seed);
+    }
+    return seed;
+}
+exports.applyScopeMaybe = applyScopeMaybe;
 var SeedToStream = /** @class */ (function (_super) {
     __extends(SeedToStream, _super);
     function SeedToStream(seed, scope) {

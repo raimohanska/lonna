@@ -1,118 +1,108 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property, PropertyEvents, PropertyEventType } from "./abstractions";
+import { Atom, AtomSeed, Observer, Property } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { duplicateSkippingObserver } from "./util";
 
+type AtomEvents<V> = { "change": V }
+
 class RootAtom<V> extends Atom<V> {    
-    private dispatcher = new Dispatcher<PropertyEvents<V>>();
-    private value: V
+    private _dispatcher = new Dispatcher<AtomEvents<V>>();
+    private _value: V
 
     constructor(desc: string, initialValue: V) {
         super(desc)
-        this.value = initialValue        
+        this._value = initialValue        
     }
 
-    on(event: PropertyEventType, observer: Observer<V>) {
-        const unsub = this.dispatcher.on(event, observer)
-        if (event === "value") {
-            observer(this.get())
-        }
-        return unsub
+    onChange(observer: Observer<V>) {
+        return this._dispatcher.on("change", observer)        
     }
 
     get(): V {
-        return this.value
+        return this._value
     }
     set(newValue: V): void {
-        this.value = newValue;
-        this.dispatcher.dispatch("value", newValue)
-        this.dispatcher.dispatch("change", newValue)
+        this._value = newValue;
+        this._dispatcher.dispatch("change", newValue)
     }
+
     modify(fn: (old: V) => V): void {
-        this.set(fn(this.value))
+        this.set(fn(this._value))
     }
-    scope() {
+    getScope() {
         return globalScope
     }
 }
 
 class LensedAtom<R, V> extends Atom<V> {
-    private root: Atom<R>;
-    private lens: L.Lens<R, V>;
+    private _root: Atom<R>;
+    private _lens: L.Lens<R, V>;
 
     constructor(desc: string, root: Atom<R>, view: L.Lens<R, V>) {
         super(desc)
-        this.root = root;
-        this.lens = view;
+        this._root = root;
+        this._lens = view;
     }
 
     get() {
-        return this.lens.get(this.root.get())
+        return this._lens.get(this._root.get())
     }
 
     set(newValue: V) {
-        this.root.set(this.lens.set(this.root.get(), newValue))
+        this._root.set(this._lens.set(this._root.get(), newValue))
     }
 
     modify(fn: (old: V) => V) {
-        this.root.modify(oldRoot => this.lens.set(oldRoot, fn(this.lens.get(oldRoot))))
+        this._root.modify(oldRoot => this._lens.set(oldRoot, fn(this._lens.get(oldRoot))))
     }
 
-    on(event: PropertyEventType, observer: Observer<V>) {
-        const unsub = this.root.on("change", newRoot => {
-            statefulObserver(this.lens.get(newRoot))
+    onChange(observer: Observer<V>) {
+        const unsub = this._root.onChange(newRoot => {
+            statefulObserver(this._lens.get(newRoot))
         })     
         let initial = this.get()
         const statefulObserver = duplicateSkippingObserver(initial, observer)
-        
-        if (event === "value") {
-            observer(initial)
-        }
         return unsub  
     }
 
-    scope() {
-        return this.root.scope()
+    getScope() {
+        return this._root.getScope()
     }
 }
 
 class DependentAtom<V> extends Atom<V> {
-    private input: Property<V>;
-    private onChange: (updatedValue: V) => void;
+    private _input: Property<V>;
+    set: (updatedValue: V) => void;
 
-    constructor(desc: string, input: Property<V>, onChange: (updatedValue: V) => void) {
+    constructor(desc: string, input: Property<V>, set: (updatedValue: V) => void) {
         super(desc)
-        this.input = input;
-        this.onChange = onChange;
+        this._input = input;
+        this.set = set
+    }
+
+    onChange(observer: Observer<V>) {
+        return this._input.onChange(observer)
     }
 
     get() {
-        return this.input.get()
-    }
-
-    set(newValue: V) {
-        this.onChange(newValue)
+        return this._input.get()
     }
 
     modify(fn: (old: V) => V) {
         this.set(fn(this.get()))
     }
 
-    on(event: PropertyEventType, observer: Observer<V>) {
-        return this.input.on(event, observer)    
+    getScope() {
+        return this._input.getScope()
     }
-
-    scope() {
-        return this.input.scope()
-    }
+    
 }
 
 export class StatefulDependentAtom<V> extends Atom<V> {
     private _scope: Scope
-    private dispatcher = new Dispatcher<PropertyEvents<V>>();
-    
-    private value: V | OutOfScope = beforeScope
+    private _dispatcher = new Dispatcher<AtomEvents<V>>();
+    private _value: V | OutOfScope = beforeScope
 
     constructor(seed: AtomSeed<V>, scope: Scope) {
         super(seed.desc)
@@ -120,24 +110,23 @@ export class StatefulDependentAtom<V> extends Atom<V> {
         this.set = seed.set;
         
         const meAsObserver = (newValue: V) => {
-            this.value = newValue
-            this.dispatcher.dispatch("change", newValue)
-            this.dispatcher.dispatch("value", newValue)
+            this._value = newValue
+            this._dispatcher.dispatch("change", newValue)
         }
         scope(
             () => {
                 const [newValue, unsub] = seed.subscribe(meAsObserver);
-                this.value = newValue;
+                this._value = newValue;
                 return () => {
-                    this.value = afterScope; 
+                    this._value = afterScope; 
                     unsub!()
                 }
             }, 
-            this.dispatcher
+            this._dispatcher
         )
     }
     get(): V {
-        return checkScope(this, this.value)
+        return checkScope(this, this._value)
     }
 
     set: (updatedValue: V) => void;
@@ -145,14 +134,10 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     modify(fn: (old: V) => V) {
         this.set(fn(this.get()))
     }
-    on(event: PropertyEventType, observer: Observer<V>) {
-        const unsub = this.dispatcher.on(event, observer)
-        if (event === "value") {
-            observer(this.get())
-        }
-        return unsub
+    onChange(observer: Observer<V>) {
+        return this._dispatcher.on("change", observer)
     }    
-    scope() {
+    getScope() {
         return this._scope
     }
 

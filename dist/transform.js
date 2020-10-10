@@ -33,10 +33,7 @@ function transform(desc, x, transformer, scope) {
     else {
         throw Error("Unknown observable " + x);
     }
-    if (scope !== undefined) {
-        return applyscope_1.applyScope(scope, seed);
-    }
-    return seed;
+    return applyscope_1.applyScopeMaybe(seed);
 }
 exports.transform = transform;
 function transformSubscribe(src, transformer) {

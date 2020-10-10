@@ -1,6 +1,5 @@
-import { Bus, EventStream, Observer, StreamEventType } from "./abstractions"
-import { StatefulEventStream } from "./eventstream"
-import { Dispatcher } from "./dispatcher"
+import { Bus } from "./abstractions"
+import { StatefulEventStream } from "./eventstream"
 import { globalScope } from "./scope"
 
 export function bus<V>(): Bus<V> {

@@ -9,7 +9,7 @@ export function flatMap<A, B>(s: EventStreamSeed<A>, fn: Spawner<A, B>, scope?: 
 
 export function flatMap<A, B>(s: EventStreamSeed<A> | EventStreamSeed<A>, fn: (value: A) => EventStreamSeed<B>, scope?: Scope): any {
     if (s instanceof EventStream) {
-        scope = s.scope()
+        scope = s.getScope()
     }
     return applyScopeMaybe(new EventStreamSeed<B>(`${s}.flatMap(fn)`, observer => {
         const children: Unsub[] = []

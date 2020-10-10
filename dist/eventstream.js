@@ -25,10 +25,10 @@ var StatefulEventStream = /** @class */ (function (_super) {
         _this._scope = scope;
         return _this;
     }
-    StatefulEventStream.prototype.on = function (event, observer) {
-        return this.dispatcher.on(event, observer);
+    StatefulEventStream.prototype.forEach = function (observer) {
+        return this.dispatcher.on("value", observer);
     };
-    StatefulEventStream.prototype.scope = function () {
+    StatefulEventStream.prototype.getScope = function () {
         return this._scope;
     };
     return StatefulEventStream;
@@ -55,10 +55,7 @@ var StatelessEventStream = /** @class */ (function (_super) {
         _this.forEach = forEach;
         return _this;
     }
-    StatelessEventStream.prototype.on = function (event, observer) {
-        return this.forEach(observer);
-    };
-    StatelessEventStream.prototype.scope = function () {
+    StatelessEventStream.prototype.getScope = function () {
         return this._scope;
     };
     return StatelessEventStream;

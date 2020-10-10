@@ -1,27 +1,21 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertyEvents, PropertyEventType, PropertySeed } from "./abstractions";
-import { Dispatcher } from "./dispatcher";
+import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
 import { Scope } from "./scope";
-export declare abstract class StatefulPropertyBase<V> extends Property<V> {
-    protected dispatcher: Dispatcher<PropertyEvents<V>>;
-    abstract get(): V;
-    constructor(desc: string);
-    on(event: PropertyEventType, observer: Observer<V>): import("./abstractions").Callback;
-}
-export declare class DerivedProperty<V> extends Property<V> {
-    private sources;
-    private combinator;
-    constructor(desc: string, sources: Property<any>[], combinator: (...inputs: any[]) => V);
-    get(): V;
-    private getCurrentArray;
-    on(event: PropertyEventType, observer: Observer<V>): () => void;
-    scope(): Scope;
-}
-export declare class StatefulProperty<V> extends StatefulPropertyBase<V> {
+export declare class StatelessProperty<V> extends Property<V> {
+    get: () => V;
+    private _onChange;
     private _scope;
-    private value;
+    constructor(desc: string, get: () => V, onChange: (observer: Observer<V>) => Unsub, scope: Scope);
+    onChange(observer: Observer<V>): import("./abstractions").Callback;
+    getScope(): Scope;
+}
+export declare class StatefulProperty<V> extends Property<V> {
+    private _dispatcher;
+    private _scope;
+    private _value;
     constructor(seed: PropertySeed<V>, scope: Scope);
+    onChange(observer: Observer<V>): import("./abstractions").Callback;
     get(): V;
-    scope(): Scope;
+    getScope(): Scope;
 }
 export declare function toPropertySeed<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
 export declare function toPropertySeed<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;

@@ -4,11 +4,7 @@ exports.filter = void 0;
 var applyscope_1 = require("./applyscope");
 var transform_1 = require("./transform");
 function filter(s, fn, scope) {
-    var seed = transform_1.transform(s + ".map(fn)", s, filterT(fn));
-    if (scope !== undefined) {
-        return applyscope_1.applyScope(scope, seed);
-    }
-    return seed;
+    return applyscope_1.applyScopeMaybe(transform_1.transform(s + ".map(fn)", s, filterT(fn)), scope);
 }
 exports.filter = filter;
 function filterT(fn) {

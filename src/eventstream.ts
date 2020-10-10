@@ -1,7 +1,8 @@
-import { EventStream, StreamEventType, Observer, StreamEvents, Unsub, EventStreamSeed } from "./abstractions";
-import { applyScope } from "./applyscope";
+import { EventStream, EventStreamSeed, Observer, Unsub } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { globalScope, Scope } from "./scope";
+import { Scope } from "./scope";
+
+type StreamEvents<V> = { "value": V }
 
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
 export class StatefulEventStream<V> extends EventStream<V> {
@@ -12,10 +13,10 @@ export class StatefulEventStream<V> extends EventStream<V> {
         this._scope = scope
     }
 
-    on(event: "value", observer: Observer<V>) {
-        return this.dispatcher.on(event, observer)
+    forEach(observer: Observer<V>) {
+        return this.dispatcher.on("value", observer)
     }
-    scope() {
+    getScope() {
         return this._scope
     }
 }
@@ -44,11 +45,7 @@ export class StatelessEventStream<V> extends EventStream<V> {
         this.forEach = forEach
     }
 
-    on(event: "value", observer: Observer<V>) {
-        return this.forEach(observer)
-    }
-
-    scope() {
+    getScope() {
         return this._scope
     }
 }
