@@ -9,8 +9,8 @@ Compared to Bacon.js
 - The `scope` decouples subscribers from EventStream/Property activation. This means that "cold observables" like `Bacon.once` cannot be EventStreams in Lonna. They will be `EventStreamSeeds` (what should I call it?) and can be used in constructs like `flatMap` as intermediary Observables.
 - Because the `scope` guarantess freshness, the `get()` method in Property and Atom can be used for reliable synchronous access to current value. Also, a Property *always* has a value.
 - More flexible Property interface that makes it easy to create properties that, for instance, extract their current value from the DOM or other external synchrnous source. 
+- Properties and Atoms always automatically skip duplicates, so no need for `.skipDuplicates` like in Bacon
 - No Error events. I've found them quite counterproductive in my use cases. 
-- No End events for now. This is something to include if this will be used as a general purpose FRP library.
 - Simpler dispatch system, no Atomic Updates. However, when decomposition using map/combine is stateless which in itself guarantees that composed/decomposed state remains in sync
 - Atoms included for read-write state, similarly Bus for read-write streams. Rudimentary lens system included for decomposing state.
 - API consists of static methods instead of prototype methods. Is tree-shakable and easier to extend.
