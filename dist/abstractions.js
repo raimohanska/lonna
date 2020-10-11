@@ -139,6 +139,7 @@ var PropertySeed = /** @class */ (function (_super) {
         var _this = this;
         if (this._subscribed)
             throw Error("PropertySeed subscribed already");
+        this._subscribed = true;
         return this.onChange_(function (event) {
             if (isValue(event)) {
                 _this._started = true;

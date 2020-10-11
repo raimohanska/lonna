@@ -132,7 +132,8 @@ export class PropertySeed<V> extends Observable<V> {
     }
 
     onChange(observer: Observer<Event<V>>): Unsub {                
-        if (this._subscribed) throw Error("PropertySeed subscribed already")        
+        if (this._subscribed) throw Error("PropertySeed subscribed already")
+        this._subscribed = true
         return this.onChange_(event => {
             if (isValue(event)) {
                 this._started = true
