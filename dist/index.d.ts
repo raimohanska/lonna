@@ -4,6 +4,8 @@ export * from "./bus";
 export * from "./boolean";
 export * from "./changes";
 export * from "./combine";
+export * from "./combinetemplate";
+export * from "./debounce";
 export * from "./dispatcher";
 export * from "./eventstream";
 export * from "./filter";

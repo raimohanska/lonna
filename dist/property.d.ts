@@ -21,4 +21,5 @@ export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A
 export declare function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
 export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;
 export declare function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
+export declare function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A>;
 export declare function constant<A>(value: A): Property<A>;

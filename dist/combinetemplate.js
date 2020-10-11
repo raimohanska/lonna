@@ -1,12 +1,52 @@
 "use strict";
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.each = exports.combineTemplate = void 0;
+exports.each = exports.combineTemplateS = exports.combineTemplate = void 0;
 var abstractions_1 = require("./abstractions");
 var combine_1 = require("./combine");
 var map_1 = require("./map");
 var property_1 = require("./property");
 var util_1 = require("./util");
 function combineTemplate(template) {
+    if (!containsObservables(template))
+        return property_1.constant(template);
+    var _a = __read(processTemplate(template, function (x) {
+        if (x instanceof abstractions_1.Property)
+            return x;
+        throw Error("Unsupported observable: " + x);
+    }), 2), observables = _a[0], combinator = _a[1];
+    return util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator));
+}
+exports.combineTemplate = combineTemplate;
+function combineTemplateS(template) {
+    if (!containsObservables(template))
+        return property_1.constant(template);
+    var _a = __read(processTemplate(template, function (x) {
+        if (x instanceof abstractions_1.Property)
+            return property_1.toPropertySeed(x);
+        if (x instanceof abstractions_1.PropertySeed)
+            return x;
+        throw Error("Unsupported observable: " + x);
+    }), 2), observables = _a[0], combinator = _a[1];
+    return util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator));
+}
+exports.combineTemplateS = combineTemplateS;
+function processTemplate(template, mapObservable) {
     function current(ctxStack) { return ctxStack[ctxStack.length - 1]; }
     function setValue(ctxStack, key, value) {
         current(ctxStack)[key] = value;
@@ -64,21 +104,19 @@ function combineTemplate(template) {
     function compileTemplate(template) { each(template, compile); }
     var funcs = [];
     var observables = [];
-    var resultProperty = containsObservables(template)
-        ? (compileTemplate(template), map_1.map(combine_1.combineAsArray(observables), combinator))
-        : property_1.constant(template);
-    return util_1.rename("combineTemplate(..)", resultProperty);
+    compileTemplate(template);
+    return [observables.map(mapObservable), combinator];
 }
-exports.combineTemplate = combineTemplate;
-function containsObservables(value) {
-    if (abstractions_1.isObservable(value)) {
+function containsObservables(value, match) {
+    if (match === void 0) { match = abstractions_1.isObservable; }
+    if (match(value)) {
         return true;
     }
     else if (value && (value.constructor == Object || value.constructor == Array)) {
         for (var key in value) {
             if (Object.prototype.hasOwnProperty.call(value, key)) {
                 var child = value[key];
-                if (containsObservables(child))
+                if (containsObservables(child, match))
                     return true;
             }
         }

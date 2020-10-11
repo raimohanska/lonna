@@ -6,7 +6,7 @@ var eventstream_1 = require("./eventstream");
 function changes(property) {
     var desc = property + ".changes";
     var sub = function (observer) {
-        return property.subscribe(observer);
+        return property.onChange(observer);
     };
     if (property instanceof abstractions_1.Property) {
         return new eventstream_1.StatelessEventStream(desc, sub, property.getScope());

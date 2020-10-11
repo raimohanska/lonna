@@ -27,6 +27,6 @@ exports.transform = transform;
 function transformPropertySubscribe(src, transformer) {
     if (src === undefined)
         throw Error("Assertion failed");
-    return function (observer) { return src.subscribe(function (value) { return transformer.changes(value, observer); }); };
+    return function (observer) { return src.onChange(function (value) { return transformer.changes(value, observer); }); };
 }
 //# sourceMappingURL=transform.js.map

@@ -30,6 +30,7 @@ export declare abstract class Observable<V> {
     log(message?: string): void;
     toString(): string;
 }
+export declare function isObservable<V>(x: any): x is Observable<V>;
 export declare abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string);
     abstract getScope(): Scope;
@@ -46,11 +47,14 @@ export declare abstract class Property<V> extends ScopedObservable<V> {
  *  Must skip duplicates!
  **/
 export declare class PropertySeed<V> extends Observable<V> {
-    private _consumed;
+    private _started;
+    private _subscribed;
     private _get;
-    subscribe: Subscribe<V>;
+    onChange_: Subscribe<V>;
     get(): V;
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>);
+    constructor(desc: string, get: () => V, onChange: Subscribe<V>);
+    onChange(observer: Observer<Event<V>>): Unsub;
+    subscribe(observer: Observer<Event<V>>): Unsub;
 }
 export declare abstract class EventStream<V> extends ScopedObservable<V> {
     constructor(desc: string);

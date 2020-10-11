@@ -65,9 +65,11 @@ var FlatMapPropertySeed = /** @class */ (function (_super) {
     function FlatMapPropertySeed(desc, src, fn, options) {
         if (options === void 0) { options = {}; }
         var _this = this;
+        var initializing = true; // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
         var subscribeWithInitial = function (observer) {
-            var unsub = src.subscribe(observer);
+            var unsub = src.onChange(observer);
             observer(abstractions_1.valueEvent(src.get())); // To spawn property for initial value
+            initializing = false;
             return unsub;
         };
         var _a = __read(flatMapSubscribe(subscribeWithInitial, fn, options), 2), children = _a[0], subscribe = _a[1];
@@ -77,7 +79,10 @@ var FlatMapPropertySeed = /** @class */ (function (_super) {
             }
             return children[0].observable.get();
         };
-        _this = _super.call(this, desc, get, function (observer) { return subscribe(observer); }) || this;
+        _this = _super.call(this, desc, get, function (observer) { return subscribe(function (value) {
+            if (!initializing)
+                observer(value);
+        }); }) || this;
         return _this;
     }
     return FlatMapPropertySeed;

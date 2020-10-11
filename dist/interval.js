@@ -11,7 +11,7 @@ var scheduler_1 = __importDefault(require("./scheduler"));
 function interval(delay, value, scope) {
     return applyscope_1.applyScopeMaybe(new _1.EventStreamSeed("interval(" + delay + ", " + value + ")", function (observer) {
         var interval = scheduler_1.default.scheduler.setInterval(function () { return observer(abstractions_1.valueEvent(value)); }, delay);
-        return function () { return clearInterval(interval); };
+        return function () { return scheduler_1.default.scheduler.clearInterval(interval); };
     }), scope);
 }
 exports.interval = interval;

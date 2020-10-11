@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.constant = exports.toProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
+exports.constant = exports.toPropertySeed = exports.toProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
@@ -69,7 +69,7 @@ var StatefulProperty = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var unsub = seed.subscribe(meAsObserver);
+            var unsub = seed.onChange(meAsObserver);
             _this._value = seed.get();
             return function () {
                 _this._value = scope_1.afterScope;
@@ -97,6 +97,13 @@ function toProperty(stream, initial, scope) {
     return applyscope_1.applyScopeMaybe(seed, scope);
 }
 exports.toProperty = toProperty;
+function toPropertySeed(property) {
+    if (property instanceof abstractions_1.PropertySeed) {
+        return property;
+    }
+    return new abstractions_1.PropertySeed(property.desc, property.get.bind(property), property.onChange.bind(property));
+}
+exports.toPropertySeed = toPropertySeed;
 function constant(value) {
     return util_1.rename("constant(" + value + ")", toProperty(never_1.never(), value, scope_1.globalScope));
 }

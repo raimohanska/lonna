@@ -18,7 +18,7 @@ function map(o, x) {
     }
     else if (o instanceof abstractions_1.PropertySeed) {
         return new abstractions_1.PropertySeed(desc, function () { return fn(o.get()); }, function (observer) {
-            return o.subscribe(mapObserver(observer, fn));
+            return o.onChange(mapObserver(observer, fn));
         });
     }
     throw Error("Unknown observable");

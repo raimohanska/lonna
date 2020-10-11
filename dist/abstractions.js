@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
 var Event = /** @class */ (function () {
     function Event() {
     }
@@ -90,6 +90,10 @@ var Observable = /** @class */ (function () {
     return Observable;
 }());
 exports.Observable = Observable;
+function isObservable(x) {
+    return x instanceof Observable;
+}
+exports.isObservable = isObservable;
 var ScopedObservable = /** @class */ (function (_super) {
     __extends(ScopedObservable, _super);
     function ScopedObservable(desc) {
@@ -103,6 +107,7 @@ var Property = /** @class */ (function (_super) {
     function Property(desc) {
         return _super.call(this, desc) || this;
     }
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
     Property.prototype.subscribe = function (observer) {
         var unsub = this.onChange(observer);
         observer(valueEvent(this.get()));
@@ -117,18 +122,35 @@ exports.Property = Property;
  **/
 var PropertySeed = /** @class */ (function (_super) {
     __extends(PropertySeed, _super);
-    function PropertySeed(desc, get, subscribe) {
+    function PropertySeed(desc, get, onChange) {
         var _this = _super.call(this, desc) || this;
-        _this._consumed = false;
+        _this._started = false;
+        _this._subscribed = false;
         _this._get = get;
-        _this.subscribe = subscribe;
+        _this.onChange_ = onChange;
         return _this;
     }
     PropertySeed.prototype.get = function () {
-        if (this._consumed)
-            throw Error("PropertySeed consumed already");
-        this._consumed = true;
+        if (this._started)
+            throw Error("PropertySeed started already: " + this);
         return this._get();
+    };
+    PropertySeed.prototype.onChange = function (observer) {
+        var _this = this;
+        if (this._subscribed)
+            throw Error("PropertySeed subscribed already");
+        return this.onChange_(function (event) {
+            if (isValue(event)) {
+                _this._started = true;
+            }
+            observer(event);
+        });
+    };
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
+    PropertySeed.prototype.subscribe = function (observer) {
+        var unsub = this.onChange(observer);
+        observer(valueEvent(this.get()));
+        return unsub;
     };
     return PropertySeed;
 }(Observable));

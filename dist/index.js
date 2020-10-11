@@ -16,6 +16,8 @@ __exportStar(require("./bus"), exports);
 __exportStar(require("./boolean"), exports);
 __exportStar(require("./changes"), exports);
 __exportStar(require("./combine"), exports);
+__exportStar(require("./combinetemplate"), exports);
+__exportStar(require("./debounce"), exports);
 __exportStar(require("./dispatcher"), exports);
 __exportStar(require("./eventstream"), exports);
 __exportStar(require("./filter"), exports);

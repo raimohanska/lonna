@@ -5,5 +5,5 @@ export declare type GenericObjectTemplate<T, O extends Observable<any>> = {
 export declare type GenericArrayTemplate<T, O extends Observable<any>> = Array<T extends Observable<infer I> ? (T extends O ? I : never) : (T extends Record<any, any> ? GenericObjectTemplate<T, O> : T)>;
 export declare type GenericCombinedTemplate<T, O extends Observable<any>> = T extends Record<any, any> ? GenericObjectTemplate<T, O> : (T extends Array<infer I> ? GenericArrayTemplate<I, O> : (T extends Observable<infer I2> ? (T extends O ? I2 : never) : T));
 export declare function combineTemplate<T>(template: T): Property<GenericObjectTemplate<T, Property<any>>>;
-export declare function combineTemplate<T>(template: T): Property<GenericObjectTemplate<T, PropertySeed<any>>>;
+export declare function combineTemplateS<T>(template: T): PropertySeed<GenericObjectTemplate<T, PropertySeed<any>>>;
 export declare function each<A>(xs: any, f: (key: string, x: A) => any): void;

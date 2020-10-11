@@ -145,7 +145,7 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var unsub = seed.subscribe(meAsObserver);
+            var unsub = seed.onChange(meAsObserver);
             _this._value = seed.get();
             return function () {
                 _this._value = scope_1.afterScope;
