@@ -79,6 +79,10 @@ export abstract class Observable<V> {
     }
 }
 
+export function isObservable<V>(x: any): x is Observable<V> {
+    return x instanceof Observable
+}
+
 export abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string) {
         super(desc)

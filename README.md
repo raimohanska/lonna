@@ -17,15 +17,10 @@ Compared to Bacon.js
 
 Current prioritized goals:
 
-- Implement just enough operators for applying in real-life projects
+- Implement just enough operators for applying in real-life projects (I guess this is done!)
 - Validate / improve API ergonomy based on the above
 - Decide on whether to make this an actual library
 - After that there will be technical debt to pay, to get to a reasonable level of quality
-
-TODO list of Bacon.js methods for first real-life use case:
-
-- `debounce`
-- `combineTemplate`
 
 To complete Harmaja examples, we also need
 

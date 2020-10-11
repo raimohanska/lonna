@@ -96,6 +96,13 @@ export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, init
     return applyScopeMaybe(seed, scope)
 }
 
+export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A> {
+    if (property instanceof PropertySeed) {
+        return property;
+    }
+    return new PropertySeed<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
+}
+
 export function constant<A>(value: A): Property<A> {
     return rename(`constant(${value})`, toProperty(never(), value, globalScope))
 }
