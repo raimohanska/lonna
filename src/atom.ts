@@ -14,6 +14,7 @@ class RootAtom<V> extends Atom<V> {
     constructor(desc: string, initialValue: V) {
         super(desc)
         this._value = initialValue        
+        this.set = this.set.bind(this)
     }
 
     onChange(observer: Observer<Event<V>>) {
@@ -44,6 +45,7 @@ class LensedAtom<R, V> extends Atom<V> {
         super(desc)
         this._root = root;
         this._lens = view;
+        this.set = this.set.bind(this)
     }
 
     get() {
@@ -86,7 +88,7 @@ class DependentAtom<V> extends Atom<V> {
     constructor(desc: string, input: Property<V>, set: (updatedValue: V) => void) {
         super(desc)
         this._input = input;
-        this.set = set
+        this.set = set.bind(this)
     }
 
     onChange(observer: Observer<Event<V>>) {
@@ -115,7 +117,7 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     constructor(seed: AtomSeed<V>, scope: Scope) {
         super(seed.desc)
         this._scope = scope;
-        this.set = seed.set;
+        this.set = seed.set.bind(this);
         
         const meAsObserver = (event: Event<V>) => {
             if (isValue(event)) {

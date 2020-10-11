@@ -43,6 +43,7 @@ var RootAtom = /** @class */ (function (_super) {
         var _this = _super.call(this, desc) || this;
         _this._dispatcher = new dispatcher_1.Dispatcher();
         _this._value = initialValue;
+        _this.set = _this.set.bind(_this);
         return _this;
     }
     RootAtom.prototype.onChange = function (observer) {
@@ -69,6 +70,7 @@ var LensedAtom = /** @class */ (function (_super) {
         var _this = _super.call(this, desc) || this;
         _this._root = root;
         _this._lens = view;
+        _this.set = _this.set.bind(_this);
         return _this;
     }
     LensedAtom.prototype.get = function () {
@@ -108,7 +110,7 @@ var DependentAtom = /** @class */ (function (_super) {
     function DependentAtom(desc, input, set) {
         var _this = _super.call(this, desc) || this;
         _this._input = input;
-        _this.set = set;
+        _this.set = set.bind(_this);
         return _this;
     }
     DependentAtom.prototype.onChange = function (observer) {
@@ -132,7 +134,7 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
         _this._dispatcher = new dispatcher_1.Dispatcher();
         _this._value = scope_1.beforeScope;
         _this._scope = scope;
-        _this.set = seed.set;
+        _this.set = seed.set.bind(_this);
         var meAsObserver = function (event) {
             if (abstractions_1.isValue(event)) {
                 if (event.value !== _this._value) {
