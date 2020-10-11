@@ -58,7 +58,7 @@ export class Dispatcher<E extends Dict> {
     }
 
     onObserverCount(subscriber: Observer<number>) {
-        return this.on(meta, valueObserver(subscriber))
+        return this.on(meta, subscriber as any)
     }
 
     hasObservers(): boolean {
