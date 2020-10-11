@@ -138,7 +138,7 @@ var PropertySeed = /** @class */ (function (_super) {
     PropertySeed.prototype.onChange = function (observer) {
         var _this = this;
         if (this._subscribed)
-            throw Error("PropertySeed subscribed already");
+            throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this);
         this._subscribed = true;
         return this.onChange_(function (event) {
             if (isValue(event)) {
