@@ -1,9 +1,10 @@
 import { Observer, Property, Event, isValue, valueEvent, endEvent, Observable, isObservable, PropertySeed } from "./abstractions";
+import { applyScopeMaybe } from "./applyscope";
 import { combineAsArray, PropertyLike } from "./combine";
 import { Predicate } from "./filter";
 import { map } from "./map";
 import { constant, StatelessProperty, toProperty, toPropertySeed } from "./property";
-import { globalScope } from "./scope";
+import { globalScope, Scope } from "./scope";
 import { rename } from "./util";
 
 export type GenericObjectTemplate<T, O extends Observable<any>> = { [K in keyof T]: T[K] extends Observable<infer I>
@@ -83,7 +84,10 @@ export function combineTemplate<T>(template: T): Property<GenericObjectTemplate<
     return rename(`combineTemplate(..)`, map(combineAsArray(observables as Property<any>[]), combinator as any)) 
 }
 
-export function combineTemplateS<T>(template: T): PropertySeed<GenericObjectTemplate<T, PropertySeed<any>>> {
+export function combineTemplateS<T>(template: T, scope: Scope): Property<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>;
+export function combineTemplateS<T>(template: T): PropertySeed<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>;
+
+export function combineTemplateS<T>(template: T, scope?: Scope): Observable<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>{
     if (!containsObservables(template)) return constant(template) as any;
 
     const [observables, combinator] = processTemplate<T, PropertySeed<any>>(template, (x: Observable<any>) => {
@@ -92,7 +96,7 @@ export function combineTemplateS<T>(template: T): PropertySeed<GenericObjectTemp
         throw Error("Unsupported observable: " + x)
     })
     
-    return rename(`combineTemplate(..)`, map(combineAsArray(observables), combinator as any))
+    return applyScopeMaybe(rename(`combineTemplate(..)`, map(combineAsArray(observables), combinator as any)), scope)
 }
 
 function processTemplate<T, Prop extends Observable<any>>(template: T, mapObservable: (o: Observable<any>) => Prop): [Prop[], Function] {

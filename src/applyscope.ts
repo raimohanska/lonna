@@ -16,7 +16,7 @@ export function applyScope<T>(scope: Scope, seed: any): any {
     } else if (seed instanceof PropertySeed) {
         return new StatefulProperty(seed, scope)
     }
-    throw Error("Unknown seed")
+    throw Error("Unknown seed: " + seed)
 }
 
 /** @hidden */

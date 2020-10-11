@@ -18,6 +18,7 @@ var __read = (this && this.__read) || function (o, n) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.each = exports.combineTemplateS = exports.combineTemplate = void 0;
 var abstractions_1 = require("./abstractions");
+var applyscope_1 = require("./applyscope");
 var combine_1 = require("./combine");
 var map_1 = require("./map");
 var property_1 = require("./property");
@@ -33,7 +34,7 @@ function combineTemplate(template) {
     return util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator));
 }
 exports.combineTemplate = combineTemplate;
-function combineTemplateS(template) {
+function combineTemplateS(template, scope) {
     if (!containsObservables(template))
         return property_1.constant(template);
     var _a = __read(processTemplate(template, function (x) {
@@ -43,7 +44,7 @@ function combineTemplateS(template) {
             return x;
         throw Error("Unsupported observable: " + x);
     }), 2), observables = _a[0], combinator = _a[1];
-    return util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator));
+    return applyscope_1.applyScopeMaybe(util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator)), scope);
 }
 exports.combineTemplateS = combineTemplateS;
 function processTemplate(template, mapObservable) {

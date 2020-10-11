@@ -15,7 +15,7 @@ function applyScope(scope, seed) {
     else if (seed instanceof abstractions_1.PropertySeed) {
         return new property_1.StatefulProperty(seed, scope);
     }
-    throw Error("Unknown seed");
+    throw Error("Unknown seed: " + seed);
 }
 exports.applyScope = applyScope;
 /** @hidden */
