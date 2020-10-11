@@ -11,6 +11,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./abstractions"), exports);
+__exportStar(require("./applyscope"), exports);
 __exportStar(require("./atom"), exports);
 __exportStar(require("./bus"), exports);
 __exportStar(require("./boolean"), exports);

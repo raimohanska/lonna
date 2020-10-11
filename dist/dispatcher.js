@@ -84,7 +84,7 @@ var Dispatcher = /** @class */ (function () {
         }
     };
     Dispatcher.prototype.onObserverCount = function (subscriber) {
-        return this.on(meta, abstractions_1.valueObserver(subscriber));
+        return this.on(meta, subscriber);
     };
     Dispatcher.prototype.hasObservers = function () {
         return this._count > 0;

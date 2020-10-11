@@ -1,4 +1,5 @@
 export * from "./abstractions";
+export * from "./applyscope";
 export * from "./atom";
 export * from "./bus";
 export * from "./boolean";
