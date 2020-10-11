@@ -17,10 +17,13 @@ setScheduler(sc);
 let seqs: StatefulEventStream<any>[] = [];
 
 const verifyCleanup = () => {
-    for (let seq of seqs) {
-        expect(seq.dispatcher.hasObservers()).toEqual(false);
+    try {
+        for (let seq of seqs) {
+            expect(seq.dispatcher.hasObservers()).toEqual(false);
+        }
+    } finally {
+        seqs = [];
     }
-    seqs = [];
 };
 
 let testScope = createScope()

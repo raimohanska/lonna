@@ -25,6 +25,7 @@ export function flatMap<A, B>(s: EventStreamSeed<A> | EventStreamSeed<A>, fn: (v
                     } else {
                         if (unsubChild) {
                             remove(children, unsubChild)
+                            unsubChild()
                         } else {
                             ended = true
                         }
