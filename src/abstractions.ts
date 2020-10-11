@@ -97,6 +97,7 @@ export abstract class Property<V> extends ScopedObservable<V> {
 
     abstract onChange(observer: Observer<Event<V>>): Unsub;
 
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
     subscribe(observer: Observer<Event<V>>): Unsub {        
         const unsub = this.onChange(observer)
         observer(valueEvent(this.get()))
@@ -109,21 +110,39 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Must skip duplicates!
  **/
 export class PropertySeed<V> extends Observable<V> {
-    private _consumed = false
+    private _started = false
+    private _subscribed = false
     private _get: () => V
 
-    subscribe: Subscribe<V>;
+    onChange_: Subscribe<V>;
+
     get() {
-        if (this._consumed) throw Error("PropertySeed consumed already")
-        this._consumed = true
+        if (this._started) throw Error("PropertySeed started already: " + this)
         return this._get()
     }
 
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>) {
+    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
         super(desc)
         this._get = get;
-        this.subscribe = subscribe;
+        this.onChange_ = onChange;
     }
+
+    onChange(observer: Observer<Event<V>>): Unsub {                
+        if (this._subscribed) throw Error("PropertySeed subscribed already")        
+        return this.onChange_(event => {
+            if (isValue(event)) {
+                this._started = true
+            }
+            observer(event)
+        })
+    }
+
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
+    subscribe(observer: Observer<Event<V>>): Unsub {        
+        const unsub = this.onChange(observer)
+        observer(valueEvent(this.get()))
+        return unsub
+    }       
 }
 
 export abstract class EventStream<V> extends ScopedObservable<V> {

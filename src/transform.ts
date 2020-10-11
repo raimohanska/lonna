@@ -39,5 +39,5 @@ export function transform<A, B>(desc: string, x: any, transformer: Transformer<A
 
 function transformPropertySubscribe<A, B>(src: { subscribe: Subscribe<A> }, transformer: Transformer<A, B>): Subscribe<B> {
     if (src === undefined) throw Error("Assertion failed")
-    return (observer: Observer<Event<B>>) => src.subscribe(value => transformer.changes(value, observer))
+    return (observer: Observer<Event<B>>) => src.onChange(value => transformer.changes(value, observer))
 }

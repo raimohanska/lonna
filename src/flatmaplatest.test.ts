@@ -23,7 +23,7 @@ describe("Property.flatMapLatest", function() {
           const spawner = (value: number) => toProperty(series(2, [value + "." + 1, value + "." + 2]), value + "." + 0)
           return flatMapLatest(property, spawner)
       }, 
-      ["0.0", "0.1", "1.1", "2.1", "2.2"])
+      ["0.0", "0.1", "1.0", "1.1", "2.0", "2.1", "2.2"])
   );
   it("toString", () => expect(flatMapLatest(constant(1), nop as any).toString()).toEqual("constant(1).flatMapLatest(fn)"));
 })

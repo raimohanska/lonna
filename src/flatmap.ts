@@ -30,9 +30,11 @@ export class FlatMapStreamSeed<A, B> extends EventStreamSeed<B> {
 
 export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
+        let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
         const subscribeWithInitial = (observer: Observer<Event<A>>) => {
-            const unsub = src.subscribe(observer)
+            const unsub = src.onChange(observer)
             observer(valueEvent(src.get())) // To spawn property for initial value
+            initializing = false
             return unsub
         }
         const [children, subscribe] = flatMapSubscribe(subscribeWithInitial, fn, options)
@@ -42,7 +44,9 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
             }
             return (children[0].observable as PropertySeed<B>).get()
         }
-        super(desc, get, observer => subscribe(observer))
+        super(desc, get, observer => subscribe(value => {
+            if (!initializing) observer(value)
+        }))
     }
 }
 
