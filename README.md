@@ -17,7 +17,7 @@ Compared to Bacon.js
 
 Current prioritized goals:
 
-- Implement just enough operators for applying in real-life projects (I guess this is done!)
+- DONE: Implement just enough operators for applying in real-life projects
 - Validate / improve API ergonomy based on the above
 - Decide on whether to make this an actual library
 - After that there will be technical debt to pay, to get to a reasonable level of quality
@@ -25,7 +25,6 @@ Current prioritized goals:
 To complete Harmaja examples, we also need
 
 - `repeat`
-- `flatMapLatest`
 - `fromEvent`
 - `update`
 - `once`
@@ -33,6 +32,5 @@ To complete Harmaja examples, we also need
 
 Other stuff:
 
-- More decent testing framework and proper coverage. Bacon has a good foundation for this stuff. At the moment this is more an experiment than a library for production use.
 - Make the API pipeable
 - Bus should probably buffer pushes while dispatching. Subscriptions while dispatching should not be a major problem because of scoping and stateless composition. (to be proven)
