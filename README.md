@@ -24,7 +24,7 @@ Current prioritized goals:
 
 TODO list of Bacon.js methods for first real-life use case:
 
-- `debounce`
+- `debounce` (requires `flatMapLatest`, which is good anyway)
 - `combineTemplate`
 
 To complete Harmaja examples, we also need
