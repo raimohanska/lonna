@@ -3,7 +3,7 @@ import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
 import { beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
-import { duplicateSkippingObserver } from "./util";
+import { duplicateSkippingObserver, rename } from "./util";
 
 type PropertyEvents<V> = { "change": V }
 
@@ -94,5 +94,5 @@ export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, init
 }
 
 export function constant<A>(value: A): Property<A> {
-    return toProperty(never(), value, globalScope)
+    return rename(`constant(${value})`, toProperty(never(), value, globalScope))
 }

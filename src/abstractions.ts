@@ -1,4 +1,5 @@
 import { Scope } from "./scope";
+import { nop } from "./util";
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
 export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
@@ -124,6 +125,13 @@ export class PropertySeed<V> extends Observable<V> {
         const [init, unsub] = this.subscribeWithInitial(observer)
         observer(valueEvent(init))
         return unsub
+    }
+
+    get(): V {
+        // TODO: replace!
+        const [init, unsub] = this.subscribeWithInitial(nop)
+        unsub()
+        return init
     }
 }
 

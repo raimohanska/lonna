@@ -18,7 +18,7 @@ export function sequentially<V>(delay: number, values: (V | Event<V>)[]): EventS
 
 export function sequentially<V>(delay: number, values: (V | Event<V>)[], scope?: Scope): any {
   var index = 0;
-  return applyScopeMaybe(rename(`sequentially(${delay}, ${values}`, fromPoll<V>(delay, () => {
+  return applyScopeMaybe(rename(`sequentially(${delay}, ${values})`, fromPoll<V>(delay, () => {
     var value = values[index++];
     if (index < values.length) {
       return value;

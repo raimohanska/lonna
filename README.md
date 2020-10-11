@@ -24,11 +24,8 @@ Current prioritized goals:
 
 TODO list of Bacon.js methods for first real-life use case:
 
-- `throttle` WIP: buffer implemented for it!
-- `changes`
 - `debounce`
 - `combineTemplate`
-- `fromPoll` DONE!
 
 To complete Harmaja examples, we also need
 

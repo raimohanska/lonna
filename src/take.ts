@@ -3,8 +3,6 @@ import { applyScope, applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { transform, Transformer } from "./transform";
 
-export type Predicate<A> = (value: A) => boolean
-
 export function take<A>(count: number, prop: Atom<A> | AtomSeed<A>): AtomSeed<A>;
 export function take<A>(count: number, prop: Atom<A> | AtomSeed<A>, scope: Scope): Atom<A>;
 export function take<A>(count: number, prop: Property<A> | PropertySeed<A>): PropertySeed<A>;

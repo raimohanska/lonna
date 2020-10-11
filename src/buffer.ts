@@ -1,6 +1,6 @@
 import { Event, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
 import GlobalScheduler from "./scheduler";
-import { transform, Transformer } from "./transform";
+import { StreamTransformer, transform, Transformer } from "./transform";
 import { nop } from "./util";
 
 export type VoidFunction = () => void
@@ -96,25 +96,19 @@ type BufferHandler<V> = (buffer: Buffer<V>) => any
 function buffer<V>(desc: string, src: EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
   //var reply = more;
   var buffer = new Buffer<V>(onFlush, onInput)
-  const transformer: Transformer<V, V[]> = {
-      changes: (event: Event<V>, sink: Observer<Event<V[]>>) => {
-        buffer.push = sink
-        if (isValue(event)) {
-          buffer.values.push(event.value);
-          //console.log Bacon.scheduler.now() + ": input " + event.value
-          onInput(buffer);
-        } else {
-          buffer.end = event;
-          if (!buffer.scheduled) {
-            //console.log Bacon.scheduler.now() + ": end-flush"
-            buffer.flush();
-          }
-        }
-      },
-      init: v => {
-          throw Error("TODO: this branch is not valid when handling EventStreams only")
-          // TODO: make a stream-only version of transform
+  const transformer: StreamTransformer<V, V[]> = (event: Event<V>, sink: Observer<Event<V[]>>) => {
+    buffer.push = sink
+    if (isValue(event)) {
+      buffer.values.push(event.value);
+      //console.log Bacon.scheduler.now() + ": input " + event.value
+      onInput(buffer);
+    } else {
+      buffer.end = event;
+      if (!buffer.scheduled) {
+        //console.log Bacon.scheduler.now() + ": end-flush"
+        buffer.flush();
       }
+    }
   }
   return transform<V, V[]>(desc, src, transformer)
 };
