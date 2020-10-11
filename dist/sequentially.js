@@ -7,7 +7,7 @@ var frompoll_1 = require("./frompoll");
 var util_1 = require("./util");
 function sequentially(delay, values, scope) {
     var index = 0;
-    return applyscope_1.applyScopeMaybe(util_1.rename("sequentially(" + delay + ", " + values, frompoll_1.fromPoll(delay, function () {
+    return applyscope_1.applyScopeMaybe(util_1.rename("sequentially(" + delay + ", " + values + ")", frompoll_1.fromPoll(delay, function () {
         var value = values[index++];
         if (index < values.length) {
             return value;

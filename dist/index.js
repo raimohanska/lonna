@@ -14,6 +14,7 @@ __exportStar(require("./abstractions"), exports);
 __exportStar(require("./atom"), exports);
 __exportStar(require("./bus"), exports);
 __exportStar(require("./boolean"), exports);
+__exportStar(require("./changes"), exports);
 __exportStar(require("./combine"), exports);
 __exportStar(require("./dispatcher"), exports);
 __exportStar(require("./eventstream"), exports);
@@ -30,4 +31,8 @@ __exportStar(require("./sampledby"), exports);
 __exportStar(require("./scan"), exports);
 __exportStar(require("./sequentially"), exports);
 __exportStar(require("./scope"), exports);
+__exportStar(require("./take"), exports);
+__exportStar(require("./throttle"), exports);
+__exportStar(require("./transform"), exports);
+__exportStar(require("./transformchanges"), exports);
 //# sourceMappingURL=index.js.map

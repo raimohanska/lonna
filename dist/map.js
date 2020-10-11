@@ -1,20 +1,4 @@
 "use strict";
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapEvent = exports.mapObserver = exports.map = void 0;
 var abstractions_1 = require("./abstractions");
@@ -33,9 +17,8 @@ function map(o, x) {
         return new property_1.StatelessProperty(desc, function () { return fn(o.get()); }, function (observer) { return o.onChange(mapObserver(observer, fn)); }, o.getScope());
     }
     else if (o instanceof abstractions_1.PropertySeed) {
-        return new abstractions_1.PropertySeed(desc, function (observer) {
-            var _a = __read(o.subscribeWithInitial(mapObserver(observer, fn)), 2), value = _a[0], unsub = _a[1];
-            return [fn(value), unsub];
+        return new abstractions_1.PropertySeed(desc, function () { return fn(o.get()); }, function (observer) {
+            return o.subscribe(mapObserver(observer, fn));
         });
     }
     throw Error("Unknown observable");

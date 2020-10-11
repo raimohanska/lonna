@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions";
+import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 
@@ -18,26 +18,26 @@ export function transform<A, B>(desc: string, seed: PropertySeed<A> | Property<A
 export function transform<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transformer: Transformer<A, A>): AtomSeed<A>
 export function transform<A, B>(desc: string, o: Observable<A>, transformer: Transformer<A, B>): Observable<B> // A generic signature. Note that the implementation is defined for the above cases only.
 
-export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {
+export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
         if (transformer instanceof Function) {
             return applyScopeMaybe(new EventStreamSeed(desc, observer => x.subscribe((value: Event<A>) => transformer(value, observer))))    
         } else {
             return transform(desc, x as any, transformer.changes as any, scope as any)
         }        
-    } else if (x instanceof Atom || x instanceof AtomSeed) {
-        return applyScopeMaybe(new AtomSeed(desc, transformPropertySubscribe(x, transformer as Transformer<A, B>), newValue => x.set(newValue)))
+    } 
+
+    const t = transformer as Transformer<A, B>        
+    if (x instanceof Atom || x instanceof AtomSeed) {
+        return applyScopeMaybe(new AtomSeed(desc, () => t.init(x.get()), transformPropertySubscribe(x, t), newValue => x.set(newValue)))
     } else if (x instanceof Property || x instanceof PropertySeed) {
-        return applyScopeMaybe(new PropertySeed(desc, transformPropertySubscribe(x, transformer as Transformer<A, B>)))
+        return applyScopeMaybe(new PropertySeed(desc, () => t.init(x.get()), transformPropertySubscribe(x, t)))
     } else {
         throw Error("Unknown observable " + x)
     }
 }
 
-function transformPropertySubscribe<A, B>(src: { subscribeWithInitial: PropertySubscribe<A> }, transformer: Transformer<A, B>): PropertySubscribe<B> {
+function transformPropertySubscribe<A, B>(src: { subscribe: Subscribe<A> }, transformer: Transformer<A, B>): Subscribe<B> {
     if (src === undefined) throw Error("Assertion failed")
-    return (observer: Observer<Event<B>>) => {
-        const [initial, unsub] = src.subscribeWithInitial(value => transformer.changes(value, observer))
-        return [transformer.init(initial), unsub]
-    }
+    return (observer: Observer<Event<B>>) => src.subscribe(value => transformer.changes(value, observer))
 }

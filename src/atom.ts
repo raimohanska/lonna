@@ -129,8 +129,8 @@ export class StatefulDependentAtom<V> extends Atom<V> {
         }
         scope(
             () => {
-                const [newValue, unsub] = seed.subscribeWithInitial(meAsObserver);
-                this._value = newValue;
+                const unsub = seed.subscribe(meAsObserver);
+                this._value = seed.get();
                 return () => {
                     this._value = afterScope; 
                     unsub!()

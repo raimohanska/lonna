@@ -31,22 +31,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.atom = exports.view = exports.StatefulDependentAtom = void 0;
 var L = __importStar(require("./lens"));
@@ -161,8 +145,8 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var _a = __read(seed.subscribeWithInitial(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
-            _this._value = newValue;
+            var unsub = seed.subscribe(meAsObserver);
+            _this._value = seed.get();
             return function () {
                 _this._value = scope_1.afterScope;
                 unsub();

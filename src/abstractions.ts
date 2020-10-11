@@ -97,11 +97,6 @@ export abstract class Property<V> extends ScopedObservable<V> {
 
     abstract onChange(observer: Observer<Event<V>>): Unsub;
 
-    subscribeWithInitial(observer: Observer<Event<V>>): [V, Unsub] {
-        const unsub = this.onChange(observer)
-        return [this.get(), unsub]
-    }
-
     subscribe(observer: Observer<Event<V>>): Unsub {        
         const unsub = this.onChange(observer)
         observer(valueEvent(this.get()))
@@ -114,24 +109,20 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Must skip duplicates!
  **/
 export class PropertySeed<V> extends Observable<V> {
-    subscribeWithInitial: PropertySubscribe<V>
+    private _consumed = false
+    private _get: () => V
 
-    constructor(desc: string, subscribeWithInitial: (observer: Observer<Event<V>>) => [V, Unsub]) {
+    subscribe: Subscribe<V>;
+    get() {
+        if (this._consumed) throw Error("PropertySeed consumed already")
+        this._consumed = true
+        return this._get()
+    }
+
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>) {
         super(desc)
-        this.subscribeWithInitial = subscribeWithInitial
-    }
-
-    subscribe(observer: Observer<Event<V>>): Unsub {
-        const [init, unsub] = this.subscribeWithInitial(observer)
-        observer(valueEvent(init))
-        return unsub
-    }
-
-    get(): V {
-        // TODO: replace!
-        const [init, unsub] = this.subscribeWithInitial(nop)
-        unsub()
-        return init
+        this._get = get;
+        this.subscribe = subscribe;
     }
 }
 
@@ -164,8 +155,8 @@ export abstract class Atom<V> extends Property<V> {
  **/
 export class AtomSeed<V> extends PropertySeed<V> {
     set: (updatedValue: V) => void;
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => [V, Unsub], set: (updatedValue: V) => void) {
-        super(desc, subscribe)
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
+        super(desc, get, subscribe)
         this.set = set
     }
 }

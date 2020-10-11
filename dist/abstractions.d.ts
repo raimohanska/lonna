@@ -39,7 +39,6 @@ export declare abstract class Property<V> extends ScopedObservable<V> {
     constructor(desc: string);
     abstract get(): V;
     abstract onChange(observer: Observer<Event<V>>): Unsub;
-    subscribeWithInitial(observer: Observer<Event<V>>): [V, Unsub];
     subscribe(observer: Observer<Event<V>>): Unsub;
 }
 /**
@@ -47,9 +46,11 @@ export declare abstract class Property<V> extends ScopedObservable<V> {
  *  Must skip duplicates!
  **/
 export declare class PropertySeed<V> extends Observable<V> {
-    subscribeWithInitial: PropertySubscribe<V>;
-    constructor(desc: string, subscribeWithInitial: (observer: Observer<Event<V>>) => [V, Unsub]);
-    subscribe(observer: Observer<Event<V>>): Unsub;
+    private _consumed;
+    private _get;
+    subscribe: Subscribe<V>;
+    get(): V;
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>);
 }
 export declare abstract class EventStream<V> extends ScopedObservable<V> {
     constructor(desc: string);
@@ -69,7 +70,7 @@ export declare abstract class Atom<V> extends Property<V> {
  **/
 export declare class AtomSeed<V> extends PropertySeed<V> {
     set: (updatedValue: V) => void;
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => [V, Unsub], set: (updatedValue: V) => void);
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void);
 }
 export interface Bus<V> extends EventStream<V> {
     push(newValue: V): void;

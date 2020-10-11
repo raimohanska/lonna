@@ -19,9 +19,8 @@ export function map<A, B>(o: any, x: ((value: A) => B) | Property<B>): any {
     } else if (o instanceof Property) {
         return new StatelessProperty(desc, () => fn(o.get()), observer => o.onChange(mapObserver(observer, fn)), o.getScope())
     } else if (o instanceof PropertySeed) {
-        return new PropertySeed(desc, observer => {
-            const [value, unsub] = o.subscribeWithInitial(mapObserver(observer, fn))        
-            return [fn(value), unsub]
+        return new PropertySeed(desc, () => fn(o.get()), observer => {
+            return o.subscribe(mapObserver(observer, fn))            
         })    
     }
     throw Error("Unknown observable")

@@ -2,7 +2,7 @@ import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, 
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
-import { beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
+import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { duplicateSkippingObserver, rename } from "./util";
 
 type PropertyEvents<V> = { "change": V }
@@ -60,9 +60,12 @@ export class StatefulProperty<V> extends Property<V> {
         }
         scope(
             () => {
-                const [newValue, unsub] = seed.subscribeWithInitial(meAsObserver)
-                this._value = newValue
-                return unsub
+                const unsub = seed.subscribe(meAsObserver);
+                this._value = seed.get();
+                return () => {
+                    this._value = afterScope; 
+                    unsub!()
+                }
             },
             this._dispatcher
         );
@@ -87,8 +90,8 @@ export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initi
 export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
 
 export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, initial: any, scope?: Scope): Property<any> | PropertySeed<any> {    
-    const seed = new PropertySeed(stream + `.toProperty(${initial})`, (observer: Observer<any>): [any, Unsub] => {        
-        return [initial, stream.subscribe(observer)]
+    const seed = new PropertySeed(stream + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
+        return stream.subscribe(observer)
     })
     return applyScopeMaybe(seed, scope)
 }

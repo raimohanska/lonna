@@ -12,22 +12,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.constant = exports.toProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
 var abstractions_1 = require("./abstractions");
@@ -35,6 +19,7 @@ var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
+var util_1 = require("./util");
 var StatelessProperty = /** @class */ (function (_super) {
     __extends(StatelessProperty, _super);
     function StatelessProperty(desc, get, onChange, scope) {
@@ -84,9 +69,12 @@ var StatefulProperty = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var _a = __read(seed.subscribeWithInitial(meAsObserver), 2), newValue = _a[0], unsub = _a[1];
-            _this._value = newValue;
-            return unsub;
+            var unsub = seed.subscribe(meAsObserver);
+            _this._value = seed.get();
+            return function () {
+                _this._value = scope_1.afterScope;
+                unsub();
+            };
         }, _this._dispatcher);
         return _this;
     }
@@ -103,14 +91,14 @@ var StatefulProperty = /** @class */ (function (_super) {
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
 function toProperty(stream, initial, scope) {
-    var seed = new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), function (observer) {
-        return [initial, stream.subscribe(observer)];
+    var seed = new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {
+        return stream.subscribe(observer);
     });
     return applyscope_1.applyScopeMaybe(seed, scope);
 }
 exports.toProperty = toProperty;
 function constant(value) {
-    return toProperty(never_1.never(), value, scope_1.globalScope);
+    return util_1.rename("constant(" + value + ")", toProperty(never_1.never(), value, scope_1.globalScope));
 }
 exports.constant = constant;
 //# sourceMappingURL=property.js.map

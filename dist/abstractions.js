@@ -12,22 +12,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __read = (this && this.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
 var Event = /** @class */ (function () {
@@ -119,10 +103,6 @@ var Property = /** @class */ (function (_super) {
     function Property(desc) {
         return _super.call(this, desc) || this;
     }
-    Property.prototype.subscribeWithInitial = function (observer) {
-        var unsub = this.onChange(observer);
-        return [this.get(), unsub];
-    };
     Property.prototype.subscribe = function (observer) {
         var unsub = this.onChange(observer);
         observer(valueEvent(this.get()));
@@ -137,15 +117,18 @@ exports.Property = Property;
  **/
 var PropertySeed = /** @class */ (function (_super) {
     __extends(PropertySeed, _super);
-    function PropertySeed(desc, subscribeWithInitial) {
+    function PropertySeed(desc, get, subscribe) {
         var _this = _super.call(this, desc) || this;
-        _this.subscribeWithInitial = subscribeWithInitial;
+        _this._consumed = false;
+        _this._get = get;
+        _this.subscribe = subscribe;
         return _this;
     }
-    PropertySeed.prototype.subscribe = function (observer) {
-        var _a = __read(this.subscribeWithInitial(observer), 2), init = _a[0], unsub = _a[1];
-        observer(valueEvent(init));
-        return unsub;
+    PropertySeed.prototype.get = function () {
+        if (this._consumed)
+            throw Error("PropertySeed consumed already");
+        this._consumed = true;
+        return this._get();
     };
     return PropertySeed;
 }(Observable));
@@ -182,8 +165,8 @@ exports.Atom = Atom;
  **/
 var AtomSeed = /** @class */ (function (_super) {
     __extends(AtomSeed, _super);
-    function AtomSeed(desc, subscribe, set) {
-        var _this = _super.call(this, desc, subscribe) || this;
+    function AtomSeed(desc, get, subscribe, set) {
+        var _this = _super.call(this, desc, get, subscribe) || this;
         _this.set = set;
         return _this;
     }

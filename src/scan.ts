@@ -6,8 +6,8 @@ export function scan<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial:
 export function scan<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, fn: (state: B, next: A) => B): PropertySeed<B>;
 
 export function scan<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, fn: (state: B, next: A) => B, scope?: Scope): any {
-    return applyScopeMaybe(new PropertySeed(stream + `.scan(fn)`, (observer: Observer<Event<B>>) => {
-        let current = initial
+    let current = initial
+    return applyScopeMaybe(new PropertySeed(stream + `.scan(fn)`, () => initial, (observer: Observer<Event<B>>) => {
         const unsub = stream.subscribe(event => {
             if (isValue(event)) {
                 current = fn(current, event.value)
@@ -16,6 +16,6 @@ export function scan<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial:
                 observer(event)
             }
         })
-        return [initial, unsub] as any
+        return unsub
     }), scope)
 }
