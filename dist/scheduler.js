@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setScheduler = exports.getScheduler = exports.defaultScheduler = void 0;
 /** @hidden */
 exports.defaultScheduler = {
-    setTimeout: function (f, d) { console.log("DEFAULT"); return setTimeout(f, d); },
-    setInterval: function (f, i) { console.log("DEFAULT"); return setInterval(f, i); },
+    setTimeout: function (f, d) { return setTimeout(f, d); },
+    setInterval: function (f, i) { return setInterval(f, i); },
     clearInterval: function (id) { return clearInterval(id); },
     clearTimeout: function (id) { return clearTimeout(id); },
     now: function () { return new Date().getTime(); }

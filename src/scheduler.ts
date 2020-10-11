@@ -8,8 +8,8 @@ export interface Scheduler {
 
 /** @hidden */
 export const defaultScheduler: Scheduler = {
-    setTimeout(f, d) { console.log("DEFAULT"); return setTimeout(f, d); },
-    setInterval(f, i) { console.log("DEFAULT"); return setInterval(f, i); },
+    setTimeout(f, d) { return setTimeout(f, d); },
+    setInterval(f, i) { return setInterval(f, i); },
     clearInterval(id) { return clearInterval(id); },
     clearTimeout(id) { return clearTimeout(id); },
     now() { return new Date().getTime(); }
