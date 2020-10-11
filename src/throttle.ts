@@ -1,4 +1,5 @@
 import { Atom, AtomSeed, EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions";
+import { applyScopeMaybe } from "./applyscope";
 import { bufferWithTime } from "./buffer";
 import { map } from "./map";
 import { Scope } from "./scope";
@@ -12,5 +13,5 @@ export function throttle<A>(s: EventStream<A> | EventStreamSeed<A>, delay: numbe
 export function throttle<A>(s: EventStream<A> | EventStreamSeed<A>, delay: number, scope: Scope): EventStream<A>;
 
 export function throttle<A>(s: any, delay: number, scope?: Scope): any {
-    return transformChanges(s + `.throttle(${delay})`, s, changes => map(bufferWithTime(changes, delay), values => values[values.length - 1]))
+    return applyScopeMaybe(transformChanges(s + `.throttle(${delay})`, s, changes => map(bufferWithTime(changes, delay), values => values[values.length - 1])), scope)
 }
