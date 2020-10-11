@@ -13,7 +13,7 @@ export interface MutableScope {
     end(): void;
 }
 export declare const globalScope: Scope;
-export declare function scope(): MutableScope;
+export declare function createScope(): MutableScope;
 /**
  *  Subscribe to source when there are observers. Use with care!
  **/

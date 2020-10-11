@@ -21,7 +21,7 @@ export const globalScope: Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any
 
 type ScopeEvents = { "in": void, "out": void }
 
-export function scope(): MutableScope {
+export function createScope(): MutableScope {
     let started = false
     const scopeDispatcher = new Dispatcher<ScopeEvents>();
     

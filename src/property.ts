@@ -1,4 +1,5 @@
 import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, Event, isValue } from "./abstractions";
+import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
 import { beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
@@ -80,20 +81,16 @@ export class StatefulProperty<V> extends Property<V> {
     }
 }
 
-export function toPropertySeed<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
-export function toPropertySeed<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
-export function toPropertySeed(stream: EventStream<any> | EventStreamSeed<any>, initial: any): PropertySeed<any> {
-    const subscribeWithInitial = (observer: Observer<any>): [any, Unsub] => {        
-        return [initial, stream.subscribe(observer)]
-    }    
-    return new PropertySeed(stream + `.toProperty(${initial})`, subscribeWithInitial)
-}
-
+export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
+export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
 export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;
 export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
 
-export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, initial: any, scope: Scope) {    
-    return new StatefulProperty(toPropertySeed(stream, initial), scope);
+export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, initial: any, scope?: Scope): Property<any> | PropertySeed<any> {    
+    const seed = new PropertySeed(stream + `.toProperty(${initial})`, (observer: Observer<any>): [any, Unsub] => {        
+        return [initial, stream.subscribe(observer)]
+    })
+    return applyScopeMaybe(seed, scope)
 }
 
 export function constant<A>(value: A): Property<A> {

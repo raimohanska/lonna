@@ -20,20 +20,18 @@ exports.transform = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 function transform(desc, x, transformer, scope) {
-    var seed;
     if (x instanceof abstractions_1.EventStream || x instanceof abstractions_1.EventStreamSeed) {
-        seed = new abstractions_1.EventStreamSeed(desc, function (observer) { return seed.on("value", function (value) { return transformer.changes(value, observer); }); });
+        return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed(desc, function (observer) { return x.subscribe(function (value) { return transformer.changes(value, observer); }); }));
     }
     else if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
-        seed = new abstractions_1.AtomSeed(desc, transformSubscribe(x, transformer), function (newValue) { return x.set(newValue); });
+        return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, transformSubscribe(x, transformer), function (newValue) { return x.set(newValue); }));
     }
     else if (x instanceof abstractions_1.Property || x instanceof abstractions_1.PropertySeed) {
-        seed = new abstractions_1.PropertySeed(desc, transformSubscribe(x, transformer));
+        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, transformSubscribe(x, transformer)));
     }
     else {
         throw Error("Unknown observable " + x);
     }
-    return applyscope_1.applyScopeMaybe(seed);
 }
 exports.transform = transform;
 function transformSubscribe(src, transformer) {

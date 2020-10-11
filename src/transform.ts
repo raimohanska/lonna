@@ -16,17 +16,15 @@ export function transform<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transfor
 export function transform<A, B>(desc: string, o: Observable<A>, transformer: Transformer<A, B>): Observable<B> // A generic signature. Note that the implementation is defined for the above cases only.
 
 export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B>, scope?: Scope): any {
-    let seed: any
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
-        seed = new EventStreamSeed(desc, observer => seed.on("value", (value: Event<A>) => transformer.changes(value, observer)))
+        return applyScopeMaybe(new EventStreamSeed(desc, observer => x.subscribe((value: Event<A>) => transformer.changes(value, observer))))
     } else if (x instanceof Atom || x instanceof AtomSeed) {
-        seed = new AtomSeed(desc, transformSubscribe(x, transformer), newValue => x.set(newValue))
+        return applyScopeMaybe(new AtomSeed(desc, transformSubscribe(x, transformer), newValue => x.set(newValue)))
     } else if (x instanceof Property || x instanceof PropertySeed) {
-        seed = new PropertySeed(desc, transformSubscribe(x, transformer))
+        return applyScopeMaybe(new PropertySeed(desc, transformSubscribe(x, transformer)))
     } else {
         throw Error("Unknown observable " + x)
     }
-    return applyScopeMaybe(seed)
 }
 
 function transformSubscribe<A, B>(src: { subscribeWithInitial: PropertySubscribe<A> }, transformer: Transformer<A, B>): PropertySubscribe<B> {

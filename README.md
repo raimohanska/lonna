@@ -28,7 +28,7 @@ TODO list of Bacon.js methods for first real-life use case:
 - `changes`
 - `debounce`
 - `combineTemplate`
-- `fromPoll`
+- `fromPoll` DONE!
 
 To complete Harmaja examples, we also need
 

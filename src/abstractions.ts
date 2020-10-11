@@ -1,13 +1,44 @@
 import { Scope } from "./scope";
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
-export type Event<V> = Value<V> | End
-export type Value<V> = { type: "value", value: V }
-export type End = { type: "end" }
+export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
+
+export abstract class Event<V> {
+    abstract type: string;
+}
+
+export class Value<V> extends Event<V> {
+    type: string = "value"
+    value: V
+    constructor(value: V) {
+        super()
+        this.value = value
+    }
+}
+
+export class End extends Event<any> {
+    type: string = "end"
+}
+export type EventLike<V> = Event<V>[] | Event<V> | V
+
 export type Unsub = Callback
 
+export function toEvent<V>(value: Event<V> | V): Event<V> {
+    if (value instanceof Event) {
+        return value
+    }
+    return valueEvent(value)
+}
+
+export function toEvents<V>(value: EventLike<V>): Event<V>[] {
+    if (value instanceof Array) {
+        return value.map(toEvent)
+    }
+    return [toEvent(value)]
+}
+
 export function valueEvent<V>(value: V): Value<V> {
-    return { type: "value", value }
+    return new Value(value)
 }
 
 export function isValue<V>(event: Event<V>): event is Value<V> {
@@ -22,12 +53,12 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
     return event => { if (isValue(event)) observer(event.value) }
 }
 
-export const endEvent: End = { type: "end" }
+export const endEvent: End = new End()
 
 // Abstract classes instead of interfaces for runtime type information and instanceof
 
 export abstract class Observable<V> {
-    readonly desc: string
+    desc: string
 
     constructor(desc: string) {
         this.desc = desc;
@@ -105,7 +136,7 @@ export abstract class EventStream<V> extends ScopedObservable<V> {
 export class EventStreamSeed<V> extends Observable<V> {
     subscribe: (observer: Observer<Event<V>>) => Unsub
 
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub) {
+    constructor(desc: string, subscribe: Subscribe<V>) {
         super(desc)
         this.subscribe = subscribe
     }

@@ -1,4 +1,4 @@
-import { Observer, Event, isValue } from "./abstractions"
+import { Observer, Event, isValue, Observable } from "./abstractions"
 
 export function duplicateSkippingObserver<V>(initial: V, observer: Observer<Event<V>>) {
     let current = initial
@@ -24,4 +24,9 @@ export function remove<A>(xs: A[], x: A) {
             return
         }
     }
+}
+
+export function rename(desc: string, observable: Observable<any>): Observable<any> {
+    observable.desc = desc
+    return observable
 }

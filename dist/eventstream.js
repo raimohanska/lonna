@@ -13,8 +13,9 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StatelessEventStream = exports.StatefulEventStream = void 0;
+exports.fromSubscribe = exports.SeedToStream = exports.StatelessEventStream = exports.StatefulEventStream = void 0;
 var abstractions_1 = require("./abstractions");
+var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
 var StatefulEventStream = /** @class */ (function (_super) {
@@ -48,4 +49,18 @@ var StatelessEventStream = /** @class */ (function (_super) {
     return StatelessEventStream;
 }(abstractions_1.EventStream));
 exports.StatelessEventStream = StatelessEventStream;
+var SeedToStream = /** @class */ (function (_super) {
+    __extends(SeedToStream, _super);
+    function SeedToStream(seed, scope) {
+        var _this = _super.call(this, seed.desc, scope) || this;
+        scope(function () { return seed.subscribe(function (v) { return _this.dispatcher.dispatch("value", v); }); }, _this.dispatcher);
+        return _this;
+    }
+    return SeedToStream;
+}(StatefulEventStream));
+exports.SeedToStream = SeedToStream;
+function fromSubscribe(subscribe, scope) {
+    return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed("fromSubscribe(fn)", subscribe), scope);
+}
+exports.fromSubscribe = fromSubscribe;
 //# sourceMappingURL=eventstream.js.map

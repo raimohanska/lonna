@@ -1,22 +1,29 @@
 import { Scope } from "./scope";
 export declare type Callback = () => void;
 export declare type Observer<V> = (value: V) => void;
-export declare type Event<V> = Value<V> | End;
-export declare type Value<V> = {
-    type: "value";
+export declare type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub;
+export declare abstract class Event<V> {
+    abstract type: string;
+}
+export declare class Value<V> extends Event<V> {
+    type: string;
     value: V;
-};
-export declare type End = {
-    type: "end";
-};
+    constructor(value: V);
+}
+export declare class End extends Event<any> {
+    type: string;
+}
+export declare type EventLike<V> = Event<V>[] | Event<V> | V;
 export declare type Unsub = Callback;
+export declare function toEvent<V>(value: Event<V> | V): Event<V>;
+export declare function toEvents<V>(value: EventLike<V>): Event<V>[];
 export declare function valueEvent<V>(value: V): Value<V>;
 export declare function isValue<V>(event: Event<V>): event is Value<V>;
 export declare function isEnd<V>(event: Event<V>): event is End;
 export declare function valueObserver<V>(observer: Observer<V>): Observer<Event<V>>;
 export declare const endEvent: End;
 export declare abstract class Observable<V> {
-    readonly desc: string;
+    desc: string;
     constructor(desc: string);
     abstract subscribe(observer: Observer<Event<V>>): Unsub;
     forEach(observer: Observer<V>): Unsub;
@@ -49,7 +56,7 @@ export declare abstract class EventStream<V> extends ScopedObservable<V> {
 }
 export declare class EventStreamSeed<V> extends Observable<V> {
     subscribe: (observer: Observer<Event<V>>) => Unsub;
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub);
+    constructor(desc: string, subscribe: Subscribe<V>);
 }
 export declare abstract class Atom<V> extends Property<V> {
     constructor(desc: string);

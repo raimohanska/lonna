@@ -29,8 +29,9 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.constant = exports.toProperty = exports.toPropertySeed = exports.StatefulProperty = exports.StatelessProperty = void 0;
+exports.constant = exports.toProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
 var abstractions_1 = require("./abstractions");
+var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
@@ -101,15 +102,11 @@ var StatefulProperty = /** @class */ (function (_super) {
     return StatefulProperty;
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
-function toPropertySeed(stream, initial) {
-    var subscribeWithInitial = function (observer) {
-        return [initial, stream.subscribe(observer)];
-    };
-    return new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), subscribeWithInitial);
-}
-exports.toPropertySeed = toPropertySeed;
 function toProperty(stream, initial, scope) {
-    return new StatefulProperty(toPropertySeed(stream, initial), scope);
+    var seed = new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), function (observer) {
+        return [initial, stream.subscribe(observer)];
+    });
+    return applyscope_1.applyScopeMaybe(seed, scope);
 }
 exports.toProperty = toProperty;
 function constant(value) {

@@ -11,6 +11,7 @@ export class Dispatcher<E extends Dict> {
     private _ended = false
 
     dispatch<X extends keyof E & string>(key: X, value: Event<E[X]>) {
+        // TODO: observers may be mutated while in this loop!
         if (this._observers[key]) for (const s of this._observers[key]!) {
             s(value)
         }

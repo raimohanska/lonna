@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkScope = exports.afterScope = exports.beforeScope = exports.autoScope = exports.scope = exports.globalScope = void 0;
+exports.checkScope = exports.afterScope = exports.beforeScope = exports.autoScope = exports.createScope = exports.globalScope = void 0;
 var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 exports.globalScope = function (onIn, dispatcher) {
     onIn();
 };
-function scope() {
+function createScope() {
     var started = false;
     var scopeDispatcher = new dispatcher_1.Dispatcher();
     return {
@@ -30,7 +30,7 @@ function scope() {
         }
     };
 }
-exports.scope = scope;
+exports.createScope = createScope;
 /**
  *  Subscribe to source when there are observers. Use with care!
  **/

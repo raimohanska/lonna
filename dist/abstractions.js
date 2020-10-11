@@ -29,9 +29,50 @@ var __read = (this && this.__read) || function (o, n) {
     return ar;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = void 0;
+exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+var Event = /** @class */ (function () {
+    function Event() {
+    }
+    return Event;
+}());
+exports.Event = Event;
+var Value = /** @class */ (function (_super) {
+    __extends(Value, _super);
+    function Value(value) {
+        var _this = _super.call(this) || this;
+        _this.type = "value";
+        _this.value = value;
+        return _this;
+    }
+    return Value;
+}(Event));
+exports.Value = Value;
+var End = /** @class */ (function (_super) {
+    __extends(End, _super);
+    function End() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.type = "end";
+        return _this;
+    }
+    return End;
+}(Event));
+exports.End = End;
+function toEvent(value) {
+    if (value instanceof Event) {
+        return value;
+    }
+    return valueEvent(value);
+}
+exports.toEvent = toEvent;
+function toEvents(value) {
+    if (value instanceof Array) {
+        return value.map(toEvent);
+    }
+    return [toEvent(value)];
+}
+exports.toEvents = toEvents;
 function valueEvent(value) {
-    return { type: "value", value: value };
+    return new Value(value);
 }
 exports.valueEvent = valueEvent;
 function isValue(event) {
@@ -47,7 +88,7 @@ function valueObserver(observer) {
         observer(event.value); };
 }
 exports.valueObserver = valueObserver;
-exports.endEvent = { type: "end" };
+exports.endEvent = new End();
 // Abstract classes instead of interfaces for runtime type information and instanceof
 var Observable = /** @class */ (function () {
     function Observable(desc) {

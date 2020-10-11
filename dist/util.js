@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.remove = exports.nop = exports.duplicateSkippingObserver = void 0;
+exports.rename = exports.remove = exports.nop = exports.duplicateSkippingObserver = void 0;
 var abstractions_1 = require("./abstractions");
 function duplicateSkippingObserver(initial, observer) {
     var current = initial;
@@ -29,4 +29,9 @@ function remove(xs, x) {
     }
 }
 exports.remove = remove;
+function rename(desc, observable) {
+    observable.desc = desc;
+    return observable;
+}
+exports.rename = rename;
 //# sourceMappingURL=util.js.map

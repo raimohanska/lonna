@@ -23,6 +23,7 @@ var Dispatcher = /** @class */ (function () {
     }
     Dispatcher.prototype.dispatch = function (key, value) {
         var e_1, _a;
+        // TODO: observers may be mutated while in this loop!
         if (this._observers[key])
             try {
                 for (var _b = __values(this._observers[key]), _c = _b.next(); !_c.done; _c = _b.next()) {

@@ -1,8 +1,8 @@
 import { Atom, AtomSeed, EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions";
-import { Scope } from "./scope";
-import { StatefulEventStream } from "./eventstream";
 import { StatefulDependentAtom } from "./atom";
+import { SeedToStream } from "./eventstream";
 import { StatefulProperty } from "./property";
+import { Scope } from "./scope";
 
 export function applyScope<T>(scope: Scope, stream: EventStreamSeed<T>): EventStream<T>;
 export function applyScope<T>(scope: Scope, stream: AtomSeed<T>): Atom<T>;
@@ -25,14 +25,4 @@ export function applyScopeMaybe<A>(seed: any, scope?: Scope): any {
         return applyScope(scope, seed)
     }
     return seed
-}
-
-class SeedToStream<V> extends StatefulEventStream<V> {
-    constructor(seed: EventStreamSeed<V>, scope: Scope) { 
-        super(seed.desc, scope)                 
-        scope(
-            () => seed.subscribe(v => this.dispatcher.dispatch("value", v)),
-            this.dispatcher            
-        )
-    }
 }
