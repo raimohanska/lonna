@@ -23,6 +23,7 @@ __exportStar(require("./dispatcher"), exports);
 __exportStar(require("./eventstream"), exports);
 __exportStar(require("./filter"), exports);
 __exportStar(require("./flatmap"), exports);
+__exportStar(require("./flatmaplatest"), exports);
 __exportStar(require("./frompoll"), exports);
 __exportStar(require("./interval"), exports);
 __exportStar(require("./later"), exports);

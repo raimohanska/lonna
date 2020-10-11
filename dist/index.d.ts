@@ -11,6 +11,7 @@ export * from "./dispatcher";
 export * from "./eventstream";
 export * from "./filter";
 export * from "./flatmap";
+export * from "./flatmaplatest";
 export * from "./frompoll";
 export * from "./interval";
 export * from "./later";
