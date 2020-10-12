@@ -39,9 +39,10 @@ export class StatelessEventStream<V> extends EventStream<V> {
 
 export class SeedToStream<V> extends StatefulEventStream<V> {
     constructor(seed: EventStreamSeed<V>, scope: Scope) { 
-        super(seed.desc, scope)                 
+        super(seed.desc, scope)
+        const source = seed.consume()
         scope(
-            () => seed.subscribe(v => this.dispatcher.dispatch("value", v)),
+            () => source.subscribe(v => this.dispatcher.dispatch("value", v)),
             this.dispatcher            
         )
     }

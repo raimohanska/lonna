@@ -45,7 +45,7 @@ var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var util_1 = require("./util");
 function flatMap(s, fn, scope) {
-    return applyscope_1.applyScopeMaybe(new FlatMapStreamSeed(s + ".flatMap(fn)", s, fn, {}), scope);
+    return applyscope_1.applyScopeMaybe(new FlatMapStreamSeed(s + ".flatMap(fn)", s, fn, {}), scope); // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
 }
 exports.flatMap = flatMap;
 var FlatMapStreamSeed = /** @class */ (function (_super) {
@@ -53,7 +53,7 @@ var FlatMapStreamSeed = /** @class */ (function (_super) {
     function FlatMapStreamSeed(desc, s, fn, options) {
         if (options === void 0) { options = {}; }
         var _this = this;
-        var _a = __read(flatMapSubscribe(s.subscribe.bind(s), fn, options), 2), children = _a[0], subscribe = _a[1];
+        var _a = __read(flatMapSubscribe(s.consume().subscribe.bind(s), fn, options), 2), children = _a[0], subscribe = _a[1];
         _this = _super.call(this, desc, subscribe) || this;
         return _this;
     }

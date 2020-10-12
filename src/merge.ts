@@ -6,22 +6,23 @@ export function merge<A, B>(a: EventStream<A>, b: EventStream<B>): EventStream<
 export function merge<A>(a: EventStreamSeed<A>, b: EventStreamSeed<A>): EventStreamSeed<A>;
 export function merge<A, B>(a: EventStreamSeed<A>, b: EventStreamSeed<B>): EventStreamSeed<A | B>;
 export function merge<A>(...streams: (EventStream<any> | EventStreamSeed<any>)[]) {
+    const sources = streams.map(s => s.consume())
     const seed = new EventStreamSeed<A>(`merge(${streams})`, observer => {
         let endCount = 0
-        const unsubs = streams.map(s => s.subscribe(event => {
+        const unsubs = sources.map(s => s.subscribe(event => {
             if (isValue(event)) {
                 observer(event)
             } else {
                 endCount++
-                if (endCount === streams.length) {
+                if (endCount === sources.length) {
                     observer(endEvent)
                 }
             }
         }))
         return () => unsubs.forEach(f => f())
     })
-    if (streams[0] instanceof EventStream) {
-        return applyScope(streams[0].getScope(), seed)
+    if (sources[0] instanceof EventStream) {
+        return applyScope(sources[0].getScope(), seed)
     }
     return seed
 }

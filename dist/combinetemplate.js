@@ -75,7 +75,7 @@ function processTemplate(template, mapObservable) {
         };
     }
     function compile(key, value) {
-        if (abstractions_1.isObservable(value)) {
+        if (abstractions_1.isObservableSeed(value)) {
             if (value instanceof abstractions_1.Property || value instanceof abstractions_1.PropertySeed) {
                 observables.push(value);
                 funcs.push(applyStreamValue(key, observables.length - 1));
@@ -110,7 +110,7 @@ function processTemplate(template, mapObservable) {
     return [observables.map(mapObservable), combinator];
 }
 function containsObservables(value, match) {
-    if (match === void 0) { match = abstractions_1.isObservable; }
+    if (match === void 0) { match = abstractions_1.isObservableSeed; }
     if (match(value)) {
         return true;
     }

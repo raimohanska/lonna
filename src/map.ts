@@ -15,7 +15,8 @@ export function map<A, B>(o: any, x: ((value: A) => B) | Property<B>): any {
     if (o instanceof EventStream) {
         return new StatelessEventStream(desc, observer => o.subscribe(mapObserver(observer, fn)), o.getScope())
     } else if (o instanceof EventStreamSeed) {
-        return new EventStreamSeed(desc, observer => o.subscribe(mapObserver(observer, fn)))
+        const source = o.consume()
+        return new EventStreamSeed(desc, observer => source.subscribe(mapObserver(observer, fn)))
     } else if (o instanceof Property) {
         return new StatelessProperty(desc, () => fn(o.get()), observer => o.onChange(mapObserver(observer, fn)), o.getScope())
     } else if (o instanceof PropertySeed) {

@@ -90,11 +90,11 @@ export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, in
 export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;
 export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
 
-export function toProperty(stream: EventStream<any> | EventStreamSeed<any>, initial: any, scope?: Scope): Property<any> | PropertySeed<any> {    
-    const seed = new PropertySeed(stream + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
-        return stream.subscribe(observer)
-    })
-    return applyScopeMaybe(seed, scope)
+export function toProperty(seed: EventStream<any> | EventStreamSeed<any>, initial: any, scope?: Scope): Property<any> | PropertySeed<any> {    
+    const source = seed.consume()
+    return applyScopeMaybe(new PropertySeed(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
+        return source.subscribe(observer)
+    }), scope)
 }
 
 export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A> {

@@ -91,11 +91,11 @@ var StatefulProperty = /** @class */ (function (_super) {
     return StatefulProperty;
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
-function toProperty(stream, initial, scope) {
-    var seed = new abstractions_1.PropertySeed(stream + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {
-        return stream.subscribe(observer);
-    });
-    return applyscope_1.applyScopeMaybe(seed, scope);
+function toProperty(seed, initial, scope) {
+    var source = seed.consume();
+    return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(seed + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {
+        return source.subscribe(observer);
+    }), scope);
 }
 exports.toProperty = toProperty;
 function toPropertySeed(property) {

@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSource = exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySource = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservable = exports.Observable = exports.ObservableSeed = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+exports.AtomSource = exports.AtomSeed = exports.Atom = exports.EventStreamSource = exports.EventStreamSeed = exports.EventStream = exports.PropertySource = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservableSeed = exports.isObservable = exports.Observable = exports.ObservableSeedImpl = exports.ObservableSeed = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
 var Event = /** @class */ (function () {
     function Event() {
     }
@@ -74,27 +74,43 @@ function valueObserver(observer) {
 exports.valueObserver = valueObserver;
 exports.endEvent = new End();
 var ObservableSeed = /** @class */ (function () {
-    function ObservableSeed() {
+    function ObservableSeed(desc) {
+        this.desc = desc;
     }
+    ObservableSeed.prototype.toString = function () {
+        return this.desc;
+    };
     return ObservableSeed;
 }());
 exports.ObservableSeed = ObservableSeed;
+var ObservableSeedImpl = /** @class */ (function (_super) {
+    __extends(ObservableSeedImpl, _super);
+    function ObservableSeedImpl(source) {
+        var _this = _super.call(this, source.desc) || this;
+        _this._source = source;
+        return _this;
+    }
+    ObservableSeedImpl.prototype.consume = function () {
+        if (this._source === null)
+            throw Error("Seed " + this.desc + "\u00A0already consumed");
+        var result = this._source;
+        this._source = null;
+        return result;
+    };
+    return ObservableSeedImpl;
+}(ObservableSeed));
+exports.ObservableSeedImpl = ObservableSeedImpl;
 // Abstract classes instead of interfaces for runtime type information and instanceof
 var Observable = /** @class */ (function (_super) {
     __extends(Observable, _super);
     function Observable(desc) {
-        var _this = _super.call(this) || this;
-        _this.desc = desc;
-        return _this;
+        return _super.call(this, desc) || this;
     }
     Observable.prototype.forEach = function (observer) {
         return this.subscribe(valueObserver(observer));
     };
     Observable.prototype.log = function (message) {
         this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
-    };
-    Observable.prototype.toString = function () {
-        return this.desc;
     };
     Observable.prototype.consume = function () {
         return this;
@@ -106,6 +122,10 @@ function isObservable(x) {
     return x instanceof Observable;
 }
 exports.isObservable = isObservable;
+function isObservableSeed(x) {
+    return x instanceof ObservableSeed;
+}
+exports.isObservableSeed = isObservableSeed;
 var ScopedObservable = /** @class */ (function (_super) {
     __extends(ScopedObservable, _super);
     function ScopedObservable(desc) {
@@ -132,20 +152,13 @@ exports.Property = Property;
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-var PropertySeed = /** @class */ (function () {
+var PropertySeed = /** @class */ (function (_super) {
+    __extends(PropertySeed, _super);
     function PropertySeed(desc, get, onChange) {
-        this.desc = desc;
-        this._source = new PropertySource(desc, get, onChange);
+        return _super.call(this, new PropertySource(desc, get, onChange)) || this;
     }
-    PropertySeed.prototype.consume = function () {
-        if (this._source === null)
-            throw Error("PropertySeed " + this.desc + "\u00A0already consumed");
-        var result = this._source;
-        this._source = null;
-        return result;
-    };
     return PropertySeed;
-}());
+}(ObservableSeedImpl));
 exports.PropertySeed = PropertySeed;
 var PropertySource = /** @class */ (function (_super) {
     __extends(PropertySource, _super);
@@ -194,13 +207,21 @@ exports.EventStream = EventStream;
 var EventStreamSeed = /** @class */ (function (_super) {
     __extends(EventStreamSeed, _super);
     function EventStreamSeed(desc, subscribe) {
+        return _super.call(this, new EventStreamSource(desc, subscribe)) || this;
+    }
+    return EventStreamSeed;
+}(ObservableSeedImpl));
+exports.EventStreamSeed = EventStreamSeed;
+var EventStreamSource = /** @class */ (function (_super) {
+    __extends(EventStreamSource, _super);
+    function EventStreamSource(desc, subscribe) {
         var _this = _super.call(this, desc) || this;
         _this.subscribe = subscribe;
         return _this;
     }
-    return EventStreamSeed;
+    return EventStreamSource;
 }(Observable));
-exports.EventStreamSeed = EventStreamSeed;
+exports.EventStreamSource = EventStreamSource;
 var Atom = /** @class */ (function (_super) {
     __extends(Atom, _super);
     function Atom(desc) {
@@ -213,20 +234,13 @@ exports.Atom = Atom;
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-var AtomSeed = /** @class */ (function () {
+var AtomSeed = /** @class */ (function (_super) {
+    __extends(AtomSeed, _super);
     function AtomSeed(desc, get, subscribe, set) {
-        this.desc = desc;
-        this._source = new AtomSource(desc, get, subscribe, set);
+        return _super.call(this, new AtomSource(desc, get, subscribe, set)) || this;
     }
-    AtomSeed.prototype.consume = function () {
-        if (this._source === null)
-            throw Error("PropertySeed " + this.desc + "\u00A0already consumed");
-        var result = this._source;
-        this._source = null;
-        return result;
-    };
     return AtomSeed;
-}());
+}(ObservableSeedImpl));
 exports.AtomSeed = AtomSeed;
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.

@@ -61,15 +61,32 @@ export abstract class ObservableSeed<V extends Observable<any>> {
     desc: string
 
     constructor(desc: string) {
-        this.desc = desc;
+        this.desc = desc
     }
 
-    abstract consume(): V
+    abstract consume(): V;
 
     toString(): string {
         return this.desc
     }
 }
+
+export abstract class ObservableSeedImpl<V extends Observable<any>> extends ObservableSeed<V> {
+    private _source: V | null
+
+    constructor(source: V) {
+        super(source.desc)
+        this._source = source
+    }
+
+    consume(): V {
+        if (this._source === null) throw Error(`Seed ${this.desc} already consumed`)
+        const result = this._source
+        this._source = null
+        return result
+    }
+}
+
 // Abstract classes instead of interfaces for runtime type information and instanceof
 export abstract class Observable<V> extends ObservableSeed<Observable<V>> {
     constructor(desc: string) {
@@ -94,7 +111,7 @@ export function isObservable<V>(x: any): x is Observable<V> {
     return x instanceof Observable
 }
 
-export function isObservableSeed<V>(x: any): x is ObservableSeed<V> {
+export function isObservableSeed<V extends Observable<any>>(x: any): x is ObservableSeed<V> {
     return x instanceof ObservableSeed
 }
 
@@ -128,20 +145,10 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class PropertySeed<V> extends ObservableSeed<PropertySource<V>> {
-    private _source: PropertySource<V> | null
-
+export class PropertySeed<V> extends ObservableSeedImpl<PropertySource<V>> {
     constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
-        super(desc)
-        this._source = new PropertySource(desc, get, onChange)
-    }
-
-    consume(): PropertySource<V> {
-        if (this._source === null) throw Error(`PropertySeed ${this.desc} already consumed`)
-        const result = this._source
-        this._source = null
-        return result
-    }     
+        super(new PropertySource(desc, get, onChange))
+    }  
 }
 
 export class PropertySource<V> extends Observable<V> {
@@ -187,7 +194,13 @@ export abstract class EventStream<V> extends ScopedObservable<V> {
     }
 }
 
-export class EventStreamSeed<V> extends Observable<V> {
+export class EventStreamSeed<V> extends ObservableSeedImpl<EventStreamSource<V>> {
+    constructor(desc: string, subscribe: Subscribe<V>) {
+        super(new EventStreamSource(desc, subscribe))
+    }
+}
+
+export class EventStreamSource<V> extends Observable<V> {
     subscribe: (observer: Observer<Event<V>>) => Unsub
 
     constructor(desc: string, subscribe: Subscribe<V>) {
@@ -208,20 +221,10 @@ export abstract class Atom<V> extends Property<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSeed<V> extends ObservableSeed<AtomSource<V>>{
-    private _source: AtomSource<V> | null
-
+export class AtomSeed<V> extends ObservableSeedImpl<AtomSource<V>>{
     constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
-        super(desc)
-        this._source = new AtomSource(desc, get, subscribe, set)
-    }
-
-    consume(): AtomSource<V> {
-        if (this._source === null) throw Error(`PropertySeed ${this.desc} already consumed`)
-        const result = this._source
-        this._source = null
-        return result
-    }    
+        super(new AtomSource(desc, get, subscribe, set))
+    }  
 }
 
 /**

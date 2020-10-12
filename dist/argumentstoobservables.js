@@ -10,8 +10,8 @@ function argumentsToObservables(args) {
 }
 exports.argumentsToObservables = argumentsToObservables;
 function singleToObservables(x) {
-    if (abstractions_1.isObservable(x)) {
-        return [x];
+    if (abstractions_1.isObservableSeed(x)) {
+        return [x.consume()];
     }
     else if (x instanceof Array) {
         return argumentsToObservables(x);

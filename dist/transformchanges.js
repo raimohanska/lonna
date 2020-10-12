@@ -7,18 +7,18 @@ var changes_1 = require("./changes");
 var util_1 = require("./util");
 function transformChanges(desc, x, transformer, scope) {
     if (x instanceof abstractions_1.EventStream || x instanceof abstractions_1.EventStreamSeed) {
-        return util_1.rename(desc, transformer(x)); // Note: stream passed as seed, seems to work...
+        return util_1.rename(desc, transformer(x)); // TODO: stream coerced into stream seed due to improper typing
     }
     else if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
         var source_1 = x instanceof abstractions_1.Property ? x : x.consume();
         return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return source_1.get(); }, function (observer) {
-            return transformer(changes_1.changes(source_1)).subscribe(observer);
+            return transformer(changes_1.changes(source_1)).consume().subscribe(observer); // TODO: AtomSource coerced into AtomSeed due to improper typing
         }, source_1.set));
     }
     else if (x instanceof abstractions_1.Property || x instanceof abstractions_1.PropertySeed) {
         var source_2 = x instanceof abstractions_1.Property ? x : x.consume();
         return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return source_2.get(); }, function (observer) {
-            return transformer(changes_1.changes(source_2)).subscribe(observer);
+            return transformer(changes_1.changes(source_2)).consume().subscribe(observer); // TODO: PropertySource coerced into PropertySeed due to improper typing
         }));
     }
     else {

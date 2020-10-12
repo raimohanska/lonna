@@ -21,7 +21,8 @@ export function transform<A, B>(desc: string, o: Observable<A>, transformer: Tra
 export function transform<A, B>(desc: string, x: any, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
         if (transformer instanceof Function) {
-            return applyScopeMaybe(new EventStreamSeed(desc, observer => x.subscribe((value: Event<A>) => transformer(value, observer))))    
+            const source = x.consume()
+            return applyScopeMaybe(new EventStreamSeed(desc, observer => source.subscribe((value: Event<A>) => transformer(value, observer))))    
         } else {
             return transform(desc, x as any, transformer.changes as any, scope as any)
         }        
