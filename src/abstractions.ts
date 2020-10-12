@@ -57,29 +57,37 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 export const endEvent: End = new End()
 
 
-export abstract class ObservableSeed<V extends Observable<any>> {
+export abstract class ObservableSeed<V, O extends Observable<any>> {
     desc: string
 
     constructor(desc: string) {
         this.desc = desc
     }
 
-    abstract consume(): V;
+    abstract consume(): O;
 
     toString(): string {
         return this.desc
     }
+
+    forEach(observer: Observer<V>): Unsub {
+        return this.consume().subscribe(valueObserver(observer))
+    }
+
+    log(message?: string) {
+        this.forEach(v => message === undefined ? console.log(v) : console.log(message, v))
+    }
 }
 
-export abstract class ObservableSeedImpl<V extends Observable<any>> extends ObservableSeed<V> {
-    private _source: V | null
+export abstract class ObservableSeedImpl<V, O extends Observable<any>> extends ObservableSeed<V, O> {
+    private _source: O | null
 
-    constructor(source: V) {
+    constructor(source: O) {
         super(source.desc)
         this._source = source
     }
 
-    consume(): V {
+    consume(): O {
         if (this._source === null) throw Error(`Seed ${this.desc} already consumed`)
         const result = this._source
         this._source = null
@@ -88,7 +96,7 @@ export abstract class ObservableSeedImpl<V extends Observable<any>> extends Obse
 }
 
 // Abstract classes instead of interfaces for runtime type information and instanceof
-export abstract class Observable<V> extends ObservableSeed<Observable<V>> {
+export abstract class Observable<V> extends ObservableSeed<V, Observable<V>> {
     constructor(desc: string) {
         super(desc)
     }
@@ -99,9 +107,6 @@ export abstract class Observable<V> extends ObservableSeed<Observable<V>> {
         return this.subscribe(valueObserver(observer))
     }
 
-    log(message?: string) {
-        this.forEach(v => message === undefined ? console.log(v) : console.log(message, v))
-    }
     consume() {
         return this
     }
@@ -111,7 +116,7 @@ export function isObservable<V>(x: any): x is Observable<V> {
     return x instanceof Observable
 }
 
-export function isObservableSeed<V extends Observable<any>>(x: any): x is ObservableSeed<V> {
+export function isObservableSeed<V>(x: any): x is ObservableSeed<V, any> {
     return x instanceof ObservableSeed
 }
 
@@ -145,7 +150,7 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class PropertySeed<V> extends ObservableSeedImpl<PropertySource<V>> {
+export class PropertySeed<V> extends ObservableSeedImpl<V, PropertySource<V>> {
     constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
         super(new PropertySource(desc, get, onChange))
     }  
@@ -194,7 +199,7 @@ export abstract class EventStream<V> extends ScopedObservable<V> {
     }
 }
 
-export class EventStreamSeed<V> extends ObservableSeedImpl<EventStreamSource<V>> {
+export class EventStreamSeed<V> extends ObservableSeedImpl<V, EventStreamSource<V>> {
     constructor(desc: string, subscribe: Subscribe<V>) {
         super(new EventStreamSource(desc, subscribe))
     }
@@ -221,7 +226,7 @@ export abstract class Atom<V> extends Property<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSeed<V> extends ObservableSeedImpl<AtomSource<V>>{
+export class AtomSeed<V> extends ObservableSeedImpl<V, AtomSource<V>>{
     constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(new AtomSource(desc, get, subscribe, set))
     }  

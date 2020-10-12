@@ -80,6 +80,12 @@ var ObservableSeed = /** @class */ (function () {
     ObservableSeed.prototype.toString = function () {
         return this.desc;
     };
+    ObservableSeed.prototype.forEach = function (observer) {
+        return this.consume().subscribe(valueObserver(observer));
+    };
+    ObservableSeed.prototype.log = function (message) {
+        this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
+    };
     return ObservableSeed;
 }());
 exports.ObservableSeed = ObservableSeed;
@@ -108,9 +114,6 @@ var Observable = /** @class */ (function (_super) {
     }
     Observable.prototype.forEach = function (observer) {
         return this.subscribe(valueObserver(observer));
-    };
-    Observable.prototype.log = function (message) {
-        this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
     };
     Observable.prototype.consume = function () {
         return this;

@@ -51,7 +51,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
     }
 }
 
-function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<Observable<B>>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
+function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<B, Observable<B>>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
     const children: FlatMapChild<Observable<B>>[] = []
     return [children, (observer: Observer<Event<B>>) => {            
         let rootEnded = false

@@ -22,26 +22,27 @@ export declare function isValue<V>(event: Event<V>): event is Value<V>;
 export declare function isEnd<V>(event: Event<V>): event is End;
 export declare function valueObserver<V>(observer: Observer<V>): Observer<Event<V>>;
 export declare const endEvent: End;
-export declare abstract class ObservableSeed<V extends Observable<any>> {
+export declare abstract class ObservableSeed<V, O extends Observable<any>> {
     desc: string;
     constructor(desc: string);
-    abstract consume(): V;
+    abstract consume(): O;
     toString(): string;
+    forEach(observer: Observer<V>): Unsub;
+    log(message?: string): void;
 }
-export declare abstract class ObservableSeedImpl<V extends Observable<any>> extends ObservableSeed<V> {
+export declare abstract class ObservableSeedImpl<V, O extends Observable<any>> extends ObservableSeed<V, O> {
     private _source;
-    constructor(source: V);
-    consume(): V;
+    constructor(source: O);
+    consume(): O;
 }
-export declare abstract class Observable<V> extends ObservableSeed<Observable<V>> {
+export declare abstract class Observable<V> extends ObservableSeed<V, Observable<V>> {
     constructor(desc: string);
     abstract subscribe(observer: Observer<Event<V>>): Unsub;
     forEach(observer: Observer<V>): Unsub;
-    log(message?: string): void;
     consume(): this;
 }
 export declare function isObservable<V>(x: any): x is Observable<V>;
-export declare function isObservableSeed<V extends Observable<any>>(x: any): x is ObservableSeed<V>;
+export declare function isObservableSeed<V>(x: any): x is ObservableSeed<V, any>;
 export declare abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string);
     abstract getScope(): Scope;
@@ -57,7 +58,7 @@ export declare abstract class Property<V> extends ScopedObservable<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export declare class PropertySeed<V> extends ObservableSeedImpl<PropertySource<V>> {
+export declare class PropertySeed<V> extends ObservableSeedImpl<V, PropertySource<V>> {
     constructor(desc: string, get: () => V, onChange: Subscribe<V>);
 }
 export declare class PropertySource<V> extends Observable<V> {
@@ -73,7 +74,7 @@ export declare class PropertySource<V> extends Observable<V> {
 export declare abstract class EventStream<V> extends ScopedObservable<V> {
     constructor(desc: string);
 }
-export declare class EventStreamSeed<V> extends ObservableSeedImpl<EventStreamSource<V>> {
+export declare class EventStreamSeed<V> extends ObservableSeedImpl<V, EventStreamSource<V>> {
     constructor(desc: string, subscribe: Subscribe<V>);
 }
 export declare class EventStreamSource<V> extends Observable<V> {
@@ -89,7 +90,7 @@ export declare abstract class Atom<V> extends Property<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export declare class AtomSeed<V> extends ObservableSeedImpl<AtomSource<V>> {
+export declare class AtomSeed<V> extends ObservableSeedImpl<V, AtomSource<V>> {
     constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void);
 }
 /**

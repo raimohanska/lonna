@@ -17,7 +17,7 @@ function map(o, x) {
     else if (o instanceof abstractions_1.Property) {
         return new property_1.StatelessProperty(desc, function () { return fn(o.get()); }, function (observer) { return o.onChange(mapObserver(observer, fn)); }, o.getScope());
     }
-    else if (o instanceof abstractions_1.PropertySeed) {
+    else if (o instanceof abstractions_1.PropertySeed || o instanceof abstractions_1.AtomSeed) {
         var source_2 = o.consume();
         return new abstractions_1.PropertySeed(desc, function () { return fn(source_2.get()); }, function (observer) {
             return source_2.onChange(mapObserver(observer, fn));
