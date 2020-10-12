@@ -1,4 +1,4 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub, valueEvent } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { remove } from "./util";
@@ -43,7 +43,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
             if (children.length != 1) {
                 throw Error("Unexpected child count: " + children.length)
             }
-            return (children[0].observable as PropertySource<B>).get()
+            return (children[0].observable as Property<B>).get()
         }
         super(desc, get, observer => subscribe(value => {
             if (!initializing) observer(value)

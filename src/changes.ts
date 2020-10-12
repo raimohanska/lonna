@@ -1,4 +1,4 @@
-import { Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed, PropertySource } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed } from "./abstractions";
 import { StatelessEventStream } from "./eventstream";
 
 export function changes<T>(property: Property<T>): EventStream<T>

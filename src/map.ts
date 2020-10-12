@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent, AtomSeed } from "./abstractions";
 import { StatelessEventStream } from "./eventstream";
 import { StatelessProperty } from "./property";
 
@@ -19,7 +19,7 @@ export function map<A, B>(o: any, x: ((value: A) => B) | Property<B>): any {
         return new EventStreamSeed(desc, observer => source.subscribe(mapObserver(observer, fn)))
     } else if (o instanceof Property) {
         return new StatelessProperty(desc, () => fn(o.get()), observer => o.onChange(mapObserver(observer, fn)), o.getScope())
-    } else if (o instanceof PropertySeed) {
+    } else if (o instanceof PropertySeed || o instanceof AtomSeed) {
         const source = o.consume()
         return new PropertySeed(desc, () => fn(source.get()), observer => {
             return source.onChange(mapObserver(observer, fn))            
