@@ -44,7 +44,8 @@ function combineTemplateS(template, scope) {
             return x;
         throw Error("Unsupported observable: " + x);
     }), 2), observables = _a[0], combinator = _a[1];
-    return applyscope_1.applyScopeMaybe(util_1.rename("combineTemplate(..)", map_1.map(combine_1.combineAsArray(observables), combinator)), scope);
+    var mapped = map_1.map(combine_1.combineAsArray(observables), combinator);
+    return applyscope_1.applyScopeMaybe(util_1.rename("combineTemplate(..)", mapped), scope);
 }
 exports.combineTemplateS = combineTemplateS;
 function processTemplate(template, mapObservable) {

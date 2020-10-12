@@ -22,13 +22,18 @@ export declare function isValue<V>(event: Event<V>): event is Value<V>;
 export declare function isEnd<V>(event: Event<V>): event is End;
 export declare function valueObserver<V>(observer: Observer<V>): Observer<Event<V>>;
 export declare const endEvent: End;
-export declare abstract class Observable<V> {
+export declare abstract class ObservableSeed<V extends Observable<any>> {
+    abstract desc: string;
+    abstract consume(): V;
+}
+export declare abstract class Observable<V> extends ObservableSeed<Observable<V>> {
     desc: string;
     constructor(desc: string);
     abstract subscribe(observer: Observer<Event<V>>): Unsub;
     forEach(observer: Observer<V>): Unsub;
     log(message?: string): void;
     toString(): string;
+    consume(): this;
 }
 export declare function isObservable<V>(x: any): x is Observable<V>;
 export declare abstract class ScopedObservable<V> extends Observable<V> {
@@ -46,7 +51,13 @@ export declare abstract class Property<V> extends ScopedObservable<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export declare class PropertySeed<V> extends Observable<V> {
+export declare class PropertySeed<V> implements ObservableSeed<PropertySource<V>> {
+    private _source;
+    desc: string;
+    constructor(desc: string, get: () => V, onChange: Subscribe<V>);
+    consume(): PropertySource<V>;
+}
+export declare class PropertySource<V> extends Observable<V> {
     private _started;
     private _subscribed;
     private _get;
@@ -72,7 +83,17 @@ export declare abstract class Atom<V> extends Property<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export declare class AtomSeed<V> extends PropertySeed<V> {
+export declare class AtomSeed<V> implements ObservableSeed<AtomSource<V>> {
+    private _source;
+    desc: string;
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void);
+    consume(): AtomSource<V>;
+}
+/**
+ *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
+ *  Must skip duplicates!
+ **/
+export declare class AtomSource<V> extends PropertySource<V> {
     set: (updatedValue: V) => void;
     constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void);
 }

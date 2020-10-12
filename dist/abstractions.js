@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservable = exports.Observable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+exports.AtomSource = exports.AtomSeed = exports.Atom = exports.EventStreamSeed = exports.EventStream = exports.PropertySource = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservable = exports.Observable = exports.ObservableSeed = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
 var Event = /** @class */ (function () {
     function Event() {
     }
@@ -73,10 +73,19 @@ function valueObserver(observer) {
 }
 exports.valueObserver = valueObserver;
 exports.endEvent = new End();
+var ObservableSeed = /** @class */ (function () {
+    function ObservableSeed() {
+    }
+    return ObservableSeed;
+}());
+exports.ObservableSeed = ObservableSeed;
 // Abstract classes instead of interfaces for runtime type information and instanceof
-var Observable = /** @class */ (function () {
+var Observable = /** @class */ (function (_super) {
+    __extends(Observable, _super);
     function Observable(desc) {
-        this.desc = desc;
+        var _this = _super.call(this) || this;
+        _this.desc = desc;
+        return _this;
     }
     Observable.prototype.forEach = function (observer) {
         return this.subscribe(valueObserver(observer));
@@ -87,8 +96,11 @@ var Observable = /** @class */ (function () {
     Observable.prototype.toString = function () {
         return this.desc;
     };
+    Observable.prototype.consume = function () {
+        return this;
+    };
     return Observable;
-}());
+}(ObservableSeed));
 exports.Observable = Observable;
 function isObservable(x) {
     return x instanceof Observable;
@@ -120,9 +132,24 @@ exports.Property = Property;
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-var PropertySeed = /** @class */ (function (_super) {
-    __extends(PropertySeed, _super);
+var PropertySeed = /** @class */ (function () {
     function PropertySeed(desc, get, onChange) {
+        this.desc = desc;
+        this._source = new PropertySource(desc, get, onChange);
+    }
+    PropertySeed.prototype.consume = function () {
+        if (this._source === null)
+            throw Error("PropertySeed " + this.desc + "\u00A0already consumed");
+        var result = this._source;
+        this._source = null;
+        return result;
+    };
+    return PropertySeed;
+}());
+exports.PropertySeed = PropertySeed;
+var PropertySource = /** @class */ (function (_super) {
+    __extends(PropertySource, _super);
+    function PropertySource(desc, get, onChange) {
         var _this = _super.call(this, desc) || this;
         _this._started = false;
         _this._subscribed = false;
@@ -130,12 +157,12 @@ var PropertySeed = /** @class */ (function (_super) {
         _this.onChange_ = onChange;
         return _this;
     }
-    PropertySeed.prototype.get = function () {
+    PropertySource.prototype.get = function () {
         if (this._started)
             throw Error("PropertySeed started already: " + this);
         return this._get();
     };
-    PropertySeed.prototype.onChange = function (observer) {
+    PropertySource.prototype.onChange = function (observer) {
         var _this = this;
         if (this._subscribed)
             throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this);
@@ -148,14 +175,14 @@ var PropertySeed = /** @class */ (function (_super) {
         });
     };
     // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
-    PropertySeed.prototype.subscribe = function (observer) {
+    PropertySource.prototype.subscribe = function (observer) {
         var unsub = this.onChange(observer);
         observer(valueEvent(this.get()));
         return unsub;
     };
-    return PropertySeed;
+    return PropertySource;
 }(Observable));
-exports.PropertySeed = PropertySeed;
+exports.PropertySource = PropertySource;
 var EventStream = /** @class */ (function (_super) {
     __extends(EventStream, _super);
     function EventStream(desc) {
@@ -186,14 +213,33 @@ exports.Atom = Atom;
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-var AtomSeed = /** @class */ (function (_super) {
-    __extends(AtomSeed, _super);
+var AtomSeed = /** @class */ (function () {
     function AtomSeed(desc, get, subscribe, set) {
+        this.desc = desc;
+        this._source = new AtomSource(desc, get, subscribe, set);
+    }
+    AtomSeed.prototype.consume = function () {
+        if (this._source === null)
+            throw Error("PropertySeed " + this.desc + "\u00A0already consumed");
+        var result = this._source;
+        this._source = null;
+        return result;
+    };
+    return AtomSeed;
+}());
+exports.AtomSeed = AtomSeed;
+/**
+ *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
+ *  Must skip duplicates!
+ **/
+var AtomSource = /** @class */ (function (_super) {
+    __extends(AtomSource, _super);
+    function AtomSource(desc, get, subscribe, set) {
         var _this = _super.call(this, desc, get, subscribe) || this;
         _this.set = set;
         return _this;
     }
-    return AtomSeed;
-}(PropertySeed));
-exports.AtomSeed = AtomSeed;
+    return AtomSource;
+}(PropertySource));
+exports.AtomSource = AtomSource;
 //# sourceMappingURL=abstractions.js.map

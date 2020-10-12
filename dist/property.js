@@ -69,8 +69,9 @@ var StatefulProperty = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var unsub = seed.onChange(meAsObserver);
-            _this._value = seed.get();
+            var source = seed.consume();
+            var unsub = source.onChange(meAsObserver);
+            _this._value = source.get();
             return function () {
                 _this._value = scope_1.afterScope;
                 unsub();

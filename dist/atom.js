@@ -134,7 +134,8 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
         _this._dispatcher = new dispatcher_1.Dispatcher();
         _this._value = scope_1.beforeScope;
         _this._scope = scope;
-        _this.set = seed.set.bind(_this);
+        var source = seed.consume();
+        _this.set = source.set.bind(_this);
         var meAsObserver = function (event) {
             if (abstractions_1.isValue(event)) {
                 if (event.value !== _this._value) {
@@ -147,8 +148,8 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
             }
         };
         scope(function () {
-            var unsub = seed.onChange(meAsObserver);
-            _this._value = seed.get();
+            var unsub = source.onChange(meAsObserver);
+            _this._value = source.get();
             return function () {
                 _this._value = scope_1.afterScope;
                 unsub();

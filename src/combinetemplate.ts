@@ -1,4 +1,4 @@
-import { Observer, Property, Event, isValue, valueEvent, endEvent, Observable, isObservable, PropertySeed } from "./abstractions";
+import { Property, PropertySeed, ObservableSeed, isObservableSeed } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { combineAsArray, PropertyLike } from "./combine";
 import { Predicate } from "./filter";
@@ -7,7 +7,7 @@ import { constant, StatelessProperty, toProperty, toPropertySeed } from "./prope
 import { globalScope, Scope } from "./scope";
 import { rename } from "./util";
 
-export type GenericObjectTemplate<T, O extends Observable<any>> = { [K in keyof T]: T[K] extends Observable<infer I>
+export type GenericObjectTemplate<T, O extends ObservableSeed<any>> = { [K in keyof T]: T[K] extends ObservableSeed<infer I>
     ? (T[K] extends O
         ? I
         : never)
@@ -18,7 +18,7 @@ export type GenericObjectTemplate<T, O extends Observable<any>> = { [K in keyof 
             : T[K]))
 }
 
-export type GenericArrayTemplate<T, O extends Observable<any>> = Array<T extends Observable<infer I>
+export type GenericArrayTemplate<T, O extends ObservableSeed<any>> = Array<T extends ObservableSeed<infer I>
     ? (T extends O
         ? I
         : never)
@@ -26,11 +26,11 @@ export type GenericArrayTemplate<T, O extends Observable<any>> = Array<T extends
         ? GenericObjectTemplate<T, O>
         : T)>
 
-export type GenericCombinedTemplate<T, O extends Observable<any>> = T extends Record<any, any>
+export type GenericCombinedTemplate<T, O extends ObservableSeed<any>> = T extends Record<any, any>
         ? GenericObjectTemplate<T, O>
         : (T extends Array<infer I>
             ? GenericArrayTemplate<I, O>
-            : (T extends Observable<infer I2>
+            : (T extends ObservableSeed<infer I2>
                 ? (T extends O
                     ? I2
                     : never)
@@ -76,7 +76,7 @@ type Ctx = any
 export function combineTemplate<T>(template: T): Property<GenericObjectTemplate<T, Property<any>>> {
     if (!containsObservables(template)) return constant(template) as any;
 
-    const [observables, combinator] = processTemplate<T, Property<any>>(template, (x: Observable<any>) => {
+    const [observables, combinator] = processTemplate<T, Property<any>>(template, (x: ObservableSeed<any>) => {
         if (x instanceof Property) return x
         throw Error("Unsupported observable: " + x)
     })
@@ -87,19 +87,19 @@ export function combineTemplate<T>(template: T): Property<GenericObjectTemplate<
 export function combineTemplateS<T>(template: T, scope: Scope): Property<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>;
 export function combineTemplateS<T>(template: T): PropertySeed<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>;
 
-export function combineTemplateS<T>(template: T, scope?: Scope): Observable<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>{
+export function combineTemplateS<T>(template: T, scope?: Scope): ObservableSeed<any>{
     if (!containsObservables(template)) return constant(template) as any;
 
-    const [observables, combinator] = processTemplate<T, PropertySeed<any>>(template, (x: Observable<any>) => {
+    const [observables, combinator] = processTemplate<T, PropertySeed<any>>(template, (x: ObservableSeed<any>) => {
         if (x instanceof Property) return toPropertySeed(x)
         if (x instanceof PropertySeed) return x
         throw Error("Unsupported observable: " + x)
     })
-    
-    return applyScopeMaybe(rename(`combineTemplate(..)`, map(combineAsArray(observables), combinator as any)), scope)
+    const mapped = map(combineAsArray(observables), combinator as any)
+    return applyScopeMaybe(rename(`combineTemplate(..)`, mapped), scope)
 }
 
-function processTemplate<T, Prop extends Observable<any>>(template: T, mapObservable: (o: Observable<any>) => Prop): [Prop[], Function] {
+function processTemplate<T, Prop>(template: T, mapObservable: (o: ObservableSeed<any>) => Prop): [Prop[], Function] {
     function current(ctxStack: Ctx[]) { return ctxStack[ctxStack.length - 1]; }
     function setValue(ctxStack: Ctx[], key: any, value: any) {
         (<any>current(ctxStack))[key] = value;
@@ -129,8 +129,9 @@ function processTemplate<T, Prop extends Observable<any>>(template: T, mapObserv
     }
 
     function compile(key: any, value: any) {
-        if (isObservable(value)) {
+        if (isObservableSeed(value)) {
             if (value instanceof Property || value instanceof PropertySeed) {
+
                 observables.push(value);
                 funcs.push(applyStreamValue(key, observables.length - 1));
             } else {
@@ -166,7 +167,7 @@ function processTemplate<T, Prop extends Observable<any>>(template: T, mapObserv
     return [observables.map(mapObservable) as Prop[], combinator]
 }
 
-function containsObservables(value: any, match: Predicate<any> = isObservable) {
+function containsObservables(value: any, match: Predicate<any> = isObservableSeed) {
     if (match(value)) {
         return true
     } else if (value && (value.constructor == Object || value.constructor == Array)) {

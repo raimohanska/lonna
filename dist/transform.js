@@ -14,10 +14,12 @@ function transform(desc, x, transformer, scope) {
     }
     var t = transformer;
     if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
-        return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return t.init(x.get()); }, transformPropertySubscribe(x, t), function (newValue) { return x.set(newValue); }));
+        var source_1 = x.consume();
+        return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return t.init(source_1.get()); }, transformPropertySubscribe(source_1, t), function (newValue) { return source_1.set(newValue); }));
     }
     else if (x instanceof abstractions_1.Property || x instanceof abstractions_1.PropertySeed) {
-        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return t.init(x.get()); }, transformPropertySubscribe(x, t)));
+        var source_2 = x.consume();
+        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return t.init(source_2.get()); }, transformPropertySubscribe(source_2, t)));
     }
     else {
         throw Error("Unknown observable " + x);

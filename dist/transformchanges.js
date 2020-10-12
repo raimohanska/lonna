@@ -9,14 +9,16 @@ function transformChanges(desc, x, transformer, scope) {
     if (x instanceof abstractions_1.EventStream || x instanceof abstractions_1.EventStreamSeed) {
         return util_1.rename(desc, transformer(x)); // Note: stream passed as seed, seems to work...
     }
-    else if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.Atom) {
-        return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return x.get(); }, function (observer) {
-            return transformer(changes_1.changes(x)).subscribe(observer);
-        }, x.set));
+    else if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
+        var source_1 = x instanceof abstractions_1.Property ? x : x.consume();
+        return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return source_1.get(); }, function (observer) {
+            return transformer(changes_1.changes(source_1)).subscribe(observer);
+        }, source_1.set));
     }
     else if (x instanceof abstractions_1.Property || x instanceof abstractions_1.PropertySeed) {
-        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return x.get(); }, function (observer) {
-            return transformer(changes_1.changes(x)).subscribe(observer);
+        var source_2 = x instanceof abstractions_1.Property ? x : x.consume();
+        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return source_2.get(); }, function (observer) {
+            return transformer(changes_1.changes(source_2)).subscribe(observer);
         }));
     }
     else {

@@ -29,9 +29,11 @@ export function transform<A, B>(desc: string, x: any, transformer: Transformer<A
 
     const t = transformer as Transformer<A, B>        
     if (x instanceof Atom || x instanceof AtomSeed) {
-        return applyScopeMaybe(new AtomSeed(desc, () => t.init(x.get()), transformPropertySubscribe(x, t), newValue => x.set(newValue)))
+        const source = x.consume()
+        return applyScopeMaybe(new AtomSeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t), newValue => source.set(newValue)))
     } else if (x instanceof Property || x instanceof PropertySeed) {
-        return applyScopeMaybe(new PropertySeed(desc, () => t.init(x.get()), transformPropertySubscribe(x, t)))
+        const source = x.consume()
+        return applyScopeMaybe(new PropertySeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t)))
     } else {
         throw Error("Unknown observable " + x)
     }

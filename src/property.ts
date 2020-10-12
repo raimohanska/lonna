@@ -60,8 +60,9 @@ export class StatefulProperty<V> extends Property<V> {
         }
         scope(
             () => {
-                const unsub = seed.onChange(meAsObserver);                
-                this._value = seed.get();
+                const source = seed.consume()
+                const unsub = source.onChange(meAsObserver);                
+                this._value = source.get();
                 return () => {
                     this._value = afterScope; 
                     unsub!()

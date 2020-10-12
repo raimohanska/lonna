@@ -1,4 +1,4 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isValue, Observable, Observer, Property, PropertySeed, Subscribe, Unsub, valueEvent } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { remove } from "./util";
@@ -7,7 +7,7 @@ export type FlatMapOptions = {
     latest?: boolean;
 }
 
-export type Spawner<A, B extends Observable<any>> = (value: A) => B
+export type Spawner<A, O> = (value: A) => O
 
 export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>): EventStreamSeed<B>;
 export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>, scope: Scope): EventStream<B>;
@@ -30,10 +30,11 @@ export class FlatMapStreamSeed<A, B> extends EventStreamSeed<B> {
 
 export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
+        const source = src instanceof Property ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
         const subscribeWithInitial = (observer: Observer<Event<A>>) => {
-            const unsub = src.onChange(observer)
-            observer(valueEvent(src.get())) // To spawn property for initial value
+            const unsub = source.onChange(observer)
+            observer(valueEvent(source.get())) // To spawn property for initial value
             initializing = false
             return unsub
         }
@@ -42,7 +43,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
             if (children.length != 1) {
                 throw Error("Unexpected child count: " + children.length)
             }
-            return (children[0].observable as PropertySeed<B>).get()
+            return (children[0].observable as PropertySource<B>).get()
         }
         super(desc, get, observer => subscribe(value => {
             if (!initializing) observer(value)
@@ -50,7 +51,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
     }
 }
 
-function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, Observable<B>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
+function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<Observable<B>>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
     const children: FlatMapChild<Observable<B>>[] = []
     return [children, (observer: Observer<Event<B>>) => {            
         let rootEnded = false
@@ -62,7 +63,7 @@ function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, Observab
                     }
                     children.splice(0)
                 }
-                const child = { observable: fn(rootEvent.value) } as FlatMapChild<Observable<B>>
+                const child = { observable: fn(rootEvent.value).consume() } as FlatMapChild<Observable<B>>
                 children.push(child)
                 let ended = false
                 child.unsub = child.observable.subscribe(childEvent => {

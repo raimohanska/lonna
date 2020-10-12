@@ -117,7 +117,8 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     constructor(seed: AtomSeed<V>, scope: Scope) {
         super(seed.desc)
         this._scope = scope;
-        this.set = seed.set.bind(this);
+        const source = seed.consume()
+        this.set = source.set.bind(this);
         
         const meAsObserver = (event: Event<V>) => {
             if (isValue(event)) {
@@ -130,9 +131,9 @@ export class StatefulDependentAtom<V> extends Atom<V> {
             }
         }
         scope(
-            () => {
-                const unsub = seed.onChange(meAsObserver);
-                this._value = seed.get();
+            () => {                
+                const unsub = source.onChange(meAsObserver);
+                this._value = source.get();
                 return () => {
                     this._value = afterScope; 
                     unsub!()

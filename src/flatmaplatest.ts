@@ -8,7 +8,7 @@ export function flatMapLatest<A, B>(s: Property<A> | PropertySeed<A>, fn: Spawne
 export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>): EventStreamSeed<B>;
 export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>, scope: Scope): EventStream<B>;
 
-export function flatMapLatest<A, B extends Observable<any>>(s: Observable<A>, fn: Spawner<A, any>, scope?: Scope): any {
+export function flatMapLatest<A>(s: any, fn: Spawner<A, any>, scope?: Scope): any {
     if (s instanceof Property || s instanceof PropertySeed) {
         return applyScopeMaybe(new FlatMapPropertySeed(`${s}.flatMapLatest(fn)`, s, fn, { latest: true }), scope)
     } else {

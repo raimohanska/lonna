@@ -19,13 +19,15 @@ export function transformChanges<A>(desc: string, o: Observable<A>, transformer:
 export function transformChanges<A, B>(desc: string, x: any, transformer: EventStreamDelay<A>, scope?: Scope): any {
     if (x instanceof EventStream || x instanceof EventStreamSeed) {
         return rename(desc, transformer(x)) // Note: stream passed as seed, seems to work...
-    } else if (x instanceof Atom || x instanceof Atom) {
-        return applyScopeMaybe(new AtomSeed(desc, () => x.get(), observer => {
-            return transformer(changes(x)).subscribe(observer)
-        }, x.set))
+    } else if (x instanceof Atom || x instanceof AtomSeed) {
+        const source = x instanceof Property ? x : x.consume()
+        return applyScopeMaybe(new AtomSeed(desc, () => source.get(), observer => {
+            return transformer(changes(source)).subscribe(observer)
+        }, source.set))
     } else if (x instanceof Property || x instanceof PropertySeed) {
-        return applyScopeMaybe(new PropertySeed(desc, () => x.get(), observer => {
-            return transformer(changes(x)).subscribe(observer)
+        const source = x instanceof Property ? x : x.consume()
+        return applyScopeMaybe(new PropertySeed(desc, () => source.get(), observer => {
+            return transformer(changes(source)).subscribe(observer)
         }))
     } else {
         throw Error("Unknown observable " + x)

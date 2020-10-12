@@ -3,7 +3,7 @@ import { Scope } from "./scope";
 export declare type FlatMapOptions = {
     latest?: boolean;
 };
-export declare type Spawner<A, B extends Observable<any>> = (value: A) => B;
+export declare type Spawner<A, O> = (value: A) => O;
 export declare function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>): EventStreamSeed<B>;
 export declare function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, Observable<B>>, scope: Scope): EventStream<B>;
 export declare type FlatMapChild<B extends Observable<any>> = {

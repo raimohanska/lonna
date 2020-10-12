@@ -17,8 +17,9 @@ function map(o, x) {
         return new property_1.StatelessProperty(desc, function () { return fn(o.get()); }, function (observer) { return o.onChange(mapObserver(observer, fn)); }, o.getScope());
     }
     else if (o instanceof abstractions_1.PropertySeed) {
-        return new abstractions_1.PropertySeed(desc, function () { return fn(o.get()); }, function (observer) {
-            return o.onChange(mapObserver(observer, fn));
+        var source_1 = o.consume();
+        return new abstractions_1.PropertySeed(desc, function () { return fn(source_1.get()); }, function (observer) {
+            return source_1.onChange(mapObserver(observer, fn));
         });
     }
     throw Error("Unknown observable");
