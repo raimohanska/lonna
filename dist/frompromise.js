@@ -27,7 +27,6 @@ function fromPromise(promise) {
         }
         if (currentState.state === "pending") {
             promise.then(function (value) {
-                console.log("Update observer", value);
                 update({ state: "resolved", value: value });
             }, function (error) {
                 update({ state: "rejected", error: error });
