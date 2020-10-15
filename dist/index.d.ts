@@ -14,6 +14,7 @@ export * from "./flatmap";
 export * from "./flatmaplatest";
 export * from "./frompoll";
 export * from "./fromevent";
+export * from "./frompromise";
 export * from "./interval";
 export * from "./later";
 export * from "./map";

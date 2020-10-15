@@ -17,14 +17,9 @@ Compared to Bacon.js
 
 Current prioritized goals:
 
-- DONE: Implement just enough operators for applying in real-life projects
-- Validate / improve API ergonomy based on the above
+- Validate / improve API ergonomy based on real life usage
 - Decide on whether to make this an actual library
 - After that there will be technical debt to pay, to get to a reasonable level of quality
-
-To complete Harmaja examples, we also need
-
-- `fromPromise` - needs to map into a tri-value thing: pending-error-value
 
 Other stuff:
 

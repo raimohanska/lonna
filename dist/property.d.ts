@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, Event } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
 import { Scope } from "./scope";
 export declare class StatelessProperty<V> extends Property<V> {
     get: () => V;
