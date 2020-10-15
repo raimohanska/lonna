@@ -24,9 +24,7 @@ Current prioritized goals:
 
 To complete Harmaja examples, we also need
 
-- `fromEvent`
 - `update`
-- `once`
 - `fromPromise` - needs to map into a tri-value thing: pending-error-value
 
 Other stuff:

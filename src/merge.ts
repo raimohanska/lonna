@@ -5,7 +5,15 @@ export function merge<A>(a: EventStream<A>, b: EventStream<A>): EventStream<A>;
 export function merge<A, B>(a: EventStream<A>, b: EventStream<B>): EventStream<A | B>;
 export function merge<A>(a: EventStreamSeed<A>, b: EventStreamSeed<A>): EventStreamSeed<A>;
 export function merge<A, B>(a: EventStreamSeed<A>, b: EventStreamSeed<B>): EventStreamSeed<A | B>;
-export function merge<A>(...streams: (EventStream<any> | EventStreamSeed<any>)[]) {
+export function merge<A>(streams: EventStreamSeed<A>[]): EventStreamSeed<A>
+export function merge<A>(...args: any[]) {
+    let streams: (EventStream<any> | EventStreamSeed<any>)[]
+    if (args[0] instanceof Array) {
+        streams = args[0]
+    } else {
+        streams = args
+    }
+
     const sources = streams.map(s => s.consume())
     const seed = new EventStreamSeed<A>(`merge(${streams})`, observer => {
         let endCount = 0
