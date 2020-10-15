@@ -24,7 +24,6 @@ Current prioritized goals:
 
 To complete Harmaja examples, we also need
 
-- `repeat`
 - `fromEvent`
 - `update`
 - `once`

@@ -47,7 +47,7 @@ export const expectStreamTimings = <V>(src: () => EventStream<any> | EventStream
       const t0 = now();
       const relativeTime = () => Math.floor(now() - t0);
       const withRelativeTime = (x: V) => [relativeTime(), x];
-      return map(src(), withRelativeTime);
+      return map(src() as EventStreamSeed<any>, withRelativeTime);
     };
     return expectStreamEvents(srcWithRelativeTime, expectedEventsAndTimings);
   };
