@@ -20,6 +20,7 @@ var dispatcher_1 = require("./dispatcher");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
 var util_1 = require("./util");
+var uninitialized = {};
 var StatelessProperty = /** @class */ (function (_super) {
     __extends(StatelessProperty, _super);
     function StatelessProperty(desc, get, onChange, scope) {
@@ -30,6 +31,7 @@ var StatelessProperty = /** @class */ (function (_super) {
         return _this;
     }
     StatelessProperty.prototype.onChange = function (observer) {
+        var current = uninitialized;
         var unsub = this._onChange(function (event) {
             if (abstractions_1.isValue(event)) {
                 if (event.value !== current) {
@@ -41,7 +43,7 @@ var StatelessProperty = /** @class */ (function (_super) {
                 observer(event);
             }
         });
-        var current = this.get();
+        current = this.get();
         return unsub;
     };
     StatelessProperty.prototype.getScope = function () {

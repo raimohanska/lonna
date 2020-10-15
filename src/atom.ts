@@ -37,6 +37,8 @@ class RootAtom<V> extends Atom<V> {
     }
 }
 
+const uninitialized = {}
+
 class LensedAtom<R, V> extends Atom<V> {
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
@@ -61,6 +63,7 @@ class LensedAtom<R, V> extends Atom<V> {
     }
 
     onChange(observer: Observer<Event<V>>) {
+        let current = uninitialized
         const unsub = this._root.onChange(event => {
             if (isValue(event)) {
                 const value = this._lens.get(event.value)
@@ -72,7 +75,7 @@ class LensedAtom<R, V> extends Atom<V> {
                 observer(event)
             }
         })
-        let current = this.get()
+        current = this.get()
         return unsub
     }
 

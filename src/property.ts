@@ -6,7 +6,7 @@ import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } f
 import { rename } from "./util";
 
 type PropertyEvents<V> = { "change": V }
-
+const uninitialized = {}
 export class StatelessProperty<V> extends Property<V> {
     get: () => V;
     private _onChange: (observer: Observer<Event<V>>) => Unsub;
@@ -20,6 +20,7 @@ export class StatelessProperty<V> extends Property<V> {
     }
 
     onChange(observer: Observer<Event<V>>) {
+        let current = uninitialized
         const unsub = this._onChange(event => {
             if (isValue(event)) {
                 if (event.value !== current) {
@@ -30,7 +31,7 @@ export class StatelessProperty<V> extends Property<V> {
                 observer(event)
             }
         })
-        let current = this.get()
+        current = this.get()
         return unsub
     }
 

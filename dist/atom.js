@@ -64,6 +64,7 @@ var RootAtom = /** @class */ (function (_super) {
     };
     return RootAtom;
 }(abstractions_1.Atom));
+var uninitialized = {};
 var LensedAtom = /** @class */ (function (_super) {
     __extends(LensedAtom, _super);
     function LensedAtom(desc, root, view) {
@@ -85,6 +86,7 @@ var LensedAtom = /** @class */ (function (_super) {
     };
     LensedAtom.prototype.onChange = function (observer) {
         var _this = this;
+        var current = uninitialized;
         var unsub = this._root.onChange(function (event) {
             if (abstractions_1.isValue(event)) {
                 var value = _this._lens.get(event.value);
@@ -97,7 +99,7 @@ var LensedAtom = /** @class */ (function (_super) {
                 observer(event);
             }
         });
-        var current = this.get();
+        current = this.get();
         return unsub;
     };
     LensedAtom.prototype.getScope = function () {
