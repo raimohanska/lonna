@@ -81,7 +81,7 @@ var findHandlerMethods = function(target: any): [Function, Function] {
  @typeparam V Type of stream elements
 
  */
-export default function fromEvent<V>(target: any, eventSource: string | EventSourceFn): EventStream<V> {
+export function fromEvent<V>(target: any, eventSource: string | EventSourceFn): EventStream<V> {
   var [sub, unsub] = findHandlerMethods(target);
   return new StatelessEventStream(`fromEvent(${toString(target)},${toString(eventSource)})`, observer => {
     const handler = toFlexibleObserver(observer)

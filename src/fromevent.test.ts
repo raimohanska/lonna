@@ -1,6 +1,6 @@
 import { expectStreamEvents } from "./test-utils";
 import { EventEmitter } from "events";
-import fromEvent from "./fromevent";
+import { fromEvent } from "./fromevent";
 import { take } from "./take";
 
 // Wrap EventEmitter as EventTarget
