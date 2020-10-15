@@ -9,10 +9,11 @@ export type FlatMapOptions = {
 
 export type Spawner<A, O> = (value: A) => O
 
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>): EventStreamSeed<B>;
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>, scope: Scope): EventStream<B>;
+// TODO: improve types and have EventStream implement EventStreamSeed
+export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): EventStreamSeed<B>;
+export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): EventStream<B>;
 
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>, scope?: Scope): any {
+export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
     return applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s as EventStreamSeed<A>, fn, {}), scope) // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
 }
 
@@ -22,7 +23,7 @@ export type FlatMapChild<B extends Observable<any>> = {
 }
 
 export class FlatMapStreamSeed<A, B> extends EventStreamSeed<B> {
-    constructor(desc: string, s: EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>, options: FlatMapOptions = {}) {
+    constructor(desc: string, s: EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, options: FlatMapOptions = {}) {
         const [children, subscribe] = flatMapSubscribe(s.consume().subscribe.bind(s), fn, options)
         super(desc, subscribe)
     }

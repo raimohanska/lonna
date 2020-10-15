@@ -5,8 +5,8 @@ import { Scope } from "./scope";
 
 export function flatMapLatest<A, B>(s: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>): PropertySeed<B>;
 export function flatMapLatest<A, B>(s: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, scope: Scope): Property<B>;
-export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>): EventStreamSeed<B>;
-export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStreamSeed<B>>, scope: Scope): EventStream<B>;
+export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): EventStreamSeed<B>;
+export function flatMapLatest<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): EventStream<B>;
 
 export function flatMapLatest<A>(s: any, fn: Spawner<A, any>, scope?: Scope): any {
     if (s instanceof Property || s instanceof PropertySeed) {

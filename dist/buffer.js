@@ -8,6 +8,7 @@ var abstractions_1 = require("./abstractions");
 var scheduler_1 = __importDefault(require("./scheduler"));
 var transform_1 = require("./transform");
 var util_1 = require("./util");
+// TODO: improve types and have EventStream implement EventStreamSeed
 function bufferWithTime(src, delay) {
     return bufferWithTimeOrCount(src + (".bufferWithTime(" + delay + ")"), src, delay, Number.MAX_VALUE);
 }

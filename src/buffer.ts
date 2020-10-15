@@ -1,4 +1,4 @@
-import { Event, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
 import GlobalScheduler from "./scheduler";
 import { StreamTransformer, transform, Transformer } from "./transform";
 import { nop } from "./util";
@@ -9,17 +9,17 @@ export type VoidFunction = () => void
  *  call the given void function to cause a buffer flush.
  */
 export type DelayFunction = (f: VoidFunction) => any
-
-export function bufferWithTime<V>(src: EventStreamSeed<V>, delay: number | DelayFunction): EventStreamSeed<V[]> {
+// TODO: improve types and have EventStream implement EventStreamSeed
+export function bufferWithTime<V>(src: EventStream<V> | EventStreamSeed<V>, delay: number | DelayFunction): EventStreamSeed<V[]> {
   return bufferWithTimeOrCount(src + `.bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
 };
 
-export function bufferWithCount<V>(src: EventStreamSeed<V>, count: number): EventStreamSeed<V[]> {
+export function bufferWithCount<V>(src: EventStream<V> | EventStreamSeed<V>, count: number): EventStreamSeed<V[]> {
   return bufferWithTimeOrCount(src + `.bufferWithCount(${count})`, src, undefined, count)
 };
 
 
-function bufferWithTimeOrCount<V>(desc: string, src: EventStreamSeed<V>, delay?: number | DelayFunction, count?: number): EventStreamSeed<V[]> {
+function bufferWithTimeOrCount<V>(desc: string, src: EventStream<V> | EventStreamSeed<V>, delay?: number | DelayFunction, count?: number): EventStreamSeed<V[]> {
   const delayFunc = toDelayFunction(delay)
   function flushOrSchedule(buffer: Buffer<V>) {
     if (buffer.values.length === count) {
@@ -93,7 +93,7 @@ function toDelayFunction(delay: number | DelayFunction | undefined): DelayFuncti
 type BufferHandler<V> = (buffer: Buffer<V>) => any
 
 /** @hidden */
-function buffer<V>(desc: string, src: EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
+function buffer<V>(desc: string, src: EventStream<V> | EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
   //var reply = more;
   var buffer = new Buffer<V>(onFlush, onInput)
   const transformer: StreamTransformer<V, V[]> = (event: Event<V>, sink: Observer<Event<V[]>>) => {
