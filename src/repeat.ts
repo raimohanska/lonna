@@ -1,11 +1,17 @@
-import { endEvent, Event, EventStreamSeed, isEnd, Observable, ObservableSeed, Observer } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isEnd, Observable, ObservableSeed, Observer } from "./abstractions";
+import { applyScopeMaybe } from "./applyscope";
 import { fromSubscribe } from "./eventstream";
+import { Scope } from "./scope";
 import { rename } from "./util";
 
-export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined): EventStreamSeed<V> {
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined): EventStreamSeed<V>;
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined, scope: Scope): EventStream<V>;
+
+
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined, scope?: Scope): any {
     var index = 0;
 
-    return rename("repeat(fn)", fromSubscribe<V>(function(sink: Observer<Event<V>>) {
+    return applyScopeMaybe(rename("repeat(fn)", fromSubscribe<V>(function(sink: Observer<Event<V>>) {
       var flag = false;
       
       var unsub = function() {};
@@ -36,5 +42,5 @@ export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, an
       }
       subscribeNext();
       return () => unsub();
-    }))
+    })), scope)
   }
