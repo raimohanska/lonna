@@ -36,7 +36,6 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
         if (currentState.state === "pending") {
             promise.then(
                 value => {
-                    console.log("Update observer", value)
                     update({ state: "resolved", value })
                 },
                 error => {
