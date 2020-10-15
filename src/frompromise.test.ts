@@ -24,12 +24,12 @@ describe("fromPromise", function() {
 
     describe("on success", () =>
       expectPropertyEvents(
-        () => fromPromise(new Promise(function(res, rej) { res("ok"); }) as any, mapper),
+        () => fromPromise(new Promise(function(res, rej) { res("ok"); }) as any, ...mapper),
         ["ok"])
     );
     describe("on error", () =>
       expectPropertyEvents(
-          () => fromPromise(new Promise(function(res, rej) { rej("fail"); }) as any, mapper),
+          () => fromPromise(new Promise(function(res, rej) { rej("fail"); }) as any, ...mapper),
           ["fail"])
       );
   });

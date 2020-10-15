@@ -12,9 +12,9 @@ export type PromisePending = { state: "pending" }
 export type PromiseResolved<O> = { state: "resolved", value: O }
 export type PromiseRejected = { state: "rejected", error: Error }
 
-export function fromPromise<I, O>(promise: Promise<I>, mapper: PromiseMapper<I, O>): Property<O>
+export function fromPromise<I, O>(promise: Promise<I>, ...mapper: PromiseMapper<I, O>): Property<O>
 export function fromPromise<I>(promise: Promise<I>): Property<PromiseState<I>>
-export function fromPromise<I>(promise: Promise<any>, mapper?: any): any {
+export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
     let currentState: PromiseState<I> = { state: "pending" }
     promise.then(
         value => {
@@ -55,7 +55,7 @@ export function fromPromise<I>(promise: Promise<any>, mapper?: any): any {
 
     const property = new StatelessProperty(`fromPromise(${toString(promise)})`, get, onChange, globalScope)
 
-    if (mapper) {
+    if (mapper.length > 0) {
         return map(property, state => {
             if (state.state === "pending") return mapper[0]()
             if (state.state === "resolved") return mapper[1](state.value)
