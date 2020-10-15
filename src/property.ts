@@ -1,9 +1,9 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub, Event, isValue } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, isValue, Observer, Property, PropertySeed, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
-import { duplicateSkippingObserver, rename } from "./util";
+import { rename } from "./util";
 
 type PropertyEvents<V> = { "change": V }
 
