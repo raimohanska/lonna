@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fromPromise = void 0;
 var abstractions_1 = require("./abstractions");
+var map_1 = require("./map");
 var property_1 = require("./property");
 var scope_1 = require("./scope");
 var tostring_1 = require("./tostring");
@@ -36,7 +37,17 @@ function fromPromise(promise, mapper) {
         };
     };
     var get = function () { return currentState; };
-    return new property_1.StatelessProperty("fromPromise(" + tostring_1.toString(promise) + ")", get, onChange, scope_1.globalScope);
+    var property = new property_1.StatelessProperty("fromPromise(" + tostring_1.toString(promise) + ")", get, onChange, scope_1.globalScope);
+    if (mapper) {
+        return map_1.map(property, function (state) {
+            if (state.state === "pending")
+                return mapper[0]();
+            if (state.state === "resolved")
+                return mapper[1](state.value);
+            return mapper[2](state.error);
+        });
+    }
+    return property;
 }
 exports.fromPromise = fromPromise;
 //# sourceMappingURL=frompromise.js.map
