@@ -12,8 +12,19 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fromSubscribe = exports.SeedToStream = exports.StatelessEventStream = exports.StatefulEventStream = void 0;
+exports.fromFlexibleSubscibe = exports.toFlexibleObserver = exports.fromSubscribe = exports.SeedToStream = exports.StatelessEventStream = exports.StatefulEventStream = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
@@ -64,4 +75,33 @@ function fromSubscribe(subscribe, scope) {
     return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed("fromSubscribe(fn)", subscribe), scope);
 }
 exports.fromSubscribe = fromSubscribe;
+function toFlexibleObserver(observer) {
+    return function (eventLike) {
+        var e_1, _a;
+        var events = abstractions_1.toEvents(eventLike);
+        try {
+            for (var events_1 = __values(events), events_1_1 = events_1.next(); !events_1_1.done; events_1_1 = events_1.next()) {
+                var event_1 = events_1_1.value;
+                observer(event_1);
+                if (abstractions_1.isEnd(event_1)) {
+                    return;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (events_1_1 && !events_1_1.done && (_a = events_1.return)) _a.call(events_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    };
+}
+exports.toFlexibleObserver = toFlexibleObserver;
+function fromFlexibleSubscibe(subscribe, scope) {
+    return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed("fromSubscribe(fn)", function (observer) {
+        return subscribe(toFlexibleObserver(observer));
+    }), scope);
+}
+exports.fromFlexibleSubscibe = fromFlexibleSubscibe;
 //# sourceMappingURL=eventstream.js.map

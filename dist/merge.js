@@ -4,9 +4,16 @@ exports.merge = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 function merge() {
-    var streams = [];
+    var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        streams[_i] = arguments[_i];
+        args[_i] = arguments[_i];
+    }
+    var streams;
+    if (args[0] instanceof Array) {
+        streams = args[0];
+    }
+    else {
+        streams = args;
     }
     var sources = streams.map(function (s) { return s.consume(); });
     var seed = new abstractions_1.EventStreamSeed("merge(" + streams + ")", function (observer) {

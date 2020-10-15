@@ -2,7 +2,6 @@ import { EventStream, EventStreamSeed, Property, PropertySeed } from "./abstract
 import { Scope } from "./scope"
 import { merge } from "./merge"
 import { scan } from "./scan"
-import { sampledBy } from "../dist"
 import { map } from "./map"
 import { applyScopeMaybe } from "./applyscope"
 import { toString } from "./tostring"

@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Unsub, Event, Subscribe } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Unsub, Event, Subscribe, EventLike } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { Scope } from "./scope";
 declare type StreamEvents<V> = {
@@ -22,4 +22,9 @@ export declare class SeedToStream<V> extends StatefulEventStream<V> {
 }
 export declare function fromSubscribe<V>(subscribe: Subscribe<V>): EventStreamSeed<V>;
 export declare function fromSubscribe<V>(subscribe: Subscribe<V>, scope: Scope): EventStream<V>;
+export declare type FlexibleObserver<V> = (event: EventLike<V>) => void;
+export declare type FlexibleSubscribe<V> = (observer: FlexibleObserver<V>) => Unsub;
+export declare function toFlexibleObserver<V>(observer: Observer<Event<V>>): (eventLike: EventLike<V>) => void;
+export declare function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>): EventStreamSeed<V>;
+export declare function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>, scope: Scope): EventStream<V>;
 export {};
