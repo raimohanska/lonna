@@ -7,6 +7,8 @@ import { Dispatcher } from "./dispatcher"
  *  - autoScope: the observable will be active as long as it has observers (will throw if trying to re-activate)
  *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
  **/ 
+
+ // TODO: scope should be type-tagged to prevent componentScope function to be passable as scope
 export type Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void
 
 export interface MutableScope {
