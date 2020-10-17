@@ -1,6 +1,7 @@
 import { Event, EventStream, EventStreamSeed, EventStreamSource, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
+import { mapSubscribe } from "./map";
 import { never } from "./never";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { rename } from "./util";
@@ -85,14 +86,15 @@ export class StatefulProperty<V> extends Property<V> {
         return this._scope
     }
 }
-export function toStatelessProperty<A>(stream: EventStream<A>, get: () => A): Property<A>
-export function toStatelessProperty<A>(onChange: Subscribe<A>, get: () => A): Property<A>
+
+export function toStatelessProperty<A>(stream: EventStream<any>, get: () => A): Property<A>
+export function toStatelessProperty<A>(onChange: Subscribe<any>, get: () => A): Property<A>
 
 export function toStatelessProperty<A>(streamOrSubscribe: any, get: () => A): Property<A> {
     if (streamOrSubscribe instanceof EventStream) {        
-        return new StatelessProperty(streamOrSubscribe.desc, get, streamOrSubscribe.subscribe.bind(streamOrSubscribe), streamOrSubscribe.getScope())
+        return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
     } else {
-        return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, streamOrSubscribe, globalScope)
+        return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
     }
 }
 
