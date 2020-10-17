@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.constant = exports.toPropertySeed = exports.toProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
+exports.constant = exports.toPropertySeed = exports.toProperty = exports.toStatelessProperty = exports.StatefulProperty = exports.StatelessProperty = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
@@ -93,6 +93,15 @@ var StatefulProperty = /** @class */ (function (_super) {
     return StatefulProperty;
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
+function toStatelessProperty(streamOrSubscribe, get) {
+    if (streamOrSubscribe instanceof abstractions_1.EventStream) {
+        return new StatelessProperty(streamOrSubscribe.desc, get, streamOrSubscribe.subscribe.bind(streamOrSubscribe), streamOrSubscribe.getScope());
+    }
+    else {
+        return new StatelessProperty("toStatelessProperty(" + streamOrSubscribe + "," + get, get, streamOrSubscribe, scope_1.globalScope);
+    }
+}
+exports.toStatelessProperty = toStatelessProperty;
 function toProperty(seed, initial, scope) {
     var source = seed.consume();
     return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(seed + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {

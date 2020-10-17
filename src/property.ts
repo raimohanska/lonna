@@ -1,4 +1,4 @@
-import { Event, EventStream, EventStreamSeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Unsub } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, EventStreamSource, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
@@ -83,6 +83,16 @@ export class StatefulProperty<V> extends Property<V> {
 
     getScope() {
         return this._scope
+    }
+}
+export function toStatelessProperty<A>(stream: EventStream<A>, get: () => A): Property<A>
+export function toStatelessProperty<A>(onChange: Subscribe<A>, get: () => A): Property<A>
+
+export function toStatelessProperty<A>(streamOrSubscribe: any, get: () => A): Property<A> {
+    if (streamOrSubscribe instanceof EventStream) {        
+        return new StatelessProperty(streamOrSubscribe.desc, get, streamOrSubscribe.subscribe.bind(streamOrSubscribe), streamOrSubscribe.getScope())
+    } else {
+        return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, streamOrSubscribe, globalScope)
     }
 }
 
