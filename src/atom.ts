@@ -131,7 +131,7 @@ export class StatefulDependentAtom<V> extends Atom<V> {
                 this._dispatcher.dispatch("change", event)
             }
         }
-        scope(
+        scope.subscribe(
             () => {                
                 const unsub = source.onChange(meAsObserver);
                 this._value = source.get();

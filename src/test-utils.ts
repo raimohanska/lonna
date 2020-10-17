@@ -27,7 +27,10 @@ const verifyCleanup = () => {
 };
 
 let testScope = createScope()
-export function scope(): Scope { return testScope.apply }
+
+export function scope(): Scope { 
+    return testScope
+}
 
 function regSrc<V>(source: EventStream<V>) {
     seqs.push(source as StatefulEventStream<V>);
@@ -35,7 +38,7 @@ function regSrc<V>(source: EventStream<V>) {
 };
 
 export function series<V>(interval: number, values: (V | Event<V>)[]): EventStream<V> { 
-    return regSrc(sequentially<V>(interval, values, testScope.apply)) 
+    return regSrc(sequentially<V>(interval, values, testScope)) 
 }
 
 export const expectStreamEvents = (src: () => EventStream<any> | EventStreamSeed<any>, expectedEvents: any[]): void => {
@@ -77,7 +80,7 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
         beforeAll(() => {
             testScope.start()
             const seed = srcF();
-            src = (seed instanceof EventStream) ? seed : applyScope(testScope.apply, seed)
+            src = (seed instanceof EventStream) ? seed : applyScope(testScope, seed)
             expect(src instanceof EventStream).toEqual(true);
         });
         beforeAll(done => collectF(src, receivedEvents, done));
@@ -119,7 +122,7 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
         beforeAll(() => {
             testScope.start()
             const seed = srcF();
-            src = (seed instanceof Property) ? seed : applyScope(testScope.apply, seed) as Property<any>
+            src = (seed instanceof Property) ? seed : applyScope(testScope, seed) as Property<any>
         });
         beforeAll(done => collectF(src, events, done));
         it("is a Property", () => expect(src instanceof Property).toEqual(true));

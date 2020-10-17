@@ -8,17 +8,25 @@ import { Dispatcher } from "./dispatcher"
  *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
  **/ 
 
- // TODO: scope should be type-tagged to prevent componentScope function to be passable as scope
-export type Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void
+export type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void
 
-export interface MutableScope {
-    apply: Scope;
+export interface Scope {
+    subscribe: ScopeFn
+}
+
+export interface MutableScope extends Scope {
     start(): void;
     end(): void;
 }
 
-export const globalScope: Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => {
+export const globalScope: Scope = mkScope((onIn) => {
     onIn()
+})
+
+export function mkScope(scopeFn: ScopeFn): Scope {
+    return {
+        subscribe: scopeFn
+    }
 }
 
 type OnIn = () => Unsub
@@ -30,7 +38,7 @@ export function createScope(): MutableScope {
     const outs: OnOut[] = []
     
     return {
-        apply(onIn: OnIn, dispatcher: Dispatcher<any>) {
+        subscribe(onIn: OnIn, dispatcher: Dispatcher<any>) {
             let onOut : Unsub | null = null
             if (started) {
                 onOut = onIn()
@@ -60,7 +68,7 @@ export function createScope(): MutableScope {
 /**
  *  Subscribe to source when there are observers. Use with care! 
  **/
-export const autoScope: Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => {
+export const autoScope: Scope = mkScope((onIn, dispatcher) => {
     let unsub : Unsub | null = null 
     if (dispatcher.hasObservers()) {
         unsub = onIn()
@@ -75,7 +83,7 @@ export const autoScope: Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>)
             unsub!()
         }
     })
-}
+})
 
 export const beforeScope = {}
 export const afterScope = {}

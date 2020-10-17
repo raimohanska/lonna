@@ -60,7 +60,7 @@ export class StatefulProperty<V> extends Property<V> {
                 this._dispatcher.dispatch("change", event)
             }
         }
-        scope(
+        scope.subscribe(
             () => {
                 const source = seed.consume()
                 const unsub = source.onChange(meAsObserver);                
