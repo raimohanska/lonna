@@ -31,3 +31,4 @@ export * from "./throttle";
 export * from "./transform";
 export * from "./transformchanges";
 export * from "./update";
+export * from "./view";

@@ -43,4 +43,5 @@ __exportStar(require("./throttle"), exports);
 __exportStar(require("./transform"), exports);
 __exportStar(require("./transformchanges"), exports);
 __exportStar(require("./update"), exports);
+__exportStar(require("./view"), exports);
 //# sourceMappingURL=index.js.map

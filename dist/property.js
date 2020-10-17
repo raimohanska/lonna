@@ -118,7 +118,7 @@ function toPropertySeed(property) {
 }
 exports.toPropertySeed = toPropertySeed;
 function constant(value) {
-    return util_1.rename("constant(" + value + ")", toProperty(never_1.never(), value, scope_1.globalScope));
+    return util_1.rename("constant(" + util_1.toString(value) + ")", toProperty(never_1.never(), value, scope_1.globalScope));
 }
 exports.constant = constant;
 //# sourceMappingURL=property.js.map

@@ -12,28 +12,8 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.atom = exports.view = exports.StatefulDependentAtom = void 0;
-var L = __importStar(require("./lens"));
+exports.atom = exports.StatefulDependentAtom = exports.LensedAtom = void 0;
 var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 var scope_1 = require("./scope");
@@ -107,6 +87,7 @@ var LensedAtom = /** @class */ (function (_super) {
     };
     return LensedAtom;
 }(abstractions_1.Atom));
+exports.LensedAtom = LensedAtom;
 var DependentAtom = /** @class */ (function (_super) {
     __extends(DependentAtom, _super);
     function DependentAtom(desc, input, set) {
@@ -174,18 +155,6 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
     return StatefulDependentAtom;
 }(abstractions_1.Atom));
 exports.StatefulDependentAtom = StatefulDependentAtom;
-function view(atom, view) {
-    if (typeof view === "string") {
-        return new LensedAtom(atom + "." + view, atom, L.prop(view));
-    }
-    else if (typeof view === "number") {
-        return new LensedAtom(atom + ("[" + view + "]"), atom, L.item(view));
-    }
-    else {
-        return new LensedAtom(atom + ".view(..)", atom, view);
-    }
-}
-exports.view = view;
 function atom(x, y) {
     if (arguments.length == 1) {
         return new RootAtom("RootAtom", x);

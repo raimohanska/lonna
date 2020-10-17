@@ -42,34 +42,34 @@ var Dispatcher = /** @class */ (function () {
             this._ended = true;
         }
     };
-    Dispatcher.prototype.on = function (key, subscriber) {
+    Dispatcher.prototype.on = function (key, observer) {
         var _this = this;
         var _a;
         if (!this._observers[key])
             this._observers[key] = [];
-        if ((_a = this._observers[key]) === null || _a === void 0 ? void 0 : _a.includes(subscriber)) {
+        if ((_a = this._observers[key]) === null || _a === void 0 ? void 0 : _a.includes(observer)) {
             console.warn("Already subscribed");
         }
         if (this._ended) {
-            subscriber(abstractions_1.endEvent);
+            observer(abstractions_1.endEvent);
             return util_1.nop;
         }
         else {
-            this._observers[key].push(subscriber);
+            this._observers[key].push(observer);
             if (key !== meta) {
                 this._count++;
                 if (this._count == 1) {
                     this.dispatch(meta, 1);
                 }
             }
-            return function () { return _this.off(key, subscriber); };
+            return function () { return _this.off(key, observer); };
         }
     };
-    Dispatcher.prototype.off = function (key, subscriber) {
+    Dispatcher.prototype.off = function (key, observer) {
         var _a;
         if (!this._observers[key])
             return;
-        var index = this._observers[key].indexOf(subscriber);
+        var index = this._observers[key].indexOf(observer);
         if (index >= 0) {
             this._observers[key].splice(index, 1);
             if (((_a = this._observers.key) === null || _a === void 0 ? void 0 : _a.length) === 0) {
