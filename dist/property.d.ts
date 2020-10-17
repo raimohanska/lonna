@@ -17,8 +17,8 @@ export declare class StatefulProperty<V> extends Property<V> {
     get(): V;
     getScope(): Scope;
 }
-export declare function toStatelessProperty<A>(stream: EventStream<A>, get: () => A): Property<A>;
-export declare function toStatelessProperty<A>(onChange: Subscribe<A>, get: () => A): Property<A>;
+export declare function toStatelessProperty<A>(stream: EventStream<any>, get: () => A): Property<A>;
+export declare function toStatelessProperty<A>(onChange: Subscribe<any>, get: () => A): Property<A>;
 export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
 export declare function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
 export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;

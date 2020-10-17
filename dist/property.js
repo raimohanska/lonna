@@ -17,6 +17,7 @@ exports.constant = exports.toPropertySeed = exports.toProperty = exports.toState
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var dispatcher_1 = require("./dispatcher");
+var map_1 = require("./map");
 var never_1 = require("./never");
 var scope_1 = require("./scope");
 var util_1 = require("./util");
@@ -95,10 +96,10 @@ var StatefulProperty = /** @class */ (function (_super) {
 exports.StatefulProperty = StatefulProperty;
 function toStatelessProperty(streamOrSubscribe, get) {
     if (streamOrSubscribe instanceof abstractions_1.EventStream) {
-        return new StatelessProperty(streamOrSubscribe.desc, get, streamOrSubscribe.subscribe.bind(streamOrSubscribe), streamOrSubscribe.getScope());
+        return new StatelessProperty(streamOrSubscribe.desc, get, map_1.mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope());
     }
     else {
-        return new StatelessProperty("toStatelessProperty(" + streamOrSubscribe + "," + get, get, streamOrSubscribe, scope_1.globalScope);
+        return new StatelessProperty("toStatelessProperty(" + streamOrSubscribe + "," + get, get, map_1.mapSubscribe(streamOrSubscribe, get), scope_1.globalScope);
     }
 }
 exports.toStatelessProperty = toStatelessProperty;
