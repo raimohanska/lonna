@@ -1,11 +1,11 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property, Event } from "./abstractions";
+import { Atom, Observer, Property, Event, ObservableSeed, AtomSource } from "./abstractions";
 import { Scope } from "./scope";
 export declare class StatefulDependentAtom<V> extends Atom<V> {
     private _scope;
     private _dispatcher;
     private _value;
-    constructor(seed: AtomSeed<V>, scope: Scope);
+    constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>>, scope: Scope);
     get(): V;
     set: (updatedValue: V) => void;
     modify(fn: (old: V) => V): void;

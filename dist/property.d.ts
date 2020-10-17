@@ -1,4 +1,4 @@
-import { Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed, Unsub } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Unsub } from "./abstractions";
 import { Scope } from "./scope";
 export declare class StatelessProperty<V> extends Property<V> {
     get: () => V;
@@ -12,7 +12,7 @@ export declare class StatefulProperty<V> extends Property<V> {
     private _dispatcher;
     private _scope;
     private _value;
-    constructor(seed: PropertySeed<V>, scope: Scope);
+    constructor(seed: ObservableSeed<V, PropertySource<V> | Property<V>>, scope: Scope);
     onChange(observer: Observer<Event<V>>): import("./abstractions").Callback;
     get(): V;
     getScope(): Scope;

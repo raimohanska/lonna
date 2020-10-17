@@ -1,4 +1,4 @@
-import { Event, EventStream, EventStreamSeed, isValue, Observer, Property, PropertySeed, Unsub } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { never } from "./never";
@@ -45,7 +45,7 @@ export class StatefulProperty<V> extends Property<V> {
     private _scope: Scope
     private _value: V | OutOfScope  = beforeScope
 
-    constructor(seed: PropertySeed<V>, scope: Scope) {
+    constructor(seed: ObservableSeed<V, PropertySource<V> | Property<V>>, scope: Scope) {
         super(seed.desc)
         this._scope = scope
         

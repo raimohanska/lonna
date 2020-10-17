@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Unsub, Event, Subscribe, EventLike, toEvents, isEnd } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Unsub, Event, Subscribe, EventLike, toEvents, isEnd, ObservableSeed, EventStreamSource } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { Scope } from "./scope";
@@ -38,7 +38,7 @@ export class StatelessEventStream<V> extends EventStream<V> {
 }
 
 export class SeedToStream<V> extends StatefulEventStream<V> {
-    constructor(seed: EventStreamSeed<V>, scope: Scope) { 
+    constructor(seed: ObservableSeed<V, EventStreamSource<V>>, scope: Scope) { 
         super(seed.desc, scope)
         const source = seed.consume()
         scope(

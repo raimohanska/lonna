@@ -1,5 +1,5 @@
 import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property, Event, valueEvent, isValue } from "./abstractions";
+import { Atom, AtomSeed, Observer, Property, Event, valueEvent, isValue, ObservableSeed, AtomSource } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
 import { duplicateSkippingObserver } from "./util";
@@ -117,7 +117,7 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V | OutOfScope = beforeScope
 
-    constructor(seed: AtomSeed<V>, scope: Scope) {
+    constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>>, scope: Scope) {
         super(seed.desc)
         this._scope = scope;
         const source = seed.consume()

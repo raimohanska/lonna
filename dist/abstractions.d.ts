@@ -81,7 +81,7 @@ export declare class EventStreamSource<V> extends Observable<V> {
     subscribe: (observer: Observer<Event<V>>) => Unsub;
     constructor(desc: string, subscribe: Subscribe<V>);
 }
-export declare abstract class Atom<V> extends Property<V> {
+export declare abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>> {
     constructor(desc: string);
     abstract set(newValue: V): void;
     abstract modify(fn: (old: V) => V): void;

@@ -124,7 +124,7 @@ export abstract class ScopedObservable<V> extends Observable<V> {
     constructor(desc: string) {
         super(desc)
     }
-    abstract getScope(): Scope;    
+    abstract getScope(): Scope;  
 }
 
 export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
@@ -214,7 +214,7 @@ export class EventStreamSource<V> extends Observable<V> {
     }
 }
 
-export abstract class Atom<V> extends Property<V> {
+export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>> {
     constructor(desc: string) { 
         super(desc) 
     }

@@ -4,6 +4,7 @@ import { StatelessProperty } from "./property"
 import { globalScope } from "./scope"
 import { toString } from "./tostring"
 
+// TODO: flatmap cases would work better with stream semantics (no need for init)
 
 export type PromiseMapper<I, O> = [() => O, (resolved: I) => O, (rejected: Error) => O]
 
