@@ -21,29 +21,38 @@ export const globalScope: Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any
     onIn()
 }
 
-type ScopeEvents = { "in": void, "out": void }
+type OnIn = () => Unsub
+type OnOut = () => void
 
 export function createScope(): MutableScope {
     let started = false
-    const scopeDispatcher = new Dispatcher<ScopeEvents>();
+    const ins: OnIn[] = []
+    const outs: OnOut[] = []
     
     return {
-        apply(onIn: () => Unsub, dispatcher: Dispatcher<any>) {
-            let unsub : Unsub | null = null
+        apply(onIn: OnIn, dispatcher: Dispatcher<any>) {
+            let onOut : Unsub | null = null
             if (started) {
-                unsub = onIn()
+                onOut = onIn()
+                outs.push(onOut)
             } else {
-                scopeDispatcher.on("in", onIn)
+                ins.push(onIn)                
             }
-            scopeDispatcher.on("out", () => unsub!())
+                    
         },        
         start() {
             started = true
-            scopeDispatcher.dispatch("in", valueEvent(undefined))
+            for (let i of ins) {
+                outs.push(i())
+            }
+            ins.splice(0)            
         },
         end() {
             started = false
-            scopeDispatcher.dispatch("out", valueEvent(undefined))
+            for (let o of outs) {
+                o()
+            }
+            outs.splice(0)            
         }
     }
 }
