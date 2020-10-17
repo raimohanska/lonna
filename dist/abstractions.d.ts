@@ -103,4 +103,5 @@ export declare class AtomSource<V> extends PropertySource<V> {
 }
 export interface Bus<V> extends EventStream<V> {
     push(newValue: V): void;
+    end(): void;
 }
