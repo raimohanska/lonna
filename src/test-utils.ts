@@ -34,8 +34,9 @@ function regSrc<V>(source: EventStream<V>) {
     return source;
 };
 
-export function series<V>(interval: number, values: (V | Event<V>)[]): EventStream<V> { return regSrc(sequentially<V>(interval, values, testScope.apply)) }
-
+export function series<V>(interval: number, values: (V | Event<V>)[]): EventStream<V> { 
+    return regSrc(sequentially<V>(interval, values, testScope.apply)) 
+}
 
 export const expectStreamEvents = (src: () => EventStream<any> | EventStreamSeed<any>, expectedEvents: any[]): void => {
     return verifySingleSubscriber(src, expectedEvents);
@@ -54,10 +55,11 @@ export const expectStreamTimings = <V>(src: () => EventStream<any> | EventStream
 
 const verifySingleSubscriber = (srcF: () => EventStream<any> | EventStreamSeed<any>, expectedEvents: any[]): void => {
     verifyStreamWith("(single subscriber)", srcF, expectedEvents, (src, events, done) => {
-        return src.subscribe((event: Event<any>) => {
+        const unsub = src.subscribe((event: Event<any>) => {
             if (isValue(event)) {
                 events.push(toValue(event));
             } else if (isEnd(event)) {
+                unsub && unsub()
                 done();
             } else {
                 throw Error("Unknown event " + event)

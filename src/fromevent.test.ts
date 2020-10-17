@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 import { fromEvent } from "./fromevent";
 import { take } from "./take";
 
+// TODO: test that toString for DOM Elements are sensible (no deep json structures)
 // Wrap EventEmitter as EventTarget
 const toEventTarget = (emitter: any) =>
   ({

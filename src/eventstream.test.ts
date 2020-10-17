@@ -8,13 +8,4 @@ describe("EventStream", () => {
             expect(B.never() instanceof B.Observable).toEqual(true)
         })
     })
-
-    it("map", () => {
-        const b = B.bus<number>()
-        const b2 = B.map(b, x => x * 2)
-        const values: number[] = []
-        b2.forEach(v => values.push(v))
-        b.push(1)
-        expect(values).toEqual([2])
-    })
 })

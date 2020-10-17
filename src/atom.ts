@@ -1,9 +1,7 @@
-import * as L from "./lens";
-import { Atom, AtomSeed, Observer, Property, Event, valueEvent, isValue, ObservableSeed, AtomSource } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
+import * as L from "./lens";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
-import { duplicateSkippingObserver } from "./util";
-import { mapObserver } from "./map";
 
 type AtomEvents<V> = { "change": V }
 
@@ -39,7 +37,7 @@ class RootAtom<V> extends Atom<V> {
 
 const uninitialized = {}
 
-class LensedAtom<R, V> extends Atom<V> {
+export class LensedAtom<R, V> extends Atom<V> {
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
 
@@ -161,19 +159,6 @@ export class StatefulDependentAtom<V> extends Atom<V> {
         return this._scope
     }
 
-}
-
-export function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
-export function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
-export function view<A, B>(atom: Atom<A>, view: any): Atom<B> {
-    if (typeof view === "string") {
-        return new LensedAtom<A, B>(atom + "." + view, atom, L.prop<any, any>(view))
-    }
-    else if (typeof view === "number") {                        
-        return new LensedAtom(atom + `[${view}]`, atom, L.item(view as number) as any)
-    } else {
-        return new LensedAtom(atom + ".view(..)", atom, view)
-    }   
 }
 export function atom<A>(initial: A): Atom<A>;
 /**
