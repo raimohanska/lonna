@@ -6,13 +6,16 @@ import { Dispatcher } from "./dispatcher";
  *  - autoScope: the observable will be active as long as it has observers (will throw if trying to re-activate)
  *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
  **/
-export declare type Scope = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void;
-export interface MutableScope {
-    apply: Scope;
+export declare type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void;
+export interface Scope {
+    subscribe: ScopeFn;
+}
+export interface MutableScope extends Scope {
     start(): void;
     end(): void;
 }
 export declare const globalScope: Scope;
+export declare function mkScope(scopeFn: ScopeFn): Scope;
 export declare function createScope(): MutableScope;
 /**
  *  Subscribe to source when there are observers. Use with care!

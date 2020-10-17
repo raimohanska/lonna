@@ -65,7 +65,7 @@ var SeedToStream = /** @class */ (function (_super) {
     function SeedToStream(seed, scope) {
         var _this = _super.call(this, seed.desc, scope) || this;
         var source = seed.consume();
-        scope(function () { return source.subscribe(function (v) { return _this.dispatcher.dispatch("value", v); }); }, _this.dispatcher);
+        scope.subscribe(function () { return source.subscribe(function (v) { return _this.dispatcher.dispatch("value", v); }); }, _this.dispatcher);
         return _this;
     }
     return SeedToStream;

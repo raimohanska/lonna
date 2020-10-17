@@ -71,7 +71,7 @@ var StatefulProperty = /** @class */ (function (_super) {
                 _this._dispatcher.dispatch("change", event);
             }
         };
-        scope(function () {
+        scope.subscribe(function () {
             var source = seed.consume();
             var unsub = source.onChange(meAsObserver);
             _this._value = source.get();

@@ -11,16 +11,22 @@ var __values = (this && this.__values) || function(o) {
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkScope = exports.afterScope = exports.beforeScope = exports.autoScope = exports.createScope = exports.globalScope = void 0;
-exports.globalScope = function (onIn, dispatcher) {
+exports.checkScope = exports.afterScope = exports.beforeScope = exports.autoScope = exports.createScope = exports.mkScope = exports.globalScope = void 0;
+exports.globalScope = mkScope(function (onIn) {
     onIn();
-};
+});
+function mkScope(scopeFn) {
+    return {
+        subscribe: scopeFn
+    };
+}
+exports.mkScope = mkScope;
 function createScope() {
     var started = false;
     var ins = [];
     var outs = [];
     return {
-        apply: function (onIn, dispatcher) {
+        subscribe: function (onIn, dispatcher) {
             var onOut = null;
             if (started) {
                 onOut = onIn();
@@ -72,7 +78,7 @@ exports.createScope = createScope;
 /**
  *  Subscribe to source when there are observers. Use with care!
  **/
-exports.autoScope = function (onIn, dispatcher) {
+exports.autoScope = mkScope(function (onIn, dispatcher) {
     var unsub = null;
     if (dispatcher.hasObservers()) {
         unsub = onIn();
@@ -89,7 +95,7 @@ exports.autoScope = function (onIn, dispatcher) {
             unsub();
         }
     });
-};
+});
 exports.beforeScope = {};
 exports.afterScope = {};
 function checkScope(thing, value) {
