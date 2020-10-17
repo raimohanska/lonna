@@ -4,12 +4,12 @@ import { SeedToStream } from "./eventstream";
 import { StatefulProperty } from "./property";
 import { Scope } from "./scope";
 
-export function applyScope<T>(scope: Scope, stream: EventStream<T>): EventStream<T>;
-export function applyScope<T>(scope: Scope, stream: Property<T>): Property<T>;
 export function applyScope<T>(scope: Scope, stream: Atom<T>): Atom<T>;
-export function applyScope<T>(scope: Scope, stream: EventStreamSeed<T>): EventStream<T>;
+export function applyScope<T>(scope: Scope, stream: Property<T>): Property<T>;
+export function applyScope<T>(scope: Scope, stream: EventStream<T>): EventStream<T>;
 export function applyScope<T>(scope: Scope, stream: AtomSeed<T>): Atom<T>;
 export function applyScope<T>(scope: Scope, stream: PropertySeed<T>): Property<T>;
+export function applyScope<T>(scope: Scope, stream: EventStreamSeed<T>): EventStream<T>;
 
 export function applyScope<T>(scope: Scope, seed: any): any {
     if (seed instanceof EventStreamSeed || seed instanceof EventStream) {        
