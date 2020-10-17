@@ -1,7 +1,7 @@
 import { later } from ".";
 import { never } from "./never";
 import { constant } from "./property";
-import { expectPropertyEvents, series } from "./test-utils";
+import { expectPropertyEvents, testScope, series } from "./test-utils";
 import { update } from "./update";
 
 describe("update", function() {
@@ -48,8 +48,22 @@ describe("Supports constant result value", () =>
     [0, "0x", 666])
 );
 
-  it("toString", () => {
-    expect(
+describe("Scoped version", () =>
+  expectPropertyEvents(
+    function() {
+      const a = later(1, "x");
+      const b = later(2, "y");
+
+      return update(testScope(), 0,
+        [a, (acc, x) => acc + x],
+        [b, 666]
+      );
+    },
+    [0, "0x", 666])
+);
+
+it("toString", () => {
+  expect(
       update(0, [never(), (state, v) => state]
     ).toString()).toEqual("update(0,[[never,fn]])")
   });

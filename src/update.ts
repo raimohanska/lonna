@@ -89,10 +89,11 @@ export function update<Out>(...args: any[]): any {
     let scope: Scope | undefined;
     let initial: Out;
     let patterns: UpdatePattern<Out>[];
-    if (args[0] instanceof Function) {
+    if (args[0] instanceof Scope) {
         scope = args[0]
         initial = args[1]
         patterns = args.slice(2)
+        console.log("Scoped", initial, patterns)
     } else {
         scope = undefined;
         initial = args[0]

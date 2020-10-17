@@ -10,13 +10,21 @@ import { Dispatcher } from "./dispatcher"
 
 export type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void
 
-export interface Scope {
+export class Scope {
     subscribe: ScopeFn
+    constructor(fn: ScopeFn) {
+        this.subscribe = fn
+    }
 }
 
-export interface MutableScope extends Scope {
-    start(): void;
-    end(): void;
+export class MutableScope extends Scope {
+    start: () => void;
+    end: () => void;
+    constructor(fn: ScopeFn, start: () => void, end: () => void) {
+        super(fn)
+        this.start = start
+        this.end = end
+    }
 }
 
 export const globalScope: Scope = mkScope((onIn) => {
@@ -24,9 +32,7 @@ export const globalScope: Scope = mkScope((onIn) => {
 })
 
 export function mkScope(scopeFn: ScopeFn): Scope {
-    return {
-        subscribe: scopeFn
-    }
+    return new Scope(scopeFn)
 }
 
 type OnIn = () => Unsub
@@ -37,8 +43,8 @@ export function createScope(): MutableScope {
     const ins: OnIn[] = []
     const outs: OnOut[] = []
     
-    return {
-        subscribe(onIn: OnIn, dispatcher: Dispatcher<any>) {
+    return new MutableScope(
+        (onIn: OnIn, dispatcher: Dispatcher<any>) => {
             let onOut : Unsub | null = null
             if (started) {
                 onOut = onIn()
@@ -48,21 +54,21 @@ export function createScope(): MutableScope {
             }
                     
         },        
-        start() {
+        () => {
             started = true
             for (let i of ins) {
                 outs.push(i())
             }
             ins.splice(0)            
         },
-        end() {
+        () => {
             started = false
             for (let o of outs) {
                 o()
             }
             outs.splice(0)            
         }
-    }
+    )
 }
 
 /**

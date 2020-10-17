@@ -26,10 +26,10 @@ const verifyCleanup = () => {
     }
 };
 
-let testScope = createScope()
+let scope = createScope()
 
-export function scope(): Scope { 
-    return testScope
+export function testScope(): Scope { 
+    return scope
 }
 
 function regSrc<V>(source: EventStream<V>) {
@@ -38,7 +38,7 @@ function regSrc<V>(source: EventStream<V>) {
 };
 
 export function series<V>(interval: number, values: (V | Event<V>)[]): EventStream<V> { 
-    return regSrc(sequentially<V>(interval, values, testScope)) 
+    return regSrc(sequentially<V>(interval, values, scope)) 
 }
 
 export const expectStreamEvents = (src: () => EventStream<any> | EventStreamSeed<any>, expectedEvents: any[]): void => {
@@ -75,12 +75,12 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
     describe(description, () => {
         let src: EventStream<any>;
         const receivedEvents: Event<any>[] = [];
-        testScope = createScope()
+        scope = createScope()
 
         beforeAll(() => {
-            testScope.start()
+            scope.start()
             const seed = srcF();
-            src = (seed instanceof EventStream) ? seed : applyScope(testScope, seed)
+            src = (seed instanceof EventStream) ? seed : applyScope(scope, seed)
             expect(src instanceof EventStream).toEqual(true);
         });
         beforeAll(done => collectF(src, receivedEvents, done));
@@ -89,7 +89,7 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
         });
         it("the stream is exhausted", () => verifyExhausted(src));
         it("cleans up observers", () => {
-            testScope.end()
+            scope.end()
             verifyCleanup();
         });
     });
@@ -120,16 +120,16 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
         let src: Property<any>;
         const events: Event<any>[] = [];
         beforeAll(() => {
-            testScope.start()
+            scope.start()
             const seed = srcF();
-            src = (seed instanceof Property) ? seed : applyScope(testScope, seed) as Property<any>
+            src = (seed instanceof Property) ? seed : applyScope(scope, seed) as Property<any>
         });
         beforeAll(done => collectF(src, events, done));
         it("is a Property", () => expect(src instanceof Property).toEqual(true));
         it("outputs expected events in order", () => expect(toValues(events)).toEqual(toValues(expectedEvents)));
         it("has correct final state", () => verifyFinalState(src, expectedEvents[expectedEvents.length - 1]));
         it("cleans up observers", () => {
-            testScope.end()
+            scope.end()
             verifyCleanup();
         });
         if (extraCheck != undefined) {
