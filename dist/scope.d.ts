@@ -7,12 +7,14 @@ import { Dispatcher } from "./dispatcher";
  *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
  **/
 export declare type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void;
-export interface Scope {
+export declare class Scope {
     subscribe: ScopeFn;
+    constructor(fn: ScopeFn);
 }
-export interface MutableScope extends Scope {
-    start(): void;
-    end(): void;
+export declare class MutableScope extends Scope {
+    start: () => void;
+    end: () => void;
+    constructor(fn: ScopeFn, start: () => void, end: () => void);
 }
 export declare const globalScope: Scope;
 export declare function mkScope(scopeFn: ScopeFn): Scope;

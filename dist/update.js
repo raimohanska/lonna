@@ -33,6 +33,7 @@ var __spread = (this && this.__spread) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.update = void 0;
 var abstractions_1 = require("./abstractions");
+var scope_1 = require("./scope");
 var merge_1 = require("./merge");
 var scan_1 = require("./scan");
 var map_1 = require("./map");
@@ -47,10 +48,11 @@ function update() {
     var scope;
     var initial;
     var patterns;
-    if (args[0] instanceof Function) {
+    if (args[0] instanceof scope_1.Scope) {
         scope = args[0];
         initial = args[1];
         patterns = args.slice(2);
+        console.log("Scoped", initial, patterns);
     }
     else {
         scope = undefined;
