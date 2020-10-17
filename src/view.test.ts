@@ -1,6 +1,9 @@
 import * as B from "."
+import { later } from "./later"
+import { constant, toProperty } from "./property"
+import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils"
 
-describe("view", () => {
+describe("Atom.view", () => {
     describe("Array index lenses", () => {
         it("Views into existing and non-existing indices", () => {
             const a = B.atom([1,2,3])
@@ -24,3 +27,26 @@ describe("view", () => {
         })    
     })
 })
+
+const fooBar = {"foo": "bar"}
+
+describe("Property.view", () => {
+    describe("maps property values", () => {
+      expectPropertyEvents(
+        () => B.view(constant(fooBar), "foo"),
+        ["bar"]
+      )
+    })
+
+    it("toString", () => {
+        expect(B.view(constant(fooBar), "foo").toString()).toEqual("constant({foo:bar}).view(foo)")
+    });    
+});
+
+describe("EventStream.view", () => {
+    describe("should map with given function", () =>
+        expectStreamEvents(
+        () => B.view(later(1, fooBar), "foo"),
+        ["bar"])
+    );
+});

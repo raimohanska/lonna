@@ -4,7 +4,7 @@ import { Dispatcher } from "./dispatcher";
 import { mapSubscribe } from "./map";
 import { never } from "./never";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
-import { rename } from "./util";
+import { rename, toString } from "./util";
 
 type PropertyEvents<V> = { "change": V }
 const uninitialized = {}
@@ -118,5 +118,5 @@ export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): Prop
 }
 
 export function constant<A>(value: A): Property<A> {
-    return rename(`constant(${value})`, toProperty(never(), value, globalScope))
+    return rename(`constant(${toString(value)})`, toProperty(never(), value, globalScope))
 }

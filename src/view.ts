@@ -2,6 +2,7 @@ import { Atom, EventStream, EventStreamSeed, ObservableSeed, Property, PropertyS
 import { LensedAtom } from "./atom";
 import * as L from "./lens";
 import { map } from "./map";
+import { rename, toString } from "./util";
 
 export function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
 export function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
@@ -15,21 +16,22 @@ export function view<A, K extends keyof A>(a: EventStreamSeed<A>, key: K): K ext
 export function view<A, B>(a: EventStreamSeed<A>, lens: L.Lens<A, B>): EventStreamSeed<B>;
 
 export function view<A, B>(atom: ObservableSeed<any, any>, view: any): any {
-    const [desc, lens] = mkView(atom, view)
+    const lens = mkView(view)
+    const desc = `${atom}.view(${toString(view)})`
     if (atom instanceof Atom) {
         return new LensedAtom<A, B>(desc, atom.consume(), lens)     
     } else {
-        return map(atom as any, lens.get)
+        return rename(desc, map(atom as any, lens.get))
     }
 }
 
-function mkView(atom: any, view: any): [string, L.Lens<any, any>] {
+function mkView(view: any) {
     if (typeof view === "string") {
-        return [atom + "." + view, L.prop<any, any>(view)]
+        return L.prop<any, any>(view)
     }
     else if (typeof view === "number") {                        
-        return [atom + `[${view}]`, L.item(view as number)]
+        return L.item(view as number)
     } else {
-        return[atom + ".view(..)", view]
+        return view
     }   
 }

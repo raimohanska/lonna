@@ -30,3 +30,5 @@ export function rename<A extends ObservableSeed<any, any>>(desc: string, observa
     observable.desc = desc
     return observable
 }
+
+export * from "./tostring"
