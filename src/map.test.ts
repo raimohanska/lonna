@@ -9,7 +9,10 @@ const times2 = (x: number) => x * 2;
 describe("Property.map", () => {
   describe("maps property values", () => {
     expectPropertyEvents(
-      () => map(times2)(toProperty(1)(series(1, [2]))),
+      () => {
+        const x = series(1, [2]).pipe(toProperty(1), map(times2))
+        return x
+      },
       [2, 4, ])
   })
 });

@@ -1,8 +1,6 @@
-import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe, Subscribe } from "./abstractions";
+import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySubscribe, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
-
-// TODO: continue
 
 export type StreamTransformer<A, B> = (event: Event<A>, observer: Observer<Event<B>>) => void;
 
@@ -11,27 +9,72 @@ export type Transformer<A, B> = {
     init: (value: A) => B;
 }
 
+// TODO: go through the rest of the newly piped operators and remove multimethods to get piped inference right (verify in tests)
+// TODO: remove scoped versions, use applyScope in pipe instead
+
+export type StatefulTransformResult<B, O> = O extends Property<any>            
+    ? PropertySeed<B>
+    : O extends PropertySeed<any>
+        ? PropertySeed<B>
+        : O extends EventStream<any>
+            ? EventStreamSeed<B>
+            : O extends EventStreamSeed<any>
+                ? EventStreamSeed<B>
+                : never
+
+export type StatefulScopedTransformResult<B, O> = O extends Property<any>            
+    ? Property<B>
+    : O extends PropertySeed<any>
+        ? Property<B>
+        : O extends EventStream<any>
+            ? EventStream<B>
+            : O extends EventStreamSeed<any>
+                ? EventStream<B>
+                : never    
+      
+export type StatefulUnaryTransformResult<B, O> = O extends Atom<any>
+    ? AtomSeed<B>
+    : O extends AtomSeed<any>
+        ? AtomSeed<B>
+        : O extends Property<any>            
+            ? PropertySeed<B>
+            : O extends PropertySeed<any>
+                ? PropertySeed<B>
+                : O extends EventStream<any>
+                    ? EventStreamSeed<B>
+                    : O extends EventStreamSeed<any>
+                        ? EventStreamSeed<B>
+                        : never
+
+export type StatefulScopedUnaryTransformResult<B, O> = O extends Atom<any>
+    ? Atom<B>
+    : O extends AtomSeed<any>
+        ? Atom<B>
+        : O extends Property<any>            
+            ? Property<B>
+            : O extends PropertySeed<any>
+                ? Property<B>
+                : O extends EventStream<any>
+                    ? EventStream<B>
+                    : O extends EventStreamSeed<any>
+                        ? EventStream<B>
+                        : never      
+        
+
 export interface GenericTransformOp {
-    <A>(prop: Atom<A> | AtomSeed<A>): AtomSeed<A>;
-    <A>(prop: Property<A> | PropertySeed<A>): PropertySeed<A>;
-    <A>(s: EventStream<A> | EventStreamSeed<A>): EventStreamSeed<A>;    
+    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<A, O>;    
 }
 
 export interface GenericTransformOpScoped {
-    <A>(prop: Atom<A> | AtomSeed<A>): Atom<A>;
-    <A>(prop: Property<A> | PropertySeed<A>): Property<A>;
-    <A>(s: EventStream<A> | EventStreamSeed<A>): EventStream<A>;
+    <A, O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<A, O>;
 }
 
 export interface BinaryTransformOp<A, B> {
-    (seed: EventStreamSeed<A> | EventStream<A>): EventStreamSeed<B>
-    (seed: PropertySeed<A> | Property<A>): PropertySeed<B>
-    (o: Observable<A>): Observable<B> // A generic signature. Note that the implementation is defined for the above cases only.    
+    <O extends ObservableSeed<A, any>>(o: O): StatefulTransformResult<B, O>;
 }
 
 export interface BinaryTransformOpScoped<A, B> {
-    (seed: EventStreamSeed<A> | EventStream<A>): EventStream<B>
-    (seed: PropertySeed<A> | Property<A>): Property<B>    
+    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedTransformResult<B, O>;
 }
 
 export interface StreamTransformOp<A, B> {
@@ -43,16 +86,11 @@ export interface StreamTransformOpScoped<A, B> {
 }
 
 export interface UnaryTransformOp<A> {
-    (seed: EventStreamSeed<A> | EventStream<A>): EventStreamSeed<A>
-    (seed: PropertySeed<A> | Property<A>): PropertySeed<A>
-    (seed: AtomSeed<A> | Atom<A>): AtomSeed<A>
-    (o: Observable<A>): Observable<A> // A generic signature. Note that the implementation is defined for the above cases only.    
+    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<A, O>;  
 }
 
 export interface UnaryTransformOpScoped<A> {
-    (seed: EventStreamSeed<A> | EventStream<A>): EventStream<A>
-    (seed: PropertySeed<A> | Property<A>): Property<A>
-    (seed: AtomSeed<A> | Atom<A>): Atom<A>
+    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<A, O>;  
 }
 
 export function transform<A>(desc: string, transformer: Transformer<A, A>): UnaryTransformOp<A>

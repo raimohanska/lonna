@@ -2,11 +2,16 @@ import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, 
 import { StatelessEventStream } from "./eventstream";
 import { StatelessProperty } from "./property";
 
+export type MapResult<A, B, O> = O extends Property<any> 
+    ? Property<B>
+    : O extends PropertySeed<any>
+        ? PropertySeed<B>
+        : O extends EventStream<any>
+            ? EventStream<B>
+            : EventStreamSeed<B>;
+
 export interface MapOp<A, B> {
-    (prop: Property<A>): Property<B>;
-    (prop: PropertySeed<A>): PropertySeed<B>;
-    (s: EventStream<A>): EventStream<B>;
-    (s: EventStreamSeed<A>): EventStreamSeed<B>;    
+    <O extends Property<A> | PropertySeed<A> | EventStream<A> | EventStreamSeed<A>>(o: O): MapResult<A, B, O>
 }
 export function map<A, B>(fn: (value: A) => B): MapOp<A, B>
 export function map<A, B>(sampledProperty: Property<B>): MapOp<A, B>

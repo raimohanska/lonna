@@ -10,7 +10,10 @@ const lessThan = (n: number) => (x: number) => x < n
 describe("EventStream.filter", function () {
     describe("should filter values", () =>
         expectStreamEvents(
-            () => filter(lessThan(3))(series(1, [1, 2, 3])),
+            () => {
+                const e = series(1, [1, 2, 3]).pipe(filter(lessThan(3)));
+                return e
+            },
             [1, 2])
     );
     it("toString", () => expect(filter(() => false)(never()).toString()).toEqual("never.filter(fn)"));
@@ -19,12 +22,15 @@ describe("EventStream.filter", function () {
 describe("Property.filter", function () {
     describe("should filter values", () =>
         expectPropertyEvents(
-            () => filter(lessThan(3))(toProperty(0)(series(1, [1, 2, 3]))),
+            () => {
+                const prop = series(1, [1, 2, 3]).pipe(toProperty(0), filter(lessThan(3)))
+                return prop
+            },
             [0, 1, 2])
     );
     it("preserves old current value if the updated value is non-matching", function () {
         const a = atom(1)
-        const p = filter(lessThan(2), globalScope)(a);
+        const p = a.pipe(filter(lessThan(2), globalScope));
         a.set(2)
         expect(p.get()).toEqual(1)
     });
