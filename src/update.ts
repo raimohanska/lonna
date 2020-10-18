@@ -93,7 +93,6 @@ export function update<Out>(...args: any[]): any {
         scope = args[0]
         initial = args[1]
         patterns = args.slice(2)
-        console.log("Scoped", initial, patterns)
     } else {
         scope = undefined;
         initial = args[0]
