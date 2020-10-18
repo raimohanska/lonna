@@ -31,7 +31,9 @@ export type StatefulScopedTransformResult<B, O> = O extends Property<any>
             : O extends EventStreamSeed<any>
                 ? EventStream<B>
                 : never    
-      
+
+// TODO: by using type branding, we can find a common type for Property<A> and PropertySeed<A> and simplify these types
+
 export type StatefulUnaryTransformResult<B, O> = O extends Atom<any>
     ? AtomSeed<B>
     : O extends AtomSeed<any>
