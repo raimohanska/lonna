@@ -44,8 +44,10 @@ exports.FlatMapPropertySeed = exports.FlatMapStreamSeed = exports.flatMap = void
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var util_1 = require("./util");
-function flatMap(s, fn, scope) {
-    return applyscope_1.applyScopeMaybe(new FlatMapStreamSeed(s + ".flatMap(fn)", s, fn, {}), scope); // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
+function flatMap(fn, scope) {
+    return function (s) {
+        return applyscope_1.applyScopeMaybe(new FlatMapStreamSeed(s + ".flatMap(fn)", s, fn, {}), scope);
+    }; // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
 }
 exports.flatMap = flatMap;
 var FlatMapStreamSeed = /** @class */ (function (_super) {

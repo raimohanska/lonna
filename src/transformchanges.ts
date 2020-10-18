@@ -1,9 +1,7 @@
-import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Observer, Property, PropertySeed, PropertySubscribe } from "./abstractions"
-import { applyScope, applyScopeMaybe } from "./applyscope"
-import { atom } from "./atom"
+import { Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Property, PropertySeed } from "./abstractions"
+import { applyScopeMaybe } from "./applyscope"
 import { changes } from "./changes"
 import { Scope } from "./scope"
-import { StreamTransformer, transform } from "./transform"
 import { rename } from "./util"
 
 export type EventStreamDelay<V> = (stream: EventStreamSeed<V>) => EventStreamSeed<V>

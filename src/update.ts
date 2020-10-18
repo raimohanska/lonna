@@ -113,15 +113,15 @@ export function update<Out>(...args: any[]): any {
             const constantValue = combinator
             combinator = () => constantValue
         }
-        return map(trigger as EventStreamSeed<any>, (v1 => {
+        return map((v1 => {
             return (state: Out) => {
                 const propValues = properties.map(p => p.get())
                 return combinator(state, v1, ...propValues)
             }
-        }))
+        }))(trigger as EventStreamSeed<any>)
     })
 
-    return rename(`update(${toString(initial)},${toString(patterns)})`, applyScopeMaybe(scan<Mutation<Out>, Out>(merge(mutators), initial, (state, mutation) => mutation(state)), scope))
+    return rename(`update(${toString(initial)},${toString(patterns)})`, applyScopeMaybe(scan<Mutation<Out>, Out>(initial, (state, mutation) => mutation(state))(merge(mutators)), scope))
 }
 
 type Mutation<V> = (prev: V) => V

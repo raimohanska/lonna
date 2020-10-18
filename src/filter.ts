@@ -1,19 +1,14 @@
-import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, isValue } from "./abstractions";
+import { Event, isValue, Observer } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
-import { transform, Transformer } from "./transform";
+import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped } from "./transform";
 
 export type Predicate<A> = (value: A) => boolean
 
-export function filter<A>(prop: Atom<A> | AtomSeed<A>, fn: Predicate<A>): AtomSeed<A>;
-export function filter<A>(prop: Atom<A> | AtomSeed<A>, fn: Predicate<A>, scope: Scope): Atom<A>;
-export function filter<A>(prop: Property<A> | PropertySeed<A>, fn: Predicate<A>): PropertySeed<A>;
-export function filter<A>(prop: Property<A> | PropertySeed<A>, fn: Predicate<A>, scope: Scope): Property<A>;
-export function filter<A>(s: EventStream<A>, fn: Predicate<A>): EventStream<A>;
-export function filter<A>(s: EventStreamSeed<A>, fn: Predicate<A>): EventStreamSeed<A>;
-
-export function filter<A>(s: any, fn: Predicate<A>, scope?: Scope): any {
-    return applyScopeMaybe(transform(s + `.filter(fn)`, s, filterT(fn)), scope)
+export function filter<A>(fn: Predicate<A>): GenericTransformOp
+export function filter<A>(fn: Predicate<A>, scope: Scope): GenericTransformOpScoped
+export function filter<A>(fn: Predicate<A>, scope?: Scope): any {
+    return (s: any) => applyScopeMaybe(transform(s + `.filter(fn)`, filterT(fn))(s), scope)
 }
 
 function filterT<A>(fn: Predicate<A>): Transformer<A, A> {

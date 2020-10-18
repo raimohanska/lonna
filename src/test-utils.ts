@@ -51,7 +51,7 @@ export const expectStreamTimings = <V>(src: () => EventStream<any> | EventStream
       const t0 = now();
       const relativeTime = () => Math.floor(now() - t0);
       const withRelativeTime = (x: V) => [relativeTime(), x];
-      return map(src() as EventStreamSeed<any>, withRelativeTime);
+      return map(withRelativeTime)(src() as EventStreamSeed<any>);
     };
     return expectStreamEvents(srcWithRelativeTime, expectedEventsAndTimings);
   };
@@ -80,7 +80,7 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
         beforeAll(() => {
             scope.start()
             const seed = srcF();
-            src = (seed instanceof EventStream) ? seed : applyScope(scope, seed)
+            src = (seed instanceof EventStream) ? seed : applyScope(scope)(seed)
             expect(src instanceof EventStream).toEqual(true);
         });
         beforeAll(done => collectF(src, receivedEvents, done));
@@ -122,7 +122,7 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
         beforeAll(() => {
             scope.start()
             const seed = srcF();
-            src = (seed instanceof Property) ? seed : applyScope(scope, seed) as Property<any>
+            src = (seed instanceof Property) ? seed : applyScope(scope)(seed) as Property<any>
         });
         beforeAll(done => collectF(src, events, done));
         it("is a Property", () => expect(src instanceof Property).toEqual(true));

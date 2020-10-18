@@ -1,17 +1,13 @@
-import { Event, Atom, AtomSeed, EventStream, EventStreamSeed, Observer, Property, PropertySeed, isValue, endEvent } from "./abstractions";
-import { applyScope, applyScopeMaybe } from "./applyscope";
+import { endEvent, Event, isValue, Observer } from "./abstractions";
+import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
-import { transform, Transformer } from "./transform";
+import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped } from "./transform";
 
-export function take<A>(count: number, prop: Atom<A> | AtomSeed<A>): AtomSeed<A>;
-export function take<A>(count: number, prop: Atom<A> | AtomSeed<A>, scope: Scope): Atom<A>;
-export function take<A>(count: number, prop: Property<A> | PropertySeed<A>): PropertySeed<A>;
-export function take<A>(count: number, prop: Property<A> | PropertySeed<A>, scope: Scope): Property<A>;
-export function take<A>(count: number, s: EventStream<A>): EventStream<A>;
-export function take<A>(count: number, s: EventStreamSeed<A>): EventStreamSeed<A>;
-
-export function take<A>(count: number, s: any, scope?: Scope): any {
-    return applyScopeMaybe(transform(s + `.map(fn)`, s, takeT(count)), scope)
+export function take<A>(count: number): GenericTransformOp
+export function take<A>(count: number, scope: Scope): GenericTransformOpScoped
+export function take<A>(count: number, scope?: Scope): any {
+    return (s: any) => 
+        applyScopeMaybe(transform(s + `.map(fn)`, takeT(count))(s), scope)
 }
 
 function takeT<A>(count: number): Transformer<A, A> {

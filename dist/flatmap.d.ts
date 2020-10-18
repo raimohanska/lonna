@@ -4,8 +4,14 @@ export declare type FlatMapOptions = {
     latest?: boolean;
 };
 export declare type Spawner<A, O> = (value: A) => O;
-export declare function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): EventStreamSeed<B>;
-export declare function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): EventStream<B>;
+export interface FlatMapOp<A, B> {
+    (s: EventStream<A> | EventStreamSeed<A>): EventStreamSeed<B>;
+}
+export interface FlatMapOpScoped<A, B> {
+    (s: EventStream<A> | EventStreamSeed<A>): EventStream<B>;
+}
+export declare function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): FlatMapOp<A, B>;
+export declare function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): FlatMapOpScoped<A, B>;
 export declare type FlatMapChild<B extends Observable<any>> = {
     observable: B;
     unsub?: Unsub;

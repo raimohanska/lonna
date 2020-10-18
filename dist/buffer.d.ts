@@ -5,5 +5,5 @@ export declare type VoidFunction = () => void;
  *  call the given void function to cause a buffer flush.
  */
 export declare type DelayFunction = (f: VoidFunction) => any;
-export declare function bufferWithTime<V>(src: EventStream<V> | EventStreamSeed<V>, delay: number | DelayFunction): EventStreamSeed<V[]>;
-export declare function bufferWithCount<V>(src: EventStream<V> | EventStreamSeed<V>, count: number): EventStreamSeed<V[]>;
+export declare function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]>;
+export declare function bufferWithCount<V>(count: number): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]>;

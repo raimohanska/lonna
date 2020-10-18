@@ -6,7 +6,7 @@ import { expectStreamEvents } from "./test-utils";
 describe("Bacon.fromPoll", () => {
   describe("repeatedly polls given function for values", () =>
     expectStreamEvents(
-      () => take(2, fromPoll(1, (() => "lol"))),
+      () => take(2)(fromPoll(1, (() => "lol"))),
       ["lol", "lol"])
   );
   /*

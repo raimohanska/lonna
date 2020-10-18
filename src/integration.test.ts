@@ -6,23 +6,23 @@ import { filter } from "./filter"
 
 describe("PropertySeed",() => {
     it("Can be used only once", () => {
-        const seed = toProperty(later(1, 1), 0)
-        map(seed, () => {})
+        const seed = toProperty(0)(later(1, 1))
+        map(() => {})(seed)
         
-        expect(() => map(seed, () => {})).toThrow("already consumed")
+        expect(() => map(() => {})(seed)).toThrow("already consumed")
     })
 })
 describe("EventStreamSeed",() => {
     it("Can be used only once", () => {
         const seed = later(1, 1)
-        map(seed, () => {})
-        expect(() => map(seed, () => {})).toThrow("already consumed")
+        map(() => {})(seed)
+        expect(() => map(() => {})(seed)).toThrow("already consumed")
     })
 })
 describe("AtomSeed",() => {
     it("Can be used only once", () => {
-        const seed = filter(atom(0), () => true)
-        map(seed, () => {})        
-        expect(() => map(seed, () => {})).toThrow("already consumed")
+        const seed = filter(() => true)(atom(0))
+        map(() => {})(seed)        
+        expect(() => map(() => {})(seed)).toThrow("already consumed")
     })
 })

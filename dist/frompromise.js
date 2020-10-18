@@ -42,13 +42,13 @@ function fromPromise(promise) {
     var get = function () { return currentState; };
     var property = new property_1.StatelessProperty("fromPromise(" + tostring_1.toString(promise) + ")", get, onChange, scope_1.globalScope);
     if (mapper.length > 0) {
-        return map_1.map(property, function (state) {
+        return map_1.map(function (state) {
             if (state.state === "pending")
                 return mapper[0]();
             if (state.state === "resolved")
                 return mapper[1](state.value);
             return mapper[2](state.error);
-        });
+        })(property);
     }
     return property;
 }

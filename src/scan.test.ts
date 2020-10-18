@@ -4,7 +4,7 @@ import { valueEvent, Event } from "./abstractions"
 describe("Property", () => {
     it("scan", () => {
         const b = B.bus<number>()
-        const prop = B.scan(b, 0, (a, b) => a + b, B.globalScope)
+        const prop = B.scan(0, (a: number, b: number) => a + b, B.globalScope)(b)
         const values: number[] = []
         const valuesChange: Event<number>[] = []
         prop.forEach(v => values.push(v))

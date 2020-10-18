@@ -32,7 +32,7 @@ function merge() {
         return function () { return unsubs.forEach(function (f) { return f(); }); };
     });
     if (sources[0] instanceof abstractions_1.EventStream) {
-        return applyscope_1.applyScope(sources[0].getScope(), seed);
+        return applyscope_1.applyScope(sources[0].getScope())(seed);
     }
     return seed;
 }

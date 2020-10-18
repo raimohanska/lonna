@@ -1,4 +1,4 @@
-import { applyScope, applyScopeMaybe } from "./applyscope"
+import { applyScopeMaybe } from "./applyscope"
 import { EventStream, EventStreamSeed } from "."
 import { Scope } from "./scope"
 import GlobalScheduler from "./scheduler"

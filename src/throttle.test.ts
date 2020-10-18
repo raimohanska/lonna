@@ -6,17 +6,17 @@ import { throttle } from "./throttle";
 describe("EventStream.throttle(delay)", function() {
   describe("outputs at steady intervals, without waiting for quiet period", () =>
     expectStreamTimings(
-      () => throttle(series(2, [1, 2, 3]), 3),
+      () => throttle(3)(series(2, [1, 2, 3])),
       [[5, 2], [8, 3]])
   );
-  it("toString", () => expect(throttle(never(), 1).toString()).toEqual("never.throttle(1)"));
+  it("toString", () => expect(throttle(1)(never()).toString()).toEqual("never.throttle(1)"));
 });
 
 describe("Property.throttle", function() {
   describe("throttles changes, but not initial value", () =>
     expectPropertyEvents(
-      () => throttle(toProperty(series(1, [1,2,3]), 0), 4),
+      () => throttle(4)(toProperty(0)(series(1, [1,2,3]))),
       [0,3])
   );
-  it("toString", () => expect(throttle(constant(0), 1).toString()).toEqual("constant(0).throttle(1)"));
+  it("toString", () => expect(throttle(1)(constant(0)).toString()).toEqual("constant(0).throttle(1)"));
 });

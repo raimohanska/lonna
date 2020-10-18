@@ -21,7 +21,7 @@ export function view<A, B>(atom: ObservableSeed<any, any>, view: any): any {
     if (atom instanceof Atom) {
         return new LensedAtom<A, B>(desc, atom.consume(), lens)     
     } else {
-        return rename(desc, map(atom as any, lens.get))
+        return rename(desc, map(lens.get)(atom as any))
     }
 }
 

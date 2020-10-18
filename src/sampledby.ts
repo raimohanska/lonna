@@ -1,6 +1,6 @@
 import { EventStream, Property } from "./abstractions";
 import { map } from "./map";
 
-export function sampledBy<A>(prop: Property<A>, sampler: EventStream<any>): EventStream<A> {
-    return map(sampler, prop)
+export function sampledBy<A>(sampler: EventStream<any>): (prop: Property<A>) => EventStream<A> {
+    return (prop: Property<A>) => map(prop)(sampler)
 }

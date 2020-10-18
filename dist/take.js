@@ -4,8 +4,10 @@ exports.take = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var transform_1 = require("./transform");
-function take(count, s, scope) {
-    return applyscope_1.applyScopeMaybe(transform_1.transform(s + ".map(fn)", s, takeT(count)), scope);
+function take(count, scope) {
+    return function (s) {
+        return applyscope_1.applyScopeMaybe(transform_1.transform(s + ".map(fn)", takeT(count))(s), scope);
+    };
 }
 exports.take = take;
 function takeT(count) {

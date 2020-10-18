@@ -9,7 +9,7 @@ describe("Property", () => {
         })
 
         it ("Has synchronous current value", () => {
-            const prop = B.toProperty(B.never<number>(), "hello", globalScope)
+            const prop = B.toProperty("hello", globalScope)(B.never<number>())
             expect(prop.get()).toEqual("hello")
         })
     })

@@ -32,7 +32,7 @@ function view(atom, view) {
         return new atom_1.LensedAtom(desc, atom.consume(), lens);
     }
     else {
-        return util_1.rename(desc, map_1.map(atom, lens.get));
+        return util_1.rename(desc, map_1.map(lens.get)(atom));
     }
 }
 exports.view = view;

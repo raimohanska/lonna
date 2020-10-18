@@ -10,7 +10,7 @@ describe("combineTemplate", function() {
             expectPropertyEvents(
                 function() {
                    const name = constant({first:"jack", last:"bauer"});
-                   const stuff = toProperty(later(1, { key: "value" }), { "key": "initial" });
+                   const stuff = toProperty({ "key": "initial" })(later(1, { key: "value" }));
                    const combined = combineTemplateS({ name, stuff });
                    return combined
                  },

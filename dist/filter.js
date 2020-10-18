@@ -4,8 +4,8 @@ exports.filter = void 0;
 var abstractions_1 = require("./abstractions");
 var applyscope_1 = require("./applyscope");
 var transform_1 = require("./transform");
-function filter(s, fn, scope) {
-    return applyscope_1.applyScopeMaybe(transform_1.transform(s + ".filter(fn)", s, filterT(fn)), scope);
+function filter(fn, scope) {
+    return function (s) { return applyscope_1.applyScopeMaybe(transform_1.transform(s + ".filter(fn)", filterT(fn))(s), scope); };
 }
 exports.filter = filter;
 function filterT(fn) {

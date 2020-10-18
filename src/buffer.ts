@@ -9,13 +9,14 @@ export type VoidFunction = () => void
  *  call the given void function to cause a buffer flush.
  */
 export type DelayFunction = (f: VoidFunction) => any
+
 // TODO: improve types and have EventStream implement EventStreamSeed
-export function bufferWithTime<V>(src: EventStream<V> | EventStreamSeed<V>, delay: number | DelayFunction): EventStreamSeed<V[]> {
-  return bufferWithTimeOrCount(src + `.bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
+export function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
+  return src => bufferWithTimeOrCount(src + `.bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
 };
 
-export function bufferWithCount<V>(src: EventStream<V> | EventStreamSeed<V>, count: number): EventStreamSeed<V[]> {
-  return bufferWithTimeOrCount(src + `.bufferWithCount(${count})`, src, undefined, count)
+export function bufferWithCount<V>(count: number): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
+  return src => bufferWithTimeOrCount(src + `.bufferWithCount(${count})`, src, undefined, count)
 };
 
 
@@ -110,5 +111,5 @@ function buffer<V>(desc: string, src: EventStream<V> | EventStreamSeed<V>, onInp
       }
     }
   }
-  return transform<V, V[]>(desc, src, transformer)
+  return transform<V, V[]>(desc, transformer)(src)
 };

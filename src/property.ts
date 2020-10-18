@@ -87,27 +87,39 @@ export class StatefulProperty<V> extends Property<V> {
     }
 }
 
-export function toStatelessProperty<A>(stream: EventStream<any>, get: () => A): Property<A>
-export function toStatelessProperty<A>(onChange: Subscribe<any>, get: () => A): Property<A>
-
-export function toStatelessProperty<A>(streamOrSubscribe: any, get: () => A): Property<A> {
-    if (streamOrSubscribe instanceof EventStream) {        
-        return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
-    } else {
-        return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
+export interface ToStatelessPropertyOp<A> {
+    (stream: EventStream<any>): Property<A>
+    (onChange: Subscribe<any>): Property<A>
+}
+export function toStatelessProperty<A>(get: () => A): ToStatelessPropertyOp<A>
+export function toStatelessProperty<A>(get: () => A) {
+    return (streamOrSubscribe: any) => {
+        if (streamOrSubscribe instanceof EventStream) {        
+            return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
+        } else {
+            return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
+        }
     }
 }
 
-export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
-export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
-export function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;
-export function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
+export interface ToPropertyOp<A> {
+    (stream: EventStream<A> | EventStreamSeed<A>): PropertySeed<A>;
+    <B>(stream: EventStream<B> | EventStreamSeed<B>): PropertySeed<A | B>;
+}
+export interface ToPropertyOpScoped<A> {
+    (stream: EventStream<A> | EventStreamSeed<A>): Property<A>;
+    <B>(stream: EventStream<B> | EventStreamSeed<A>): Property<A | B>;    
+}
 
-export function toProperty(seed: EventStream<any> | EventStreamSeed<any>, initial: any, scope?: Scope): Property<any> | PropertySeed<any> {    
-    const source = seed.consume()
-    return applyScopeMaybe(new PropertySeed(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
-        return source.subscribe(observer)
-    }), scope)
+export function toProperty<A>(initial: A): ToPropertyOp<A>;
+export function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
+export function toProperty(initial: any, scope?: Scope) {    
+    return (seed: EventStream<any> | EventStreamSeed<any>) => {
+        const source = seed.consume()
+        return applyScopeMaybe(new PropertySeed(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
+            return source.subscribe(observer)
+        }), scope)    
+    }
 }
 
 export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A> {
@@ -118,5 +130,5 @@ export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): Prop
 }
 
 export function constant<A>(value: A): Property<A> {
-    return rename(`constant(${toString(value)})`, toProperty(never(), value, globalScope))
+    return rename(`constant(${toString(value)})`, toProperty(value, globalScope)(never()))
 }

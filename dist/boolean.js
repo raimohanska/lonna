@@ -12,7 +12,7 @@ function and(left, right) {
 }
 exports.and = and;
 function not(prop) {
-    return map_1.map(prop, function (x) { return !x; });
+    return map_1.map(function (x) { return !x; })(prop);
 }
 exports.not = not;
 //# sourceMappingURL=boolean.js.map

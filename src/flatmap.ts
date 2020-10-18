@@ -9,12 +9,20 @@ export type FlatMapOptions = {
 
 export type Spawner<A, O> = (value: A) => O
 
-// TODO: improve types and have EventStream implement EventStreamSeed
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): EventStreamSeed<B>;
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): EventStream<B>;
+export interface FlatMapOp<A, B> {
+    (s: EventStream<A> | EventStreamSeed<A>): EventStreamSeed<B>;
+}
+export interface FlatMapOpScoped<A, B> {
+    (s: EventStream<A> | EventStreamSeed<A>): EventStream<B>;
+}
 
-export function flatMap<A, B>(s: EventStream<A> | EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
-    return applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s as EventStreamSeed<A>, fn, {}), scope) // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
+// TODO: improve types and have EventStream implement EventStreamSeed
+export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): FlatMapOp<A, B>;
+export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): FlatMapOpScoped<A, B>;
+
+export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
+    return (s: EventStream<A> | EventStreamSeed<A>) => 
+        applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s as EventStreamSeed<A>, fn, {}), scope) // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
 }
 
 export type FlatMapChild<B extends Observable<any>> = {

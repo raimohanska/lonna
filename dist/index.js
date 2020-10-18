@@ -32,6 +32,7 @@ __exportStar(require("./later"), exports);
 __exportStar(require("./map"), exports);
 __exportStar(require("./merge"), exports);
 __exportStar(require("./never"), exports);
+__exportStar(require("./pipe"), exports);
 __exportStar(require("./property"), exports);
 __exportStar(require("./repeat"), exports);
 __exportStar(require("./sampledby"), exports);

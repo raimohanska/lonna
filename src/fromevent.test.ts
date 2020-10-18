@@ -42,7 +42,7 @@ describe("Bacon.fromEvent", function() {
           emitter.on("newListener", () => soon(() => emitter.emit("click", "x")));
           const element = toEventTarget(emitter);
           const src = fromEvent(element, "click")
-          return take(1, src);
+          return take(1)(src);
         },
         ["x"]
       )
@@ -53,7 +53,7 @@ describe("Bacon.fromEvent", function() {
         function() {
           const emitter = new EventEmitter();
           emitter.on("newListener", () => soon(() => emitter.emit("data", "x")));
-          return take(1, fromEvent(emitter, "data"));
+          return take(1)(fromEvent(emitter, "data"));
         },
         ["x"]
       )
@@ -61,7 +61,7 @@ describe("Bacon.fromEvent", function() {
 
     it("should clean up event listeners from EventEmitter", function() {
       const emitter = new EventEmitter();
-      const stream = take(1, fromEvent(emitter, "data"))
+      const stream = take(1)(fromEvent(emitter, "data"))
       stream.forEach(function() {})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       emitter.emit("data", "x");
       expect(emitter.listeners("data").length).toEqual(0);
@@ -78,7 +78,7 @@ describe("Bacon.fromEvent", function() {
     it("should create EventStream from on/off event", function() {
       const values: string[] = [];
       const src = onOffSource();
-      take(1, fromEvent<string>(src, "test")).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
+      take(1)(fromEvent<string>(src, "test")).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       expect(values).toEqual(["test"]);
       expect(src.cleaned).toEqual(true);
     });
@@ -88,14 +88,14 @@ describe("Bacon.fromEvent", function() {
       const src = {
         addListener(type: any, callback: any) { return callback(type); }
       };
-      take(1, fromEvent<string>(src, "test")).forEach(value => {values.push(value)});
+      take(1)(fromEvent<string>(src, "test")).forEach(value => {values.push(value)});
       expect(values).toEqual(["test"])
   });
 
     it("should create EventStream from bind/unbind event", function() {
       const values: string[] = [];
       const src = bindUnbindSource();
-      take(1, fromEvent<string>(src, "test")).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
+      take(1)(fromEvent<string>(src, "test")).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       expect(values).toEqual(["test"]);
       expect(src.cleaned).toEqual(true);
 
@@ -111,7 +111,7 @@ describe("Bacon.fromEvent", function() {
           const emitter = new EventEmitter();
           emitter.on("newListener", () => soon(() => emitter.emit("click", "x")));
           const element = toEventTarget(emitter);
-          return take(1, fromEvent(element, (binder, listener) => binder("click", listener)));
+          return take(1)(fromEvent(element, (binder, listener) => binder("click", listener)));
         },
         ["x"]
       )
@@ -122,7 +122,7 @@ describe("Bacon.fromEvent", function() {
         function() {
           const emitter = new EventEmitter();
           emitter.on("newListener", () => soon(() => emitter.emit("data", "x")));
-          return take(1, fromEvent(emitter, (binder, listener) => binder("data", listener)));
+          return take(1)(fromEvent(emitter, (binder, listener) => binder("data", listener)));
         },
         ["x"]
       )
@@ -130,7 +130,7 @@ describe("Bacon.fromEvent", function() {
 
     it("should clean up event listeners from EventEmitter", function() {
       const emitter = new EventEmitter();
-      take(1, fromEvent(emitter, (binder, listener) => binder("data", listener))).forEach(function() {})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
+      take(1)(fromEvent(emitter, (binder, listener) => binder("data", listener))).forEach(function() {})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       emitter.emit("data", "x");
       expect(emitter.listeners("data").length).toEqual(0);
     });
@@ -146,7 +146,7 @@ describe("Bacon.fromEvent", function() {
     it("should create EventStream from on/off event", function() {
       const values: string[] = [];
       const src = onOffSource();
-      take(1, fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
+      take(1)(fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       expect(values).toEqual(["test"]);
         expect(src.cleaned).toEqual(true);
     });
@@ -156,14 +156,14 @@ describe("Bacon.fromEvent", function() {
       const src = {
         addListener(type: any, callback: any) { return callback(type); }
       };
-      take(1, fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)});
+      take(1)(fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)});
       expect(values).toEqual(["test"])
   });
 
     it("should create EventStream from bind/unbind event", function() {
       const values: string[] = [];
       const src = bindUnbindSource();
-      take(1, fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
+      take(1)(fromEvent<string>(src, (binder, listener) => binder("test", listener))).forEach(value => {values.push(value)})(); // TODO: currently Lonna streams don't auto-unsub on end. Should they?
       expect(values).toEqual(["test"]);
       expect(src.cleaned).toEqual(true);
     });

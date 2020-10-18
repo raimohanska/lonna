@@ -52,7 +52,6 @@ function update() {
         scope = args[0];
         initial = args[1];
         patterns = args.slice(2);
-        console.log("Scoped", initial, patterns);
     }
     else {
         scope = undefined;
@@ -87,14 +86,14 @@ function update() {
             var constantValue_1 = combinator;
             combinator = function () { return constantValue_1; };
         }
-        return map_1.map(trigger, (function (v1) {
+        return map_1.map((function (v1) {
             return function (state) {
                 var propValues = properties.map(function (p) { return p.get(); });
                 return combinator.apply(void 0, __spread([state, v1], propValues));
             };
-        }));
+        }))(trigger);
     });
-    return util_1.rename("update(" + tostring_1.toString(initial) + "," + tostring_1.toString(patterns) + ")", applyscope_1.applyScopeMaybe(scan_1.scan(merge_1.merge(mutators), initial, function (state, mutation) { return mutation(state); }), scope));
+    return util_1.rename("update(" + tostring_1.toString(initial) + "," + tostring_1.toString(patterns) + ")", applyscope_1.applyScopeMaybe(scan_1.scan(initial, function (state, mutation) { return mutation(state); })(merge_1.merge(mutators)), scope));
 }
 exports.update = update;
 //# sourceMappingURL=update.js.map

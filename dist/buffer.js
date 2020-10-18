@@ -9,13 +9,13 @@ var scheduler_1 = __importDefault(require("./scheduler"));
 var transform_1 = require("./transform");
 var util_1 = require("./util");
 // TODO: improve types and have EventStream implement EventStreamSeed
-function bufferWithTime(src, delay) {
-    return bufferWithTimeOrCount(src + (".bufferWithTime(" + delay + ")"), src, delay, Number.MAX_VALUE);
+function bufferWithTime(delay) {
+    return function (src) { return bufferWithTimeOrCount(src + (".bufferWithTime(" + delay + ")"), src, delay, Number.MAX_VALUE); };
 }
 exports.bufferWithTime = bufferWithTime;
 ;
-function bufferWithCount(src, count) {
-    return bufferWithTimeOrCount(src + (".bufferWithCount(" + count + ")"), src, undefined, count);
+function bufferWithCount(count) {
+    return function (src) { return bufferWithTimeOrCount(src + (".bufferWithCount(" + count + ")"), src, undefined, count); };
 }
 exports.bufferWithCount = bufferWithCount;
 ;
@@ -110,7 +110,7 @@ function buffer(desc, src, onInput, onFlush) {
             }
         }
     };
-    return transform_1.transform(desc, src, transformer);
+    return transform_1.transform(desc, transformer)(src);
 }
 ;
 //# sourceMappingURL=buffer.js.map

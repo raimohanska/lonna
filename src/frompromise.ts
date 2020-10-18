@@ -56,11 +56,11 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
     const property = new StatelessProperty(`fromPromise(${toString(promise)})`, get, onChange, globalScope)
 
     if (mapper.length > 0) {
-        return map(property, state => {
+        return map((state: PromiseState<any>) => {
             if (state.state === "pending") return mapper[0]()
             if (state.state === "resolved") return mapper[1](state.value)
             return mapper[2](state.error)
-        })
+        })(property)
     }
 
     return property

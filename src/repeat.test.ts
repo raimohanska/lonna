@@ -27,7 +27,7 @@ describe("repeat", function() {
         return repeat(function(iteration) {
           count++;
           if (count <= 3) {
-            return toProperty(later(1, count * iteration), -1);
+            return toProperty(-1)(later(1, count * iteration));
           }
         });
       },

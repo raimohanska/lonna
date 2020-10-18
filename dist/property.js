@@ -94,20 +94,24 @@ var StatefulProperty = /** @class */ (function (_super) {
     return StatefulProperty;
 }(abstractions_1.Property));
 exports.StatefulProperty = StatefulProperty;
-function toStatelessProperty(streamOrSubscribe, get) {
-    if (streamOrSubscribe instanceof abstractions_1.EventStream) {
-        return new StatelessProperty(streamOrSubscribe.desc, get, map_1.mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope());
-    }
-    else {
-        return new StatelessProperty("toStatelessProperty(" + streamOrSubscribe + "," + get, get, map_1.mapSubscribe(streamOrSubscribe, get), scope_1.globalScope);
-    }
+function toStatelessProperty(get) {
+    return function (streamOrSubscribe) {
+        if (streamOrSubscribe instanceof abstractions_1.EventStream) {
+            return new StatelessProperty(streamOrSubscribe.desc, get, map_1.mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope());
+        }
+        else {
+            return new StatelessProperty("toStatelessProperty(" + streamOrSubscribe + "," + get, get, map_1.mapSubscribe(streamOrSubscribe, get), scope_1.globalScope);
+        }
+    };
 }
 exports.toStatelessProperty = toStatelessProperty;
-function toProperty(seed, initial, scope) {
-    var source = seed.consume();
-    return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(seed + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {
-        return source.subscribe(observer);
-    }), scope);
+function toProperty(initial, scope) {
+    return function (seed) {
+        var source = seed.consume();
+        return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(seed + (".toProperty(" + initial + ")"), function () { return initial; }, function (observer) {
+            return source.subscribe(observer);
+        }), scope);
+    };
 }
 exports.toProperty = toProperty;
 function toPropertySeed(property) {
@@ -118,7 +122,7 @@ function toPropertySeed(property) {
 }
 exports.toPropertySeed = toPropertySeed;
 function constant(value) {
-    return util_1.rename("constant(" + util_1.toString(value) + ")", toProperty(never_1.never(), value, scope_1.globalScope));
+    return util_1.rename("constant(" + util_1.toString(value) + ")", toProperty(value, scope_1.globalScope)(never_1.never()));
 }
 exports.constant = constant;
 //# sourceMappingURL=property.js.map

@@ -11,5 +11,5 @@ export function and(left: Property<boolean>, right: Property<boolean>): Property
 }
 
 export function not(prop: Property<boolean>): Property<boolean> {
-    return map(prop, x => !x)
+    return map(x => !x)(prop)
 }

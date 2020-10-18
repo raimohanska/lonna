@@ -17,11 +17,20 @@ export declare class StatefulProperty<V> extends Property<V> {
     get(): V;
     getScope(): Scope;
 }
-export declare function toStatelessProperty<A>(stream: EventStream<any>, get: () => A): Property<A>;
-export declare function toStatelessProperty<A>(onChange: Subscribe<any>, get: () => A): Property<A>;
-export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A): PropertySeed<A>;
-export declare function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B): PropertySeed<A | B>;
-export declare function toProperty<A>(stream: EventStream<A> | EventStreamSeed<A>, initial: A, scope: Scope): Property<A>;
-export declare function toProperty<A, B>(stream: EventStream<A> | EventStreamSeed<A>, initial: B, scope: Scope): Property<A | B>;
+export interface ToStatelessPropertyOp<A> {
+    (stream: EventStream<any>): Property<A>;
+    (onChange: Subscribe<any>): Property<A>;
+}
+export declare function toStatelessProperty<A>(get: () => A): ToStatelessPropertyOp<A>;
+export interface ToPropertyOp<A> {
+    (stream: EventStream<A> | EventStreamSeed<A>): PropertySeed<A>;
+    <B>(stream: EventStream<B> | EventStreamSeed<B>): PropertySeed<A | B>;
+}
+export interface ToPropertyOpScoped<A> {
+    (stream: EventStream<A> | EventStreamSeed<A>): Property<A>;
+    <B>(stream: EventStream<B> | EventStreamSeed<A>): Property<A | B>;
+}
+export declare function toProperty<A>(initial: A): ToPropertyOp<A>;
+export declare function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
 export declare function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A>;
 export declare function constant<A>(value: A): Property<A>;

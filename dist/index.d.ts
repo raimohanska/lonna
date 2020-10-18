@@ -20,6 +20,7 @@ export * from "./later";
 export * from "./map";
 export * from "./merge";
 export * from "./never";
+export * from "./pipe";
 export * from "./property";
 export * from "./repeat";
 export * from "./sampledby";

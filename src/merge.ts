@@ -30,7 +30,7 @@ export function merge<A>(...args: any[]) {
         return () => unsubs.forEach(f => f())
     })
     if (sources[0] instanceof EventStream) {
-        return applyScope(sources[0].getScope(), seed)
+        return applyScope(sources[0].getScope())(seed)
     }
     return seed
 }

@@ -10,21 +10,21 @@ const lessThan = (n: number) => (x: number) => x < n
 describe("EventStream.filter", function () {
     describe("should filter values", () =>
         expectStreamEvents(
-            () => filter(series(1, [1, 2, 3]), lessThan(3)),
+            () => filter(lessThan(3))(series(1, [1, 2, 3])),
             [1, 2])
     );
-    it("toString", () => expect(filter(never(), () => false).toString()).toEqual("never.filter(fn)"));
+    it("toString", () => expect(filter(() => false)(never()).toString()).toEqual("never.filter(fn)"));
 });
 
 describe("Property.filter", function () {
     describe("should filter values", () =>
         expectPropertyEvents(
-            () => filter(toProperty(series(1, [1, 2, 3]), 0), lessThan(3)),
+            () => filter(lessThan(3))(toProperty(0)(series(1, [1, 2, 3]))),
             [0, 1, 2])
     );
     it("preserves old current value if the updated value is non-matching", function () {
         const a = atom(1)
-        const p = filter(a, lessThan(2), globalScope);
+        const p = filter(lessThan(2), globalScope)(a);
         a.set(2)
         expect(p.get()).toEqual(1)
     });
@@ -33,7 +33,7 @@ describe("Property.filter", function () {
 describe("Atom.filter", () => {
     describe("Root atom", () => {
         it("Freezes on unwanted values", () => {
-            const a = B.filter(B.atom<string | null>("hello"), a => a !== null, B.globalScope)
+            const a = B.filter(a => a !== null, B.globalScope)(B.atom<string | null>("hello"))
             
             a.set("world")
             expect(a.get()).toEqual("world")
@@ -42,7 +42,7 @@ describe("Atom.filter", () => {
         })
     
         it("Freezes on unwanted values (when not getting in between sets)", () => {
-            const atom = B.filter(B.atom<string | null>("hello"), a => a !== null, B.globalScope)    
+            const atom = B.filter(a => a !== null, B.globalScope)(B.atom<string | null>("hello"))
             
             atom.set("world")        
             atom.set(null)
@@ -54,9 +54,9 @@ describe("Atom.filter", () => {
     describe("Dependent atom", () => {
         it("Freezes on unwanted values", () => {
             var b = B.bus()
-            var prop = B.toProperty(b, "1", B.globalScope)
+            var prop = B.toProperty("1", B.globalScope)(b)
             const root = B.atom(prop, newValue => b.push(newValue))
-            var atom = B.filter(root, a => a !== null, B.globalScope)
+            var atom = B.filter(a => a !== null, B.globalScope)(root)
 
             atom.set("world")
             expect(atom.get()).toEqual("world")
@@ -66,9 +66,9 @@ describe("Atom.filter", () => {
 
         it("Freezes on unwanted values (subscriber case)", () => {
             var b = B.bus()
-            var prop = B.toProperty(b, "1", B.globalScope)
+            var prop = B.toProperty("1", B.globalScope)(b)
             const root = B.atom(prop, newValue => b.push(newValue))
-            var atom = B.filter(root, a => a !== null, B.globalScope)
+            var atom = B.filter(a => a !== null, B.globalScope)(root)
 
             atom.set("world")        
             atom.set(null)

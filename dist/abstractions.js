@@ -12,8 +12,29 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AtomSource = exports.AtomSeed = exports.Atom = exports.EventStreamSource = exports.EventStreamSeed = exports.EventStream = exports.PropertySource = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservableSeed = exports.isObservable = exports.Observable = exports.ObservableSeedImpl = exports.ObservableSeed = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+exports.AtomSource = exports.AtomSeed = exports.Atom = exports.EventStreamSource = exports.EventStreamSeed = exports.EventStream = exports.PropertySource = exports.PropertySeed = exports.Property = exports.ScopedObservable = exports.isObservableSeed = exports.isObservable = exports.Observable = exports.ObservableSeedImpl = exports.ObservableSeed = exports.Pipeable = exports.endEvent = exports.valueObserver = exports.isEnd = exports.isValue = exports.valueEvent = exports.toEvents = exports.toEvent = exports.End = exports.Value = exports.Event = void 0;
+var pipe_1 = require("./pipe");
 var Event = /** @class */ (function () {
     function Event() {
     }
@@ -73,9 +94,25 @@ function valueObserver(observer) {
 }
 exports.valueObserver = valueObserver;
 exports.endEvent = new End();
-var ObservableSeed = /** @class */ (function () {
+var Pipeable = /** @class */ (function () {
+    function Pipeable() {
+    }
+    Pipeable.prototype.pipe = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        return pipe_1.pipe.apply(void 0, __spread([this], args));
+    };
+    return Pipeable;
+}());
+exports.Pipeable = Pipeable;
+var ObservableSeed = /** @class */ (function (_super) {
+    __extends(ObservableSeed, _super);
     function ObservableSeed(desc) {
-        this.desc = desc;
+        var _this = _super.call(this) || this;
+        _this.desc = desc;
+        return _this;
     }
     ObservableSeed.prototype.toString = function () {
         return this.desc;
@@ -87,7 +124,7 @@ var ObservableSeed = /** @class */ (function () {
         this.forEach(function (v) { return message === undefined ? console.log(v) : console.log(message, v); });
     };
     return ObservableSeed;
-}());
+}(Pipeable));
 exports.ObservableSeed = ObservableSeed;
 var ObservableSeedImpl = /** @class */ (function (_super) {
     __extends(ObservableSeedImpl, _super);
