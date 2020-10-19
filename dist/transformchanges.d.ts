@@ -1,10 +1,6 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Observable, Property, PropertySeed } from "./abstractions";
+import { EventStreamSeed } from "./abstractions";
 import { Scope } from "./scope";
+import { UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
 export declare type EventStreamDelay<V> = (stream: EventStreamSeed<V>) => EventStreamSeed<V>;
-export declare function transformChanges<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transformer: EventStreamDelay<A>): AtomSeed<A>;
-export declare function transformChanges<A>(desc: string, seed: AtomSeed<A> | Atom<A>, transformer: EventStreamDelay<A>, scope: Scope): Atom<A>;
-export declare function transformChanges<A>(desc: string, seed: EventStreamSeed<A> | EventStream<A>, transformer: EventStreamDelay<A>): EventStreamSeed<A>;
-export declare function transformChanges<A>(desc: string, seed: Property<A> | PropertySeed<A>, transformer: EventStreamDelay<A>): PropertySeed<A>;
-export declare function transformChanges<A>(desc: string, seed: EventStreamSeed<A> | EventStream<A>, transformer: EventStreamDelay<A>, scope: Scope): EventStream<A>;
-export declare function transformChanges<A>(desc: string, seed: Property<A> | PropertySeed<A>, transformer: EventStreamDelay<A>, scope: Scope): Property<A>;
-export declare function transformChanges<A>(desc: string, o: Observable<A>, transformer: EventStreamDelay<A>): Observable<A>;
+export declare function transformChanges<A>(descSuffix: string, transformer: EventStreamDelay<A>): UnaryTransformOp<A>;
+export declare function transformChanges<A>(descSuffix: string, transformer: EventStreamDelay<A>, scope: Scope): UnaryTransformOpScoped<A>;

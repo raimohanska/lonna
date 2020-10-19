@@ -80,7 +80,13 @@ var FlatMapPropertySeed = /** @class */ (function (_super) {
             if (children.length != 1) {
                 throw Error("Unexpected child count: " + children.length);
             }
-            return children[0].observable.get();
+            var observable = children[0].observable;
+            if (observable instanceof abstractions_1.Property || observable instanceof abstractions_1.PropertySource) {
+                return observable.get();
+            }
+            else {
+                throw Error("Observable returned by the spawner function if flatMapLatest for Properties must return a Property. This one is not a Property: " + observable);
+            }
         };
         _this = _super.call(this, desc, get, function (observer) { return subscribe(function (value) {
             if (!initializing)

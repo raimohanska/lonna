@@ -18,16 +18,13 @@ export declare class StatefulProperty<V> extends Property<V> {
     getScope(): Scope;
 }
 export interface ToStatelessPropertyOp<A> {
-    (stream: EventStream<any>): Property<A>;
-    (onChange: Subscribe<any>): Property<A>;
+    (stream: EventStream<any> | Subscribe<any>): Property<A>;
 }
 export declare function toStatelessProperty<A>(get: () => A): ToStatelessPropertyOp<A>;
 export interface ToPropertyOp<A> {
-    (stream: EventStream<A> | EventStreamSeed<A>): PropertySeed<A>;
     <B>(stream: EventStream<B> | EventStreamSeed<B>): PropertySeed<A | B>;
 }
 export interface ToPropertyOpScoped<A> {
-    (stream: EventStream<A> | EventStreamSeed<A>): Property<A>;
     <B>(stream: EventStream<B> | EventStreamSeed<A>): Property<A | B>;
 }
 export declare function toProperty<A>(initial: A): ToPropertyOp<A>;
