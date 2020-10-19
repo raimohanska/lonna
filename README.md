@@ -23,5 +23,4 @@ Current prioritized goals:
 
 Other stuff:
 
-- Make the API pipeable
 - Bus should probably buffer pushes while dispatching. Subscriptions while dispatching should not be a major problem because of scoping and stateless composition. (to be proven)
