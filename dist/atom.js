@@ -17,6 +17,7 @@ exports.atom = exports.StatefulDependentAtom = exports.LensedAtom = void 0;
 var abstractions_1 = require("./abstractions");
 var dispatcher_1 = require("./dispatcher");
 var scope_1 = require("./scope");
+var util_1 = require("./util");
 var RootAtom = /** @class */ (function (_super) {
     __extends(RootAtom, _super);
     function RootAtom(desc, initialValue) {
@@ -157,10 +158,12 @@ var StatefulDependentAtom = /** @class */ (function (_super) {
 exports.StatefulDependentAtom = StatefulDependentAtom;
 function atom(x, y) {
     if (arguments.length == 1) {
-        return new RootAtom("RootAtom", x);
+        // TODO: construct desciptions in a structured manner like in Bacon
+        // TODO: dynamic toString for atoms and properties (current value)
+        return new RootAtom("Atom(" + util_1.toString(x) + ")", x);
     }
     else {
-        return new DependentAtom("DependentAtom(" + x + ")", x, y);
+        return new DependentAtom("DependentAtom(" + util_1.toString(x) + "," + util_1.toString(y) + ")", x, y);
     }
 }
 exports.atom = atom;
