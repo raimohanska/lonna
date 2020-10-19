@@ -24,7 +24,10 @@ describe("fromPromise", function() {
 
     describe("on success", () =>
       expectPropertyEvents(
-        () => fromPromise(new Promise(function(res, rej) { res("ok"); }) as any, ...mapper),
+        () => {
+          const p = fromPromise(new Promise(function(res, rej) { res("ok"); }) as any, ...mapper)
+          return p
+        },
         ["ok"])
     );
     describe("on error", () =>

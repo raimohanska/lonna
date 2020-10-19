@@ -2,7 +2,7 @@ import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, v
 import { Dispatcher } from "./dispatcher";
 import * as L from "./lens";
 import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
-
+import { toString } from "./util"
 type AtomEvents<V> = { "change": V }
 
 class RootAtom<V> extends Atom<V> {    
@@ -178,8 +178,10 @@ export function atom<A>(input: Property<A>, onChange: (updatedValue: A) => void)
 
 export function atom<A>(x: any, y?: any): Atom<A> {
     if (arguments.length == 1) {
-        return new RootAtom<A>("RootAtom", x)
+        // TODO: construct desciptions in a structured manner like in Bacon
+        // TODO: dynamic toString for atoms and properties (current value)
+        return new RootAtom<A>(`Atom(${toString(x)})`, x)
     } else {
-        return new DependentAtom(`DependentAtom(${x})`, x, y)
+        return new DependentAtom(`DependentAtom(${toString(x)},${toString(y)})`, x, y)
     }
 }
