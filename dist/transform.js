@@ -8,16 +8,16 @@ function transform(desc, transformer, scope) {
         if (x instanceof abstractions_1.EventStream || x instanceof abstractions_1.EventStreamSeed) {
             var transformFn_1 = (transformer instanceof Function) ? transformer : transformer.changes;
             var source_1 = x.consume();
-            return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed(desc, function (observer) { return source_1.subscribe(function (value) { return transformFn_1(value, observer); }); }));
+            return applyscope_1.applyScopeMaybe(new abstractions_1.EventStreamSeed(desc, function (observer) { return source_1.subscribe(function (value) { return transformFn_1(value, observer); }); }), scope);
         }
         var t = transformer;
         if (x instanceof abstractions_1.Atom || x instanceof abstractions_1.AtomSeed) {
             var source_2 = x.consume();
-            return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return t.init(source_2.get()); }, transformPropertySubscribe(source_2, t), function (newValue) { return source_2.set(newValue); }));
+            return applyscope_1.applyScopeMaybe(new abstractions_1.AtomSeed(desc, function () { return t.init(source_2.get()); }, transformPropertySubscribe(source_2, t), function (newValue) { return source_2.set(newValue); }), scope);
         }
         else if (x instanceof abstractions_1.Property || x instanceof abstractions_1.PropertySeed) {
             var source_3 = x.consume();
-            return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return t.init(source_3.get()); }, transformPropertySubscribe(source_3, t)));
+            return applyscope_1.applyScopeMaybe(new abstractions_1.PropertySeed(desc, function () { return t.init(source_3.get()); }, transformPropertySubscribe(source_3, t)), scope);
         }
         else {
             throw Error("Unknown observable " + x);

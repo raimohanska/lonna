@@ -19,7 +19,7 @@ export function applyScope(scope: Scope): GenericTransformOpScoped {
 }
 
 /** @hidden */
-export function applyScopeMaybe<A>(seed: any, scope?: Scope): any {
+export function applyScopeMaybe<A>(seed: any, scope: Scope | undefined): any {
     if (scope !== undefined) {
         return applyScope(scope)(seed)
     }

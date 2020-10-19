@@ -1,7 +1,6 @@
 import { EventStream } from "./abstractions"
-import { applyScope, applyScopeMaybe } from "./applyscope"
-import { later } from "./later"
-import { pipe } from "./pipe"
+import { applyScope } from "./applyscope"
+import { later } from "./later"
 import { globalScope } from "./scope"
 
 describe("applyScope", () => {

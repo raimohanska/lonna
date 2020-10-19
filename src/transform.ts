@@ -105,16 +105,15 @@ export function transform<A, B>(desc: string, transformer: Transformer<A, B> | S
         if (x instanceof EventStream || x instanceof EventStreamSeed) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes
             const source = x.consume()
-            return applyScopeMaybe(new EventStreamSeed(desc, observer => source.subscribe((value: Event<A>) => transformFn(value, observer))))    
+            return applyScopeMaybe(new EventStreamSeed(desc, observer => source.subscribe((value: Event<A>) => transformFn(value, observer))), scope)    
         } 
-    
         const t = transformer as Transformer<A, B>        
         if (x instanceof Atom || x instanceof AtomSeed) {
             const source = x.consume()
-            return applyScopeMaybe(new AtomSeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t), newValue => source.set(newValue)))
+            return applyScopeMaybe(new AtomSeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t), newValue => source.set(newValue)), scope)
         } else if (x instanceof Property || x instanceof PropertySeed) {
             const source = x.consume()
-            return applyScopeMaybe(new PropertySeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t)))
+            return applyScopeMaybe(new PropertySeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t)), scope)
         } else {
             throw Error("Unknown observable " + x)
         }    
