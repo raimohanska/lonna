@@ -1,18 +1,22 @@
 import { debounce } from ".";
+import { applyScope } from "./applyscope";
 import { never } from "./never";
 import { constant, toProperty } from "./property";
-import { expectPropertyEvents, expectStreamEvents, expectStreamTimings, series } from "./test-utils";
+import { expectPropertyEvents, expectStreamEvents, expectStreamTimings, series, testScope } from "./test-utils";
 import { throttle } from "./throttle";
 
 describe("EventStream.debounce(delay)", function () {
     describe("throttles input by given delay", () =>
         expectStreamEvents(
-            () => debounce(7)(series(2, [1, 1, 1, 1, 2])),
+            () => {
+                const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7))
+                return s
+            },
             [2])
     );
     describe("waits for a quiet period before outputing anything", () =>
         expectStreamTimings(
-            () => debounce(3)(series(2, [1, 2, 3, 4])),
+            () => series(2, [1, 2, 3, 4]).pipe(debounce(3)),
             [[11, 4]])
     );
 
@@ -22,7 +26,10 @@ describe("EventStream.debounce(delay)", function () {
 describe("Property.debounce", function () {
     describe("throttles changes, but not initial value", () =>
         expectPropertyEvents(
-            () => debounce(4)(toProperty(0)(series(1, [1, 2, 3]))),
+            () => {
+                const p = series(1, [1, 2, 3]).pipe(debounce(4), toProperty(0), applyScope(testScope()))
+                return p
+            },
             [0, 3])
     );
     it("toString", () => expect(debounce(1)(constant(0)).toString()).toEqual("constant(0).debounce(1)"));

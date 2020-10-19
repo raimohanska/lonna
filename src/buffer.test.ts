@@ -7,7 +7,10 @@ import { never } from "./never";
 describe("EventStream.bufferWithTime", function() {
   describe("returns events in bursts, passing through errors", () =>
     expectStreamEvents(
-      () =>  series(2, [1, 2, 3, 4, 5, 6, 7]).pipe(bufferWithTime(7)),
+      () => {
+        const s = series(2, [1, 2, 3, 4, 5, 6, 7]).pipe(bufferWithTime(7))
+        return s
+      },
       [[1, 2, 3, 4], [5, 6, 7]])
   );
   describe("keeps constant output rate even when input is sporadical", () =>

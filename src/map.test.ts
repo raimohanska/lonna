@@ -5,15 +5,16 @@ import { constant, toProperty } from "./property";
 import { expectPropertyEvents, expectStreamEvents, series, wait } from "./test-utils"
 
 const times2 = (x: number) => x * 2;
+const toString = (x: number) => "" + x;
 
 describe("Property.map", () => {
   describe("maps property values", () => {
     expectPropertyEvents(
       () => {
-        const x = series(1, [2]).pipe(toProperty(1), map(times2))
+        const x = series(1, [2]).pipe(toProperty(1), map(toString))
         return x
       },
-      [2, 4, ])
+      ["1", "2"])
   })
 });
 

@@ -1,9 +1,7 @@
-import { Event, EventStream, EventStreamSeed, Observer, Property, PropertySeed } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, EventStreamSource, Observer, Property, PropertySeed } from "./abstractions";
 import { StatelessEventStream } from "./eventstream";
 
-export function changes<T>(property: Property<T>): EventStream<T>
-export function changes<T>(property: PropertySeed<T>): EventStreamSeed<T>
-export function changes<T>(property: PropertySeed<T> | Property<T>): EventStreamSeed<T> | EventStream<T>
+export function changes<O extends PropertySeed<any> | Property<any>>(property: O): O extends PropertySeed<infer A> ? EventStreamSeed<A> : O extends Property<infer A> ? EventStream<A>: never;
 
 export function changes<T>(property: Property<T> | PropertySeed<T>): EventStream<T> | EventStreamSeed<T> {
     const desc = property + ".changes"

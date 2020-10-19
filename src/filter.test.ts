@@ -39,7 +39,7 @@ describe("Property.filter", function () {
 describe("Atom.filter", () => {
     describe("Root atom", () => {
         it("Freezes on unwanted values", () => {
-            const a = B.filter(a => a !== null, B.globalScope)(B.atom<string | null>("hello"))
+            const a = B.atom<string | null>("hello").pipe(B.filter(a => a !== null, B.globalScope))
             
             a.set("world")
             expect(a.get()).toEqual("world")

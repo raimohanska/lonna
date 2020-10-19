@@ -34,41 +34,41 @@ export type StatefulScopedTransformResult<B, O> = O extends Property<any>
 
 // TODO: by using type branding, we can find a common type for Property<A> and PropertySeed<A> and simplify these types
 
-export type StatefulUnaryTransformResult<B, O> = O extends Atom<any>
-    ? AtomSeed<B>
-    : O extends AtomSeed<any>
-        ? AtomSeed<B>
-        : O extends Property<any>            
-            ? PropertySeed<B>
-            : O extends PropertySeed<any>
-                ? PropertySeed<B>
-                : O extends EventStream<any>
-                    ? EventStreamSeed<B>
-                    : O extends EventStreamSeed<any>
-                        ? EventStreamSeed<B>
+export type StatefulUnaryTransformResult<O> = O extends Atom<infer A>
+    ? AtomSeed<A>
+    : O extends AtomSeed<infer A>
+        ? AtomSeed<A>
+        : O extends Property<infer A>            
+            ? PropertySeed<A>
+            : O extends PropertySeed<infer A>
+                ? PropertySeed<A>
+                : O extends EventStream<infer A>
+                    ? EventStreamSeed<A>
+                    : O extends EventStreamSeed<infer A>
+                        ? EventStreamSeed<A>
                         : never
 
-export type StatefulScopedUnaryTransformResult<B, O> = O extends Atom<any>
-    ? Atom<B>
-    : O extends AtomSeed<any>
-        ? Atom<B>
-        : O extends Property<any>            
-            ? Property<B>
-            : O extends PropertySeed<any>
-                ? Property<B>
-                : O extends EventStream<any>
-                    ? EventStream<B>
-                    : O extends EventStreamSeed<any>
-                        ? EventStream<B>
+export type StatefulScopedUnaryTransformResult<O> = O extends Atom<infer A>
+    ? Atom<A>
+    : O extends AtomSeed<infer A>
+        ? Atom<A>
+        : O extends Property<infer A>            
+            ? Property<A>
+            : O extends PropertySeed<infer A>
+                ? Property<A>
+                : O extends EventStream<infer A>
+                    ? EventStream<A>
+                    : O extends EventStreamSeed<infer A>
+                        ? EventStream<A>
                         : never      
         
 
 export interface GenericTransformOp {
-    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<A, O>;    
+    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<O>;    
 }
 
 export interface GenericTransformOpScoped {
-    <A, O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<A, O>;
+    <A, O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<O>;
 }
 
 export interface BinaryTransformOp<A, B> {
@@ -88,11 +88,11 @@ export interface StreamTransformOpScoped<A, B> {
 }
 
 export interface UnaryTransformOp<A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<A, O>;  
+    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<O>;  
 }
 
 export interface UnaryTransformOpScoped<A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<A, O>;  
+    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<O>;  
 }
 
 export function transform<A>(desc: string, transformer: Transformer<A, A>): UnaryTransformOp<A>

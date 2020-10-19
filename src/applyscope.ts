@@ -1,19 +1,11 @@
 import { Atom, AtomSeed, EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions";
 import { StatefulDependentAtom } from "./atom";
 import { SeedToStream } from "./eventstream";
-import { constant, StatefulProperty } from "./property";
-import { globalScope, Scope } from "./scope";
+import { StatefulProperty } from "./property";
+import { Scope } from "./scope";
+import { GenericTransformOpScoped } from "./transform";
 
-export interface ApplyScopeFn {
-    <T>(stream: Atom<T>): Atom<T>;
-    <T>(stream: Property<T>): Property<T>;
-    <T>(stream: EventStream<T>): EventStream<T>;
-    <T>(stream: AtomSeed<T>): Atom<T>;
-    <T>(stream: PropertySeed<T>): Property<T>;
-    <T>(stream: EventStreamSeed<T>): EventStream<T>;    
-}
-
-export function applyScope(scope: Scope): ApplyScopeFn {
+export function applyScope(scope: Scope): GenericTransformOpScoped {
     return ((seed: any) => {
         if (seed instanceof EventStreamSeed || seed instanceof EventStream) {        
             return new SeedToStream(seed, scope)

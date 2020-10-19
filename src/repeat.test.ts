@@ -10,12 +10,13 @@ describe("repeat", function() {
     expectStreamEvents(
       function() {
         let count = 0;
-        return repeat(function(iteration) {
+        const s = repeat(function(iteration) {
           count++;
           if (count <= 3) {
             return later(1, count * iteration);
           }
         });
+        return s
       },
       [0,2,6])
   );

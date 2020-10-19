@@ -10,5 +10,5 @@ import { transformChanges } from "./transformchanges";
 export function debounce<A>(delay: number): GenericTransformOp
 export function debounce<A>(delay: number, scope: Scope): GenericTransformOpScoped
 export function debounce<A>(delay: number, scope?: Scope): any {
-    return (s: any) => applyScopeMaybe(transformChanges(s + `.debounce(${delay})`, s, changes => flatMapLatest(value => later(delay, value))(changes)), scope)
+    return transformChanges(`debounce(${delay})`, changes => flatMapLatest(value => later(delay, value))(changes), scope as any)
 }
