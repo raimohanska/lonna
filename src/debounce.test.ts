@@ -1,4 +1,5 @@
 import { debounce } from ".";
+import { EventStream } from "./abstractions";
 import { applyScope } from "./applyscope";
 import { never } from "./never";
 import { constant, toProperty } from "./property";
@@ -19,6 +20,11 @@ describe("EventStream.debounce(delay)", function () {
             () => series(2, [1, 2, 3, 4]).pipe(debounce(3)),
             [[11, 4]])
     );
+
+    it ("Scoped debounce", () => {
+        const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7, testScope()))
+        expect(s instanceof EventStream).toEqual(true)
+    })
 
     it("toString", () => expect(debounce(1)(never()).toString()).toEqual("never.debounce(1)"));
 });

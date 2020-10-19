@@ -13,20 +13,22 @@ export function transformChanges<A>(descSuffix: string, transformer: EventStream
 export function transformChanges<A, B>(descSuffix: string, transformer: EventStreamDelay<A>, scope?: Scope): any {
     return (x: any) => {
         const desc = `${x}.${descSuffix}`
+        let r;
         if (x instanceof EventStream || x instanceof EventStreamSeed) {
-            return rename(desc, transformer(x as EventStreamSeed<A>)) // TODO: stream coerced into stream seed due to improper typing
+            r = rename(desc, transformer(x as EventStreamSeed<A>)) // TODO: stream coerced into stream seed due to improper typing
         } else if (x instanceof Atom || x instanceof AtomSeed) {
             const source = x instanceof Property ? x : x.consume()
-            return applyScopeMaybe(new AtomSeed(desc, () => source.get(), observer => {
+            r = new AtomSeed(desc, () => source.get(), observer => {
                 return transformer(changes(source as any as AtomSeed<A>)).consume().subscribe(observer) // TODO: AtomSource coerced into AtomSeed due to improper typing
-            }, source.set))
+            }, source.set)
         } else if (x instanceof Property || x instanceof PropertySeed) {
             const source = x instanceof Property ? x : x.consume()
-            return applyScopeMaybe(new PropertySeed(desc, () => source.get(), observer => {
+            r = new PropertySeed(desc, () => source.get(), observer => {
                 return transformer(changes(source as any as PropertySeed<A>)).consume().subscribe(observer) // TODO: PropertySource coerced into PropertySeed due to improper typing
-            }))
+            })
         } else {
             throw Error("Unknown observable " + x)
         }
+        return applyScopeMaybe(r, scope)
     }
 }
