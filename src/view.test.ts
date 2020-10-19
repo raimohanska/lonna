@@ -31,22 +31,28 @@ describe("Atom.view", () => {
 const fooBar = {"foo": "bar"}
 
 describe("Property.view", () => {
-    describe("maps property values", () => {
+    describe("maps property values by string key", () => {
       expectPropertyEvents(
         () => B.view(constant(fooBar), "foo"),
         ["bar"]
       )
     })
 
+    describe("maps property values by unary function", () => {
+        expectPropertyEvents(
+          () => B.view(constant(fooBar), v => v.foo + " lol"),
+          ["bar lol"]
+        )
+    })
+
+    describe("combines multiple property values by n-ary function", () => {
+        expectPropertyEvents(
+          () => B.view(constant(fooBar), constant("hello"), (v, h) => h + " " + v.foo + " lol"),
+          ["hello bar lol"]
+        )
+    })
+  
     it("toString", () => {
         expect(B.view(constant(fooBar), "foo").toString()).toEqual("constant({foo:bar}).view(foo)")
     });    
-});
-
-describe("EventStream.view", () => {
-    describe("should map with given function", () =>
-        expectStreamEvents(
-        () => B.view(later(1, fooBar), "foo"),
-        ["bar"])
-    );
 });
