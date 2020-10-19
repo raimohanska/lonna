@@ -8,9 +8,7 @@ export type Transformer<A, B> = {
     changes: StreamTransformer<A, B>;
     init: (value: A) => B;
 }
-
-// TODO: go through the rest of the newly piped operators and remove multimethods to get piped inference right (verify in tests)
-// TODO: remove scoped versions, use applyScope in pipe instead
+// TODO: maybe remove scoped versions, use applyScope in pipe instead
 
 export type StatefulTransformResult<B, O> = O extends Property<any>            
     ? PropertySeed<B>
@@ -22,7 +20,7 @@ export type StatefulTransformResult<B, O> = O extends Property<any>
                 ? EventStreamSeed<B>
                 : never
 
-export type StatefulScopedTransformResult<B, O> = O extends Property<any>            
+export type StatefulTransformResultScoped<B, O> = O extends Property<any>            
     ? Property<B>
     : O extends PropertySeed<any>
         ? Property<B>
@@ -48,7 +46,7 @@ export type StatefulUnaryTransformResult<O> = O extends Atom<infer A>
                         ? EventStreamSeed<A>
                         : never
 
-export type StatefulScopedUnaryTransformResult<O> = O extends Atom<infer A>
+export type StatefulUnaryTransformResultScoped<O> = O extends Atom<infer A>
     ? Atom<A>
     : O extends AtomSeed<infer A>
         ? Atom<A>
@@ -68,7 +66,7 @@ export interface GenericTransformOp {
 }
 
 export interface GenericTransformOpScoped {
-    <A, O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<O>;
+    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScoped<O>;
 }
 
 export interface BinaryTransformOp<A, B> {
@@ -76,7 +74,7 @@ export interface BinaryTransformOp<A, B> {
 }
 
 export interface BinaryTransformOpScoped<A, B> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedTransformResult<B, O>;
+    <O extends ObservableSeed<A, any>>(o: O): StatefulTransformResultScoped<B, O>;
 }
 
 export interface StreamTransformOp<A, B> {
@@ -92,7 +90,7 @@ export interface UnaryTransformOp<A> {
 }
 
 export interface UnaryTransformOpScoped<A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulScopedUnaryTransformResult<O>;  
+    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScoped<O>;  
 }
 
 export function transform<A>(desc: string, transformer: Transformer<A, A>): UnaryTransformOp<A>
