@@ -25,14 +25,33 @@ var atom_1 = require("./atom");
 var L = __importStar(require("./lens"));
 var map_1 = require("./map");
 var util_1 = require("./util");
-function view(atom, view) {
-    var lens = mkView(view);
-    var desc = atom + ".view(" + util_1.toString(view) + ")";
-    if (atom instanceof abstractions_1.Atom) {
-        return new atom_1.LensedAtom(desc, atom.consume(), lens);
+var combine_1 = require("./combine");
+function view() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    if (args[1] instanceof abstractions_1.Property || args[1] instanceof Function) {
+        // properties + function
+        var properties = args.slice(0, args.length - 1);
+        var fn = args[args.length - 1];
+        if (!(fn instanceof Function)) {
+            throw Error("Expecting n properties + function");
+        }
+        return combine_1.combine(properties, fn);
     }
     else {
-        return util_1.rename(desc, map_1.map(lens.get)(atom));
+        // property/atom + lens
+        var atom = args[0];
+        var view_1 = args[1];
+        var lens = mkView(view_1);
+        var desc = atom + ".view(" + util_1.toString(view_1) + ")";
+        if (atom instanceof abstractions_1.Atom) {
+            return new atom_1.LensedAtom(desc, atom.consume(), lens);
+        }
+        else {
+            return util_1.rename(desc, map_1.map(lens.get)(atom));
+        }
     }
 }
 exports.view = view;
