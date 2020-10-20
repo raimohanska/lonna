@@ -26,6 +26,11 @@ describe("Atom.view", () => {
             expect(view.get()).toEqual("bar")
         })    
     })
+
+    it("maps property values by unary function", () => {
+        const a = B.atom([1,2,3])
+        expect(B.view(a, xs => xs[0]).get()).toEqual(1)
+    })
 })
 
 const fooBar = {"foo": "bar"}
