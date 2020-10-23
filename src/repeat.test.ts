@@ -1,4 +1,3 @@
-import * as Bacon from "..";
 import { later } from "./later";
 import { toProperty } from "./property";
 import { repeat } from "./repeat";
