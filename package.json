@@ -4,6 +4,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/jest": "^26.0.10",
     "babel-jest": "^26.3.0",
@@ -20,6 +23,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "prepublishOnly": "rm -rf dist && yarn build"
   }
 }
