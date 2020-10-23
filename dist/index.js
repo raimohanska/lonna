@@ -29,6 +29,7 @@ __exportStar(require("./fromevent"), exports);
 __exportStar(require("./frompromise"), exports);
 __exportStar(require("./interval"), exports);
 __exportStar(require("./later"), exports);
+__exportStar(require("./lens"), exports);
 __exportStar(require("./map"), exports);
 __exportStar(require("./merge"), exports);
 __exportStar(require("./never"), exports);

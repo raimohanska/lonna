@@ -3,7 +3,7 @@ import * as L from "./lens";
 import { Function1, Function2, Function3, Function4, Function5, Function6 } from "./abstractions";
 export declare function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
 export declare function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
-export declare function view<A, K extends keyof A>(a: Property<A>, key: K): K extends number ? Atom<A[K] | undefined> : Property<A[K]>;
+export declare function view<A, K extends keyof A>(a: Property<A>, key: K): K extends number ? Property<A[K] | undefined> : Property<A[K]>;
 export declare function view<A, B>(a: Property<A>, lens: L.Lens<A, B>): Property<B>;
 export declare function view<V, R>(a: Property<V>, fn: Function1<V, R>): Property<R>;
 export declare function view<V, V2, R>(a: Property<V>, b: Property<V2>, fn: Function2<V, V2, R>): Property<R>;

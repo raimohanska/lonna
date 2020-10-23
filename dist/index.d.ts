@@ -17,6 +17,7 @@ export * from "./fromevent";
 export * from "./frompromise";
 export * from "./interval";
 export * from "./later";
+export * from "./lens";
 export * from "./map";
 export * from "./merge";
 export * from "./never";
