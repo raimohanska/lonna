@@ -105,7 +105,7 @@ export interface ToPropertyOp<A> {
     <B>(stream: EventStream<B> | EventStreamSeed<B>): PropertySeed<A | B>;
 }
 export interface ToPropertyOpScoped<A> {
-    <B>(stream: EventStream<B> | EventStreamSeed<A>): Property<A | B>;    
+    <B>(stream: EventStream<B> | EventStreamSeed<B>): Property<A | B>;    
 }
 
 export function toProperty<A>(initial: A): ToPropertyOp<A>;
