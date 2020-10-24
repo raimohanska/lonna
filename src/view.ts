@@ -18,15 +18,32 @@ export function view<V, V2, V3, V4, R>(a: Property<V>, b: Property<V2>, c: Prope
 export function view<V, V2, V3, V4, V5, R>(a: Property<V>, b: Property<V2>, c: Property<V3>, d: Property<V4>, e: Property<V5>, fn: Function5<V, V2, V3, V4, V5, R>): Property<R>
 export function view<V, V2, V3, V4, V5, V6, R>(a: Property<V>, b: Property<V2>, c: Property<V3>, d: Property<V4>, e: Property<V5>, f: Property<V6>, fn: Function6<V, V2, V3, V4, V5, V6, R>): Property<R>
 
+export function view<A, K extends keyof A>(a: PropertySeed<A>, key: K): K extends number ? PropertySeed<A[K] | undefined> : PropertySeed<A[K]>;
+export function view<A, B>(a: PropertySeed<A>, lens: L.Lens<A, B>): PropertySeed<B>;
+export function view<V, R>(a: PropertySeed<V>, fn: Function1<V, R>): PropertySeed<R>
+
+export function view<A, K extends keyof A>(a: EventStream<A>, key: K): K extends number ? EventStream<A[K] | undefined> : EventStream<A[K]>;
+export function view<A, B>(a: EventStream<A>, lens: L.Lens<A, B>): EventStream<B>;
+export function view<V, R>(a: EventStream<V>, fn: Function1<V, R>): EventStream<R>
+
+export function view<A, K extends keyof A>(a: EventStreamSeed<A>, key: K): K extends number ? EventStreamSeed<A[K] | undefined> : EventStreamSeed<A[K]>;
+export function view<A, B>(a: EventStreamSeed<A>, lens: L.Lens<A, B>): EventStreamSeed<B>;
+export function view<V, R>(a: EventStreamSeed<V>, fn: Function1<V, R>): EventStreamSeed<R>
+
+
 export function view<A, B>(...args: any[]): any {
-    if (args[1] instanceof Property || args[1] instanceof Function) {
+    if (args[args.length - 1] instanceof Function) {
         // properties + function
         const properties = args.slice(0, args.length - 1)
         const fn = args[args.length - 1]
-        if (!(fn instanceof Function)) {
-            throw Error("Expecting n properties + function")
-        }
-        return combine(properties, fn)
+        if (properties.length === 1) {
+            const o = properties[0]
+            const f = args[1]
+            const desc = `${o}.view(${toString(f)})`
+            return rename(desc, map(f)(o))
+        } else {
+            return combine(properties, fn)
+        }        
     } else {
         // property/atom + lens
         const atom = args[0]

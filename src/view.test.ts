@@ -61,3 +61,23 @@ describe("Property.view", () => {
         expect(B.view(constant(fooBar), "foo").toString()).toEqual("constant({foo:bar}).view(foo)")
     });    
 });
+
+describe("EventStream.view", () => {
+    describe("maps property values by string key", () => {
+      expectStreamEvents(
+        () => B.view(later(1, fooBar), "foo"),
+        ["bar"]
+      )
+    })
+
+    describe("maps property values by unary function", () => {
+        expectStreamEvents(
+          () => B.view(later(1, fooBar), v => v.foo + " lol"),
+          ["bar lol"]
+        )
+    })
+  
+    it("toString", () => {
+        expect(B.view(later(1, fooBar), "foo").toString()).toEqual("later(1,{foo:bar}).view(foo)")
+    });    
+});
