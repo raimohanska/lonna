@@ -50,11 +50,17 @@ describe("Property.view", () => {
         )
     })
 
-    describe("maps property values by unary function chain, skipping duplicates on every step", () => {
-      expectPropertyEvents(        
-        () => B.view(series(1, [1,2,3]).pipe(B.toProperty(0, testScope())), v => v > 0, () => "BOOM"),
-        ["BOOM"]
-      )
+    it("maps property values by unary function chain, skipping duplicates on every step", () => {
+      let calls = 0
+      let values: boolean[] = []
+      const a = B.atom(0)
+      const result = B.view(a, x => x > 0, b => { calls++; return b })
+      result.forEach(b => values.push(b))
+      a.set(1)
+      a.set(2)
+      a.set(3)
+      expect(values).toEqual([false, true])
+      expect(calls).toEqual(3) // One would hope this to be 2 at optimum. There's one "extra" call for the initial value.
     })
 
 
