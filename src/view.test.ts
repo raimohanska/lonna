@@ -1,7 +1,7 @@
 import * as B from "."
 import { later } from "./later"
 import { constant, toProperty } from "./property"
-import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils"
+import { expectPropertyEvents, expectStreamEvents, series, testScope } from "./test-utils"
 
 describe("Atom.view", () => {
     describe("Array index lenses", () => {
@@ -49,6 +49,14 @@ describe("Property.view", () => {
           ["bar lol"]
         )
     })
+
+    describe("maps property values by unary function chain, skipping duplicates on every step", () => {
+      expectPropertyEvents(        
+        () => B.view(series(1, [1,2,3]).pipe(B.toProperty(0, testScope())), v => v > 0, () => "BOOM"),
+        ["BOOM"]
+      )
+    })
+
 
     describe("combines multiple property values by n-ary function", () => {
         expectPropertyEvents(
