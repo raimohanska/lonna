@@ -5,7 +5,8 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "devDependencies": {
     "@types/jest": "^26.0.10",
