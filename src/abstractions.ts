@@ -17,6 +17,7 @@ export const T_VALUE = 0x1100
 export const T_END = 0x2100
 
 export function matchFlags(o: any, flags: TypeBitfield) {
+    if (!o) return false
     return (o._L & flags) === flags
 }
 
