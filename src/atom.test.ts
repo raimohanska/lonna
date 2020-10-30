@@ -3,9 +3,10 @@ import * as B from "."
 describe("Atom", () => {
     describe("Basics", () => {
         it ("Uses inheritance", () => {
-            expect(B.atom(1) instanceof B.Atom).toEqual(true)
-            expect(B.atom(1) instanceof B.Property).toEqual(true)
-            expect(B.atom(1) instanceof B.Observable).toEqual(true)
+            expect(B.isAtom(B.atom(1))).toEqual(true)
+            expect(B.isProperty(B.atom(1))).toEqual(true)
+            expect(B.isAtomSeed(B.atom(1))).toEqual(true)
+            expect(B.isPropertySeed(B.atom(1))).toEqual(true)
         })
 
         it ("Dispatches values", () => {

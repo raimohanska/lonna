@@ -1,5 +1,4 @@
-import { EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions"
-import { Scope } from "./scope"
+import { Scope, EventStream, EventStreamSeed, isEventStreamSeed, isPropertySeed, Property, PropertySeed, isScope } from "./abstractions"
 import { merge } from "./merge"
 import { scan } from "./scan"
 import { map } from "./map"
@@ -89,7 +88,7 @@ export function update<Out>(...args: any[]): any {
     let scope: Scope | undefined;
     let initial: Out;
     let patterns: UpdatePattern<Out>[];
-    if (args[0] instanceof Scope) {
+    if (isScope(args[0])) {
         scope = args[0]
         initial = args[1]
         patterns = args.slice(2)
@@ -103,10 +102,10 @@ export function update<Out>(...args: any[]): any {
         if (pattern.length < 2) throw Error(`Illegal pattern ${pattern}, length must be >= 2`)
         let sources: UpdateParam<Out>[] = pattern.slice(0, pattern.length - 1) as any
         const trigger = sources[0]
-        if (!(trigger instanceof EventStream || trigger instanceof EventStreamSeed)) throw Error(`Illegal pattern ${pattern}, must contain one EventStream`)
+        if (!isEventStreamSeed(trigger)) throw Error(`Illegal pattern ${pattern}, must contain one EventStream`)
         const properties = sources.slice(1) as Property<any>[]
         for (let prop of properties) {
-            if (!(prop instanceof Property)) throw Error(`Illegal pattern ${pattern}. After one EventStream the rest on the observables must be Properties`)
+            if (!isPropertySeed(prop)) throw Error(`Illegal pattern ${pattern}. After one EventStream the rest on the observables must be Properties`)
         }
         let combinator = pattern[pattern.length - 1] as (...args: any) => Out
         if (!(combinator instanceof Function)) {

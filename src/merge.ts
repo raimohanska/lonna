@@ -1,4 +1,4 @@
-import { endEvent, EventStream, EventStreamSeed, isValue } from "./abstractions";
+import { endEvent, EventStream, EventStreamSeed, isEventStream, isValue } from "./abstractions";
 import { applyScope } from "./applyscope";
 
 export function merge<A>(a: EventStream<A>, b: EventStream<A>): EventStream<A>;
@@ -29,7 +29,7 @@ export function merge<A>(...args: any[]) {
         }))
         return () => unsubs.forEach(f => f())
     })
-    if (sources[0] instanceof EventStream) {
+    if (isEventStream(sources[0])) {
         return applyScope(sources[0].getScope())(seed)
     }
     return seed

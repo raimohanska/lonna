@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions";
+import { Atom, AtomSeed, EventStream, EventStreamSeed, isAtom, isAtomSeed, isEventStream, isEventStreamSeed, isPropertySeed, Property, PropertySeed } from "./abstractions";
 import { StatefulDependentAtom } from "./atom";
 import { SeedToStream } from "./eventstream";
 import { StatefulProperty } from "./property";
@@ -7,11 +7,11 @@ import { GenericTransformOpScoped } from "./transform";
 
 export function applyScope(scope: Scope): GenericTransformOpScoped {
     return ((seed: any) => {
-        if (seed instanceof EventStreamSeed || seed instanceof EventStream) {        
+        if (isEventStreamSeed(seed)) {        
             return new SeedToStream(seed, scope)
-        } else if (seed instanceof AtomSeed || seed instanceof Atom) {
+        } else if (isAtomSeed(seed)) {
             return new StatefulDependentAtom(seed, scope)
-        } else if (seed instanceof PropertySeed || seed instanceof Property) {
+        } else if (isPropertySeed(seed)) {
             return new StatefulProperty(seed, scope)
         }
         throw Error("Unknown seed: " + seed)

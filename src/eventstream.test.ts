@@ -1,11 +1,12 @@
 import * as B from "."
+import { isEventStream, isEventStreamSeed, isProperty } from "./abstractions"
 
 describe("EventStream", () => {
     describe("Basics", () => {
         it ("Uses inheritance", () => {
-            expect(B.never() instanceof B.Property).toEqual(false)
-            expect(B.never() instanceof B.EventStream).toEqual(true)
-            expect(B.never() instanceof B.Observable).toEqual(true)
+            expect(isProperty(B.never())).toEqual(false)
+            expect(isEventStream(B.never())).toEqual(true)
+            expect(isEventStreamSeed(B.never())).toEqual(true)
         })
     })
 })

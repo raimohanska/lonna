@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySubscribe, Subscribe } from "./abstractions";
+import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySubscribe, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 
@@ -102,16 +102,16 @@ export function transform<A, B>(desc: string, transformer: StreamTransformer<A, 
 
 export function transform<A, B>(desc: string, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
     return (x: any) => {
-        if (x instanceof EventStream || x instanceof EventStreamSeed) {
+        if (isEventStreamSeed(x)) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes
             const source = x.consume()
             return applyScopeMaybe(new EventStreamSeed(desc, observer => source.subscribe((value: Event<A>) => transformFn(value, observer))), scope)    
         } 
         const t = transformer as Transformer<A, B>        
-        if (x instanceof Atom || x instanceof AtomSeed) {
+        if (isAtomSeed<A>(x)) {
             const source = x.consume()
             return applyScopeMaybe(new AtomSeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t), newValue => source.set(newValue)), scope)
-        } else if (x instanceof Property || x instanceof PropertySeed) {
+        } else if (isPropertySeed<A>(x)) {
             const source = x.consume()
             return applyScopeMaybe(new PropertySeed(desc, () => t.init(source.get()), transformPropertySubscribe(source, t)), scope)
         } else {

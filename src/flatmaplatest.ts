@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observable, Property, PropertySeed } from "./abstractions";
+import { EventStream, EventStreamSeed, isPropertySeed, Observable, Property, PropertySeed } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { FlatMapStreamSeed, FlatMapPropertySeed, Spawner } from "./flatmap";
 import { Scope } from "./scope";
@@ -11,7 +11,7 @@ export function flatMapLatest<A, B>(fn: Spawner<A, PropertySeed<B> | Property<B>
 
 export function flatMapLatest<A>(fn: Spawner<A, any>, scope?: Scope): any {
     return (s: any) => {
-        if (s instanceof Property || s instanceof PropertySeed) {
+        if (isPropertySeed<A>(s)) {
             return applyScopeMaybe(new FlatMapPropertySeed(`${s}.flatMapLatest(fn)`, s, fn, { latest: true }), scope)
         } else {
             return applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMapLatest(fn)`, s, fn, { latest: true }), scope)

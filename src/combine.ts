@@ -1,4 +1,4 @@
-import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed, Function0, Function1, Function2, Function3, Function4, Function5, Function6 } from "./abstractions";
+import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed, Function0, Function1, Function2, Function3, Function4, Function5, Function6, isProperty } from "./abstractions";
 import { StatelessProperty } from "./property";
 import { globalScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
@@ -88,7 +88,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   }
 
   const desc = `combine(${properties}, fn)`
-  if (properties.length === 0 || properties[0] instanceof Property) {
+  if (properties.length === 0 || isProperty(properties[0])) {
     const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
     return new StatelessProperty<Out>(desc, get, subscribe, scope);
   } else {

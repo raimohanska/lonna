@@ -1,4 +1,4 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub, valueEvent } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Scope } from "./scope";
 import { remove } from "./util";
@@ -39,7 +39,7 @@ export class FlatMapStreamSeed<A, B> extends EventStreamSeed<B> {
 
 export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
-        const source = src instanceof Property ? src : src.consume()
+        const source = isProperty(src) ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
         const subscribeWithInitial = (observer: Observer<Event<A>>) => {
             const unsub = source.onChange(observer)
@@ -53,7 +53,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
                 throw Error("Unexpected child count: " + children.length)
             }
             const observable = children[0].observable
-            if (observable instanceof Property || observable instanceof PropertySource) {
+            if (isProperty(observable) || isPropertySource(observable)) {
                 return (observable as Property<B>).get()
             } else {
                 throw Error("Observable returned by the spawner function if flatMapLatest for Properties must return a Property. This one is not a Property: " + observable)

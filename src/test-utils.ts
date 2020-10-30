@@ -1,4 +1,4 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isEnd, isValue, Observable, Property, PropertySeed, toEvent, toEvents, valueEvent } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isEnd, isEventStream, isProperty, isPropertySeed, isValue, Observable, Property, PropertySeed, toEvent, toEvents, valueEvent } from "./abstractions";
 import { StatefulEventStream, fromSubscribe } from "./eventstream";
 import { sequentially } from "./sequentially";
 import { createScope, Scope } from "./scope";
@@ -80,8 +80,8 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
         beforeAll(() => {
             scope.start()
             const seed = srcF();
-            src = (seed instanceof EventStream) ? seed : applyScope(scope)(seed)
-            expect(src instanceof EventStream).toEqual(true);
+            src = (isEventStream(seed)) ? seed : applyScope(scope)(seed)
+            expect(isEventStream(src)).toEqual(true);
         });
         beforeAll(done => collectF(src, receivedEvents, done));
         it("outputs expected values in order", () => {
@@ -122,10 +122,10 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
         beforeAll(() => {
             scope.start()
             const seed = srcF();
-            src = (seed instanceof Property) ? seed : applyScope(scope)(seed) as Property<any>
+            src = isProperty(seed) ? seed : applyScope(scope)(seed) as Property<any>
         });
         beforeAll(done => collectF(src, events, done));
-        it("is a Property", () => expect(src instanceof Property).toEqual(true));
+        it("is a Property", () => expect(isProperty(src)).toEqual(true));
         it("outputs expected events in order", () => expect(toValues(events)).toEqual(toValues(expectedEvents)));
         it("has correct final state", () => verifyFinalState(src, expectedEvents[expectedEvents.length - 1]));
         it("cleans up observers", () => {

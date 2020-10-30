@@ -1,4 +1,4 @@
-import { Property, PropertySeed, ObservableSeed, isObservableSeed } from "./abstractions";
+import { Property, PropertySeed, ObservableSeed, isObservableSeed, isProperty, isPropertySeed } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { combineAsArray, PropertyLike } from "./combine";
 import { Predicate } from "./filter";
@@ -75,9 +75,8 @@ type Ctx = any
 
 export function combineTemplate<T>(template: T): Property<GenericObjectTemplate<T, Property<any>>> {
     if (!containsObservables(template)) return constant(template) as any;
-
     const [observables, combinator] = processTemplate<T, Property<any>>(template, (x: ObservableSeed<any, any>) => {
-        if (x instanceof Property) return x
+        if (isProperty(x)) return x
         throw Error("Unsupported observable: " + x)
     })
     
@@ -91,8 +90,8 @@ export function combineTemplateS<T>(template: T, scope?: Scope): ObservableSeed<
     if (!containsObservables(template)) return constant(template) as any;
 
     const [observables, combinator] = processTemplate<T, PropertySeed<any>>(template, (x: ObservableSeed<any, any>) => {
-        if (x instanceof Property) return toPropertySeed(x)
-        if (x instanceof PropertySeed) return x
+        if (isProperty(x)) return toPropertySeed(x)
+        if (isPropertySeed(x)) return x
         throw Error("Unsupported observable: " + x)
     })
     const mapped = map(combinator as any)(combineAsArray(observables))
@@ -130,8 +129,7 @@ function processTemplate<T, Prop>(template: T, mapObservable: (o: ObservableSeed
 
     function compile(key: any, value: any) {
         if (isObservableSeed(value)) {
-            if (value instanceof Property || value instanceof PropertySeed) {
-
+            if (isPropertySeed(value)) {
                 observables.push(value);
                 funcs.push(applyStreamValue(key, observables.length - 1));
             } else {

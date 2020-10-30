@@ -1,4 +1,4 @@
-import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent, AtomSeed, Subscribe } from "./abstractions";
+import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent, AtomSeed, Subscribe, isProperty, isEventStream, isEventStreamSeed, isPropertySeed } from "./abstractions";
 import { StatelessEventStream } from "./eventstream";
 import { StatelessProperty } from "./property";
 
@@ -18,15 +18,15 @@ export function map<A, B>(sampledProperty: Property<B>): MapOp<A, B>
 export function map<A, B>(x: ((value: A) => B) | Property<B>): any {
     return (o: any) => {
         const desc = o + `.map(fn)`;
-        const fn = (x instanceof Property) ? () => x.get() : x
-        if (o instanceof EventStream) {
+        const fn = isProperty(x) ? () => x.get() : x
+        if (isEventStream(o)) {
             return new StatelessEventStream(desc, mapSubscribe(o.subscribe.bind(o), fn), o.getScope())
-        } else if (o instanceof EventStreamSeed) {
+        } else if (isEventStreamSeed(o)) {
             const source = o.consume()
             return new EventStreamSeed(desc, mapSubscribe(source.subscribe.bind(source), fn))
-        } else if (o instanceof Property) {
+        } else if (isProperty<A>(o)) {
             return new StatelessProperty(desc, () => fn(o.get()), mapSubscribe(o.onChange.bind(o), fn), o.getScope())
-        } else if (o instanceof PropertySeed || o instanceof AtomSeed) {
+        } else if (isPropertySeed<A>(o)) {
             const source = o.consume()
             return new PropertySeed(desc, () => fn(source.get()), mapSubscribe(source.onChange.bind(source), fn))    
         }

@@ -1,4 +1,4 @@
-import { Atom, EventStream, EventStreamSeed, ObservableSeed, Property, PropertySeed } from "./abstractions";
+import { Atom, EventStream, EventStreamSeed, isAtom, ObservableSeed, Property, PropertySeed } from "./abstractions";
 import { LensedAtom } from "./atom";
 import * as L from "./lens";
 import { map } from "./map";
@@ -63,8 +63,8 @@ export function view<A, B>(...args: any[]): any {
         const view = args[1]
         const lens = mkView(view)
         const desc = `${atom}.view(${toString(view)})`
-        if (atom instanceof Atom) {
-            return new LensedAtom<A, B>(desc, atom.consume(), lens)     
+        if (isAtom<A>(atom)) {
+            return new LensedAtom<A, B>(desc, atom, lens)     
         } else {
             return rename(desc, map(lens.get)(atom as any))
         }

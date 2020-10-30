@@ -1,21 +1,5 @@
-import { Unsub, valueEvent } from "./abstractions"
+import { Scope, ScopeFn, Unsub, valueEvent } from "./abstractions"
 import { Dispatcher } from "./dispatcher"
-
-/**
- *  Defines the active lifetime of an Observable. You can use 
- *  - globalScope: the observable will stay active forever, connected to its underlying data sources
- *  - autoScope: the observable will be active as long as it has observers (will throw if trying to re-activate)
- *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
- **/ 
-
-export type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void
-
-export class Scope {
-    subscribe: ScopeFn
-    constructor(fn: ScopeFn) {
-        this.subscribe = fn
-    }
-}
 
 export class MutableScope extends Scope {
     start: () => void;

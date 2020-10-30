@@ -1,4 +1,4 @@
-import { isObservable, isObservableSeed, Observable, ObservableSeed } from "./abstractions"
+import { isObservableSeed, Observable, ObservableSeed } from "./abstractions"
 import { constant } from "./property"
 
 /** @hidden */

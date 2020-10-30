@@ -1,4 +1,4 @@
-import { Event, EventStream, EventStreamSeed, EventStreamSource, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, EventStreamSource, isEventStream, isProperty, isPropertySeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { mapSubscribe } from "./map";
@@ -93,7 +93,7 @@ export interface ToStatelessPropertyOp<A> {
 export function toStatelessProperty<A>(get: () => A): ToStatelessPropertyOp<A>
 export function toStatelessProperty<A>(get: () => A) {
     return (streamOrSubscribe: any) => {
-        if (streamOrSubscribe instanceof EventStream) {        
+        if (isEventStream(streamOrSubscribe)) {        
             return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
         } else {
             return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
@@ -120,7 +120,10 @@ export function toProperty(initial: any, scope?: Scope) {
 }
 
 export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A> {
-    if (property instanceof PropertySeed) {
+    if (!isProperty(property)) {
+        if (!isPropertySeed(property)) {
+            throw Error("Assertion fail")
+        }
         return property;
     }
     return new PropertySeed<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
