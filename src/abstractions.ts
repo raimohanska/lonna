@@ -15,6 +15,8 @@ const T_ATOM = 0x0050; // atoms are always properties
 
 const T_EVENT = 0x0100
 const T_SCOPE = 0x0200
+const T_VALUE = 0x1100
+const T_END = 0x2100
 
 function matchFlags(o: any, flags: TypeBitfield) {
     return (o._L & flags) === flags
@@ -36,11 +38,10 @@ export function isObservableSeed<V, O extends Observable<any>>(e: any): e is Obs
 
 export abstract class Event<V> {
     _L: TypeBitfield = T_EVENT
-    abstract type: string;
 }
 
 export class Value<V> extends Event<V> {
-    type: string = "value"
+    _L: TypeBitfield = T_VALUE
     value: V
     constructor(value: V) {
         super()
@@ -49,7 +50,7 @@ export class Value<V> extends Event<V> {
 }
 
 export class End extends Event<any> {
-    type: string = "end"
+    _L: TypeBitfield = T_END
 }
 export type EventLike<V> = Event<V>[] | Event<V> | V
 
@@ -78,11 +79,11 @@ export function valueEvent<V>(value: V): Value<V> {
 }
 
 export function isValue<V>(event: Event<V>): event is Value<V> {
-    return event.type === "value"
+    return matchFlags(event, T_VALUE)
 }
 
 export function isEnd<V>(event: Event<V>): event is End {
-    return event.type === "end"
+    return matchFlags(event, T_END)
 }
 
 export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
