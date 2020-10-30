@@ -1,9 +1,10 @@
-import { Event, EventStream, EventStreamSeed, EventStreamSource, isEventStream, isProperty, isPropertySeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
+import { Event, EventStream, EventStreamSeed, Scope, isEventStream, isProperty, isPropertySeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
+import { PropertySeedImpl } from "./implementations";
 import { mapSubscribe } from "./map";
 import { never } from "./never";
-import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
+import { afterScope, beforeScope, checkScope, globalScope, OutOfScope } from "./scope";
 import { rename, toString } from "./util";
 
 type PropertyEvents<V> = { "change": V }
@@ -113,7 +114,7 @@ export function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
 export function toProperty(initial: any, scope?: Scope) {    
     return (seed: EventStream<any> | EventStreamSeed<any>) => {
         const source = seed.consume()
-        return applyScopeMaybe(new PropertySeed(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
+        return applyScopeMaybe(new PropertySeedImpl(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
             return source.subscribe(observer)
         }), scope)    
     }
@@ -126,7 +127,7 @@ export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): Prop
         }
         return property;
     }
-    return new PropertySeed<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
+    return new PropertySeedImpl<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
 }
 
 export function constant<A>(value: A): Property<A> {

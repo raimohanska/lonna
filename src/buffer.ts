@@ -10,7 +10,6 @@ export type VoidFunction = () => void
  */
 export type DelayFunction = (f: VoidFunction) => any
 
-// TODO: improve types and have EventStream implement EventStreamSeed
 export function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
   return src => bufferWithTimeOrCount(src + `.bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
 };

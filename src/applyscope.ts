@@ -1,8 +1,7 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, isAtom, isAtomSeed, isEventStream, isEventStreamSeed, isPropertySeed, Property, PropertySeed } from "./abstractions";
+import { isAtomSeed, isEventStreamSeed, isPropertySeed, Scope } from "./abstractions";
 import { StatefulDependentAtom } from "./atom";
 import { SeedToStream } from "./eventstream";
 import { StatefulProperty } from "./property";
-import { Scope } from "./scope";
 import { GenericTransformOpScoped } from "./transform";
 
 export function applyScope(scope: Scope): GenericTransformOpScoped {

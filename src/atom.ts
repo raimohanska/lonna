@@ -1,7 +1,7 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, valueEvent } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, valueEvent, Scope } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import * as L from "./lens";
-import { afterScope, beforeScope, checkScope, globalScope, OutOfScope, Scope } from "./scope";
+import { afterScope, beforeScope, checkScope, globalScope, OutOfScope } from "./scope";
 import { toString } from "./util"
 type AtomEvents<V> = { "change": V }
 

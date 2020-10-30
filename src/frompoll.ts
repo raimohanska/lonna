@@ -1,11 +1,9 @@
 /**
  * A polled function used by [fromPoll](../globals.html#frompoll)
  */
-import { toEvents, EventLike, EventStream, EventStreamSeed, isEnd } from "./abstractions"
-import { applyScopeMaybe } from "./applyscope"
+import { EventLike, EventStream, EventStreamSeed, isEnd, Scope, toEvents } from "./abstractions"
 import { fromSubscribe } from "./eventstream"
 import GlobalScheduler from "./scheduler"
-import { Scope } from "./scope"
 import { rename } from "./util"
 
 export type PollFunction<V> = () => EventLike<V>

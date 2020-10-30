@@ -1,40 +1,42 @@
 import { pipe } from "./pipe";
 import { Dispatcher } from "./dispatcher";
-export type Callback = () => void
-export type Observer<V> = (value: V) => void
-export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
+import { Pipeable } from "./pipeable";
 
-type TypeBitfield = number
+export type TypeBitfield = number
 
-const T_OBSERVABLE = 0x0001;
-const T_SEED = 0x0002;
-const T_SOURCE = 0x0004;
-const T_PROPERTY = 0x0010;
-const T_STREAM = 0x0020;
-const T_ATOM = 0x0050; // atoms are always properties
+export const T_SCOPED = 0x0001;
+export const T_SEED = 0x0002;
+export const T_COLD = 0x0004;
+export const T_PROPERTY = 0x0010;
+export const T_STREAM = 0x0020;
+export const T_ATOM = 0x0050; // atoms are always properties
 
-const T_EVENT = 0x0100
-const T_SCOPE = 0x0200
-const T_VALUE = 0x1100
-const T_END = 0x2100
+export const T_EVENT = 0x0100
+export const T_SCOPE = 0x0200
+export const T_VALUE = 0x1100
+export const T_END = 0x2100
 
-function matchFlags(o: any, flags: TypeBitfield) {
+export function matchFlags(o: any, flags: TypeBitfield) {
     return (o._L & flags) === flags
 }
 
-export function isProperty<V>(e: any): e is Property<V> { return matchFlags(e, T_OBSERVABLE | T_PROPERTY) }
+export function isProperty<V>(e: any): e is Property<V> { return matchFlags(e, T_SCOPED | T_PROPERTY) }
 export function isPropertySeed<V>(e: any): e is PropertySeed<V> { return matchFlags(e, T_SEED | T_PROPERTY) }
-export function isPropertySource<V>(e: any): e is PropertySource<V> { return matchFlags(e, T_SOURCE | T_PROPERTY) }
-export function isEventStream<V>(e: any): e is EventStream<V> { return matchFlags(e, T_OBSERVABLE | T_STREAM) }
+export function isPropertySource<V>(e: any): e is PropertySource<V> { return matchFlags(e, T_COLD | T_PROPERTY) }
+export function isEventStream<V>(e: any): e is EventStream<V> { return matchFlags(e, T_SCOPED | T_STREAM) }
 export function isEventStreamSeed<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_SEED | T_STREAM) }
-export function isEventStreamSource<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_SOURCE | T_STREAM) }
-export function isAtom<V>(e: any): e is Atom<V> { return matchFlags(e, T_OBSERVABLE | T_ATOM) }
+export function isEventStreamSource<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_COLD | T_STREAM) }
+export function isAtom<V>(e: any): e is Atom<V> { return matchFlags(e, T_SCOPED | T_ATOM) }
 export function isAtomSeed<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SEED | T_ATOM) }
-export function isAtomSource<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SOURCE | T_ATOM) }
+export function isAtomSource<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_COLD | T_ATOM) }
 
 export function isObservableSeed<V, O extends Observable<any>>(e: any): e is ObservableSeed<V, O> { 
     return e._L !== undefined
 }
+
+export type Callback = () => void
+export type Observer<V> = (value: V) => void
+export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
 
 export abstract class Event<V> {
     _L: TypeBitfield = T_EVENT
@@ -92,78 +94,6 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 
 export const endEvent: End = new End()
 
-export class Pipeable {
-    pipe<A>( a2b: (a: this) => A): A
-    pipe<A, B>( a2b: (a: this) => A, b2c: (a: A) => B): B
-    pipe<A, B, C>( a2b: (a: this) => A, b2c: (a: A) => B, c2d: (b: B) => C): C
-    pipe<A, B, C, D>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-    ): D
-    pipe<A, B, C, D, E>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-    ): E
-    pipe<A, B, C, D, E, F>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-      f2g: (e: E) => F,
-    ): F
-    pipe<A, B, C, D, E, F, G>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-      f2g: (e: E) => F,
-      g2h: (f: F) => G,
-    ): G
-    pipe<A, B, C, D, E, F, G, H>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-      f2g: (e: E) => F,
-      g2h: (f: F) => G,
-      h2i: (g: G) => H,
-    ): H
-    pipe<A, B, C, D, E, F, G, H, I>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-      f2g: (e: E) => F,
-      g2h: (f: F) => G,
-      h2i: (g: G) => H,
-      i2j: (h: H) => I,
-    ): I
-    pipe<A, B, C, D, E, F, G, H, I, J>(
-      a2b: (a: this) => A,
-      b2c: (a: A) => B,
-      c2d: (b: B) => C,
-      d2e: (c: C) => D,
-      e2f: (d: D) => E,
-      f2g: (e: E) => F,
-      g2h: (f: F) => G,
-      h2i: (g: G) => H,
-      i2j: (h: H) => I,
-      j2k: (i: I) => J,
-    ): J    
-    pipe(...args: any): any {
-        return pipe(this, ...(args as [any]))
-    }
-}
-
 export abstract class ObservableSeed<V, O extends Observable<any>> extends Pipeable {
     abstract _L: TypeBitfield
     desc: string
@@ -188,21 +118,6 @@ export abstract class ObservableSeed<V, O extends Observable<any>> extends Pipea
     }
 }
 
-export abstract class ObservableSeedImpl<V, O extends Observable<any>> extends ObservableSeed<V, O> {
-    private _source: O | null
-
-    constructor(source: O) {
-        super(source.desc)
-        this._source = source
-    }
-
-    consume(): O {
-        if (this._source === null) throw Error(`Seed ${this.desc} already consumed`)
-        const result = this._source
-        this._source = null
-        return result
-    }
-}
 
 export abstract class Observable<V> extends ObservableSeed<V, Observable<V>> {
     abstract _L: TypeBitfield
@@ -230,8 +145,8 @@ export abstract class ScopedObservable<V> extends Observable<V> {
 
 export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
 
-export abstract class Property<V> extends ScopedObservable<V> {
-    _L: TypeBitfield = T_PROPERTY | T_OBSERVABLE | T_SEED
+export abstract class Property<V> extends ScopedObservable<V> implements PropertySeed<V>, PropertySource<V> {
+    _L: TypeBitfield = T_PROPERTY | T_SCOPED | T_SEED
 
     constructor(desc: string) {
         super(desc)
@@ -253,78 +168,34 @@ export abstract class Property<V> extends ScopedObservable<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class PropertySeed<V> extends ObservableSeedImpl<V, PropertySource<V>> {
-    _L: TypeBitfield = T_PROPERTY | T_SEED
-    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
-        super(new PropertySource(desc, get, onChange))
-    }  
+export interface PropertySeed<V> extends ObservableSeed<V, PropertySource<V>> {
+ 
 }
 
-// TODO: Property should be PropertySource too
-export class PropertySource<V> extends Observable<V> {
-    _L: TypeBitfield = T_PROPERTY | T_SOURCE
-    private _started = false
-    private _subscribed = false
-    private _get: () => V
 
-    onChange_: Subscribe<V>;
-
-    get() {
-        if (this._started) throw Error("PropertySeed started already: " + this)
-        return this._get()
-    }
-
-    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
-        super(desc)
-        this._get = get;
-        this.onChange_ = onChange;
-    }
-
-    onChange(observer: Observer<Event<V>>): Unsub {                
-        if (this._subscribed) throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this)
-        this._subscribed = true
-        return this.onChange_(event => {
-            if (isValue(event)) {
-                this._started = true
-            }
-            observer(event)
-        })
-    }
-
-    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
-    subscribe(observer: Observer<Event<V>>): Unsub {        
-        const unsub = this.onChange(observer)
-        observer(valueEvent(this.get()))
-        return unsub
-    }       
+export type PropertySource<V> = Observable<V> & PropertySeed<V> & {
+    onChange(observer: Observer<Event<V>>): Unsub
+    get(): V 
 }
 
-export abstract class EventStream<V> extends ScopedObservable<V> {
-    _L: TypeBitfield = T_STREAM | T_OBSERVABLE | T_SEED
+
+export abstract class EventStream<V> extends ScopedObservable<V> implements EventStreamSeed<V>, EventStreamSource<V> {
+    _L: TypeBitfield = T_STREAM | T_SCOPED | T_SEED
     constructor(desc: string) { 
         super(desc) 
     }
 }
 
-export class EventStreamSeed<V> extends ObservableSeedImpl<V, EventStreamSource<V>> {
-    _L: TypeBitfield = T_STREAM | T_SEED
-    constructor(desc: string, subscribe: Subscribe<V>) {
-        super(new EventStreamSource(desc, subscribe))
-    }
+export interface EventStreamSeed<V> extends ObservableSeed<V, EventStreamSource<V>> {
+    
 }
 
-export class EventStreamSource<V> extends Observable<V> {
-    _L: TypeBitfield = T_STREAM | T_SOURCE
-    subscribe: (observer: Observer<Event<V>>) => Unsub
 
-    constructor(desc: string, subscribe: Subscribe<V>) {
-        super(desc)
-        this.subscribe = subscribe
-    }
-}
+export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
 
-export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>> {
-    _L: TypeBitfield = T_ATOM | T_OBSERVABLE | T_SEED
+
+export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>>, AtomSeed<V>, AtomSource<V> {
+    _L: TypeBitfield = T_ATOM | T_SCOPED | T_SEED
     constructor(desc: string) { 
         super(desc) 
     }
@@ -336,24 +207,16 @@ export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, A
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSeed<V> extends ObservableSeedImpl<V, AtomSource<V>>{
-    _L: TypeBitfield = T_ATOM | T_SEED
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
-        super(new AtomSource(desc, get, subscribe, set))
-    }  
+export interface AtomSeed<V> extends ObservableSeed<V, AtomSource<V>>{
+    
 }
 
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSource<V> extends PropertySource<V> {
-    _L: TypeBitfield = T_ATOM | T_SOURCE
-    set: (updatedValue: V) => void;
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
-        super(desc, get, subscribe)
-        this.set = set
-    }
+export type AtomSource<V> = PropertySource<V> & AtomSeed<V> & Observable<V> & {
+    set(updatedValue: V): void;
 }
 
 export interface Bus<V> extends EventStream<V> {

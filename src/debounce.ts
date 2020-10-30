@@ -1,11 +1,10 @@
 
-import { Atom, AtomSeed, EventStream, EventStreamSeed, Property, PropertySeed } from "./abstractions";
-import { applyScopeMaybe } from "./applyscope";
+import { Scope } from "./abstractions";
 import { flatMapLatest } from "./flatmaplatest";
 import { later } from "./later";
-import { Scope } from "./scope";
 import { GenericTransformOp, GenericTransformOpScoped } from "./transform";
 import { transformChanges } from "./transformchanges";
+
 
 export function debounce<A>(delay: number): GenericTransformOp
 export function debounce<A>(delay: number, scope: Scope): GenericTransformOpScoped

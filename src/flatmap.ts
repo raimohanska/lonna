@@ -1,6 +1,6 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub, valueEvent } from "./abstractions";
+import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { Scope } from "./scope";
+import { EventStreamSeedImpl, PropertySeedImpl } from "./implementations";
 import { remove } from "./util";
 
 export type FlatMapOptions = {
@@ -16,13 +16,12 @@ export interface FlatMapOpScoped<A, B> {
     (s: EventStream<A> | EventStreamSeed<A>): EventStream<B>;
 }
 
-// TODO: improve types and have EventStream implement EventStreamSeed
 export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>): FlatMapOp<A, B>;
 export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope: Scope): FlatMapOpScoped<A, B>;
 
 export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
     return (s: EventStream<A> | EventStreamSeed<A>) => 
-        applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s as EventStreamSeed<A>, fn, {}), scope) // TODO: type coercion. EventStream should implement Seed (but now impossible because of inheritance)
+        applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s, fn, {}), scope)
 }
 
 export type FlatMapChild<B extends Observable<any>> = {
@@ -30,14 +29,14 @@ export type FlatMapChild<B extends Observable<any>> = {
     unsub?: Unsub;
 }
 
-export class FlatMapStreamSeed<A, B> extends EventStreamSeed<B> {
+export class FlatMapStreamSeed<A, B> extends EventStreamSeedImpl<B> {
     constructor(desc: string, s: EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, options: FlatMapOptions = {}) {
         const [children, subscribe] = flatMapSubscribe(s.consume().subscribe.bind(s), fn, options)
         super(desc, subscribe)
     }
 }
 
-export class FlatMapPropertySeed<A, B> extends PropertySeed<B> {
+export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
         const source = isProperty(src) ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.

@@ -1,7 +1,6 @@
-import { Event, isValue, Observer } from "./abstractions";
+import { Event, isValue, Observer, Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { Scope } from "./scope";
-import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped, UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
+import { transform, Transformer, UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
 
 export type Predicate<A> = (value: A) => boolean
 

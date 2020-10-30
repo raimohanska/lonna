@@ -1,7 +1,7 @@
-import { EventStream, EventStreamSeed, Observer, Unsub, Event, Subscribe, EventLike, toEvents, isEnd, ObservableSeed, EventStreamSource } from "./abstractions";
+import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
-import { Scope } from "./scope";
+import { EventStreamSeedImpl } from "./implementations";
 
 type StreamEvents<V> = { "value": V }
 
@@ -51,7 +51,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 export function fromSubscribe<V>(subscribe: Subscribe<V>): EventStreamSeed<V>;
 export function fromSubscribe<V>(subscribe: Subscribe<V>, scope: Scope): EventStream<V>;
 export function fromSubscribe<V>(subscribe: Subscribe<V>, scope?: Scope): EventStream<V> | EventStreamSeed<V> {
-    return applyScopeMaybe(new EventStreamSeed("fromSubscribe(fn)", subscribe), scope)
+    return applyScopeMaybe(new EventStreamSeedImpl("fromSubscribe(fn)", subscribe), scope)
 }
 
 export type FlexibleObserver<V> = (event: EventLike<V>) => void
@@ -72,7 +72,7 @@ export function toFlexibleObserver<V>(observer: Observer<Event<V>>) {
 export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>): EventStreamSeed<V>;
 export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>, scope: Scope): EventStream<V>;
 export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>, scope?: Scope): EventStream<V> | EventStreamSeed<V> {
-    return applyScopeMaybe(new EventStreamSeed("fromSubscribe(fn)", observer =>
+    return applyScopeMaybe(new EventStreamSeedImpl("fromSubscribe(fn)", observer =>
         subscribe(toFlexibleObserver(observer))
     ), scope)
 }

@@ -1,6 +1,5 @@
-import { endEvent, Event, isValue, Observer } from "./abstractions";
+import { endEvent, Event, isValue, Observer, Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { Scope } from "./scope";
 import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped } from "./transform";
 
 export function take<A>(count: number): GenericTransformOp

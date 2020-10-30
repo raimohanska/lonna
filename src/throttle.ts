@@ -1,6 +1,6 @@
 import { bufferWithTime } from "./buffer";
 import { map } from "./map";
-import { Scope } from "./scope";
+import { Scope } from "./abstractions";
 import { GenericTransformOp, GenericTransformOpScoped } from "./transform";
 import { transformChanges } from "./transformchanges";
 

@@ -1,7 +1,6 @@
-import { EventStream, EventStreamSeed, isPropertySeed, Observable, Property, PropertySeed } from "./abstractions";
+import { Scope, EventStream, EventStreamSeed, isPropertySeed, Observable, Property, PropertySeed } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { FlatMapStreamSeed, FlatMapPropertySeed, Spawner } from "./flatmap";
-import { Scope } from "./scope";
 import { BinaryTransformOp, BinaryTransformOpScoped } from "./transform";
 
 // TODO: typing is not perfect: spawners for properties should spawn property(seed)s, not streams

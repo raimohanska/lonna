@@ -1,10 +1,9 @@
-import { Property, PropertySeed, ObservableSeed, isObservableSeed, isProperty, isPropertySeed } from "./abstractions";
+import { isObservableSeed, isProperty, isPropertySeed, ObservableSeed, Property, PropertySeed, Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { combineAsArray, PropertyLike } from "./combine";
 import { Predicate } from "./filter";
 import { map } from "./map";
-import { constant, StatelessProperty, toProperty, toPropertySeed } from "./property";
-import { globalScope, Scope } from "./scope";
+import { constant, toPropertySeed } from "./property";
 import { rename } from "./util";
 
 export type GenericObjectTemplate<T, O extends ObservableSeed<any, any>> = { [K in keyof T]: T[K] extends ObservableSeed<infer I, any>

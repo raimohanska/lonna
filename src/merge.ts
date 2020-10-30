@@ -1,5 +1,6 @@
 import { endEvent, EventStream, EventStreamSeed, isEventStream, isValue } from "./abstractions";
 import { applyScope } from "./applyscope";
+import { EventStreamSeedImpl } from "./implementations";
 
 export function merge<A>(a: EventStream<A>, b: EventStream<A>): EventStream<A>;
 export function merge<A, B>(a: EventStream<A>, b: EventStream<B>): EventStream<A | B>;
@@ -15,7 +16,7 @@ export function merge<A>(...args: any[]) {
     }
 
     const sources = streams.map(s => s.consume())
-    const seed = new EventStreamSeed<A>(`merge(${streams})`, observer => {
+    const seed = new EventStreamSeedImpl<A>(`merge(${streams})`, observer => {
         let endCount = 0
         const unsubs = sources.map(s => s.subscribe(event => {
             if (isValue(event)) {

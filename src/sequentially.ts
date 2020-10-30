@@ -1,7 +1,6 @@
-import { endEvent, Event, EventLike, EventStream, EventStreamSeed, toEvent } from "./abstractions";
+import { endEvent, Event, Scope, EventStream, EventStreamSeed, toEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { fromPoll } from "./frompoll";
-import { Scope } from "./scope";
 import { rename } from "./util";
 
 /**

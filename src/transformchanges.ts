@@ -1,9 +1,10 @@
-import { Atom, AtomSeed, EventStream, EventStreamSeed, isAtomSeed, isAtom, isEventStreamSeed, Property, PropertySeed, isPropertySeed } from "./abstractions"
+import { EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, PropertySeed, Scope } from "./abstractions"
 import { applyScopeMaybe } from "./applyscope"
 import { changes } from "./changes"
-import { Scope } from "./scope"
+import { AtomSeedImpl, PropertySeedImpl } from "./implementations"
 import { UnaryTransformOp, UnaryTransformOpScoped } from "./transform"
 import { rename } from "./util"
+
 
 export type EventStreamDelay<V> = (stream: EventStreamSeed<V>) => EventStreamSeed<V>
 
@@ -18,13 +19,13 @@ export function transformChanges<A, B>(descSuffix: string, transformer: EventStr
             r = rename(desc, transformer(x))
         } else if (isAtomSeed<A>(x)) {
             const source = x.consume()
-            r = new AtomSeed(desc, () => source.get(), observer => {
-                return transformer(changes(source as any as AtomSeed<A>)).consume().subscribe(observer) // TODO: AtomSource coerced into AtomSeed due to improper typing
+            r = new AtomSeedImpl(desc, () => source.get(), observer => {
+                return transformer(changes(source)).consume().subscribe(observer)
             }, source.set)
         } else if (isPropertySeed<A>(x)) {
             const source = x.consume()
-            r = new PropertySeed(desc, () => source.get(), observer => {
-                return transformer(changes(source as any as PropertySeed<A>)).consume().subscribe(observer) // TODO: PropertySource coerced into PropertySeed due to improper typing
+            r = new PropertySeedImpl(desc, () => source.get(), observer => {
+                return transformer(changes(source)).consume().subscribe(observer)
             })
         } else {
             throw Error("Unknown observable " + x)

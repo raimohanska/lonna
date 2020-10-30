@@ -1,7 +1,7 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isEnd, isEventStream, isProperty, isPropertySeed, isValue, Observable, Property, PropertySeed, toEvent, toEvents, valueEvent } from "./abstractions";
+import { Scope, endEvent, Event, EventStream, EventStreamSeed, isEnd, isEventStream, isProperty, isPropertySeed, isValue, Observable, Property, PropertySeed, toEvent, toEvents, valueEvent } from "./abstractions";
 import { StatefulEventStream, fromSubscribe } from "./eventstream";
 import { sequentially } from "./sequentially";
-import { createScope, Scope } from "./scope";
+import { createScope } from "./scope";
 import { applyScope } from "./applyscope";
 import GlobalScheduler, { setScheduler } from "./scheduler";
 import TickScheduler from "./tickscheduler";

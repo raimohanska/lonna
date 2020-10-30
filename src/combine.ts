@@ -2,6 +2,7 @@ import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed,
 import { StatelessProperty } from "./property";
 import { globalScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
+import { PropertySeedImpl } from "./implementations";
 
 /**
   Combines given *n* Properties and
@@ -92,6 +93,6 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
     const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
     return new StatelessProperty<Out>(desc, get, subscribe, scope);
   } else {
-    return new PropertySeed<Out>(desc, get, subscribe)
+    return new PropertySeedImpl<Out>(desc, get, subscribe)
   } 
 };
