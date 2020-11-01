@@ -2,6 +2,7 @@
   "name": "lonna",
   "version": "0.2.9",
   "main": "dist/index.js",
+  "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "files": [
@@ -21,7 +22,7 @@
     "node": ">13.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.esm.json",
     "build:watch": "tsc --watch",
     "test": "jest",
     "test:watch": "jest --watchAll",
