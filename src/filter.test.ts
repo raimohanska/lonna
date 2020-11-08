@@ -39,12 +39,17 @@ describe("Property.filter", function () {
 describe("Atom.filter", () => {
     describe("Root atom", () => {
         it("Freezes on unwanted values", () => {
-            const a = B.atom<string | null>("hello").pipe(B.filter(a => a !== null, B.globalScope))
+            const root = B.atom<string | null>("hello")
+            const a = root.pipe(B.filter(a => a !== null, B.globalScope))
             
             a.set("world")
             expect(a.get()).toEqual("world")
             a.set(null)
             expect(a.get()).toEqual("world")
+            expect(root.get()).toEqual(null) // pass all values in set
+            a.set("hello")
+            expect(a.get()).toEqual("hello")
+            expect(root.get()).toEqual("hello")
         })
     
         it("Freezes on unwanted values (when not getting in between sets)", () => {
@@ -53,7 +58,7 @@ describe("Atom.filter", () => {
             atom.set("world")        
             atom.set(null)
             expect(atom.get()).toEqual("world") 
-        })        
+        })   
     })
     
 
