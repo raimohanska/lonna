@@ -37,6 +37,22 @@ export type StatefulUnaryTransformResultScoped<O> = O extends AtomSeed<infer A>
                     ? EventStream<A>
                     : never      
         
+export type StatefulUnaryTransformResultFor<O, A> = O extends AtomSeed<any>
+    ? AtomSeed<A>
+        : O extends PropertySeed<any>
+            ? PropertySeed<A>
+                : O extends EventStreamSeed<any>
+                    ? EventStreamSeed<A>
+                    : never
+
+export type StatefulUnaryTransformResultScopedFor<O, A> = O extends AtomSeed<any>
+    ? Atom<A>
+        : O extends PropertySeed<any>
+            ? Property<A>
+                : O extends EventStreamSeed<any>
+                    ? EventStream<A>
+                    : never
+
 
 export interface GenericTransformOp {
     <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<O>;    
@@ -62,12 +78,12 @@ export interface StreamTransformOpScoped<A, B> {
     (seed: EventStreamSeed<A> | EventStream<A>): EventStream<B>
 }
 
-export interface UnaryTransformOp<A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<O>;  
+export interface UnaryTransformOp<A, B extends A = A> {
+    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultFor<O, B>;
 }
 
-export interface UnaryTransformOpScoped<A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScoped<O>;  
+export interface UnaryTransformOpScoped<A, B extends A = A> {
+    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScopedFor<O, B>;
 }
 
 export function transform<A>(desc: string, transformer: Transformer<A, A>): UnaryTransformOp<A>
