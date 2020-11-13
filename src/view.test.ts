@@ -60,7 +60,7 @@ describe("Property.view", () => {
       a.set(2)
       a.set(3)
       expect(values).toEqual([false, true])
-      expect(calls).toEqual(3) // One would hope this to be 2 at optimum. There's one "extra" call for the initial value.
+      expect(calls).toEqual(2)
     })
 
 

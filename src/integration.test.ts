@@ -3,6 +3,7 @@ import { map } from "./map"
 import { constant, toProperty } from "./property"
 import { atom } from "./atom"
 import { filter } from "./filter"
+import * as B from "./index"
 
 describe("PropertySeed",() => {
     it("Can be used only once", () => {

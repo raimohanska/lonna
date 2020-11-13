@@ -110,6 +110,7 @@ class DependentAtom<V> extends Atom<V> {
     
 }
 
+// TODO: looks identical to StatefulProperty
 export class StatefulDependentAtom<V> extends Atom<V> {
     private _scope: Scope
     private _dispatcher = new Dispatcher<AtomEvents<V>>();

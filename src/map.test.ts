@@ -16,6 +16,18 @@ describe("Property.map", () => {
       },
       ["1", "2"])
   })
+
+  it("Minimizes calls to mapping function", () => {
+    let count = 0
+    const property = B.constant("foo")
+    const mapped = property.pipe(
+        B.map((value: string) => {
+            count++
+        })
+    )
+    mapped.forEach(value => {})
+    expect(count).toEqual(1)
+  })
 });
 
 describe("EventStream.map", () => {
