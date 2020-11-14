@@ -1,6 +1,6 @@
 import * as B from "."
 import { later } from "./later"
-import { constant, toProperty } from "./property"
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, expectStreamEvents, series, testScope } from "./test-utils"
 
 describe("Atom.view", () => {

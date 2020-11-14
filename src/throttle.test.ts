@@ -1,5 +1,5 @@
 import { never } from "./never";
-import { constant, toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, expectStreamTimings, series } from "./test-utils";
 import { throttle } from "./throttle";
 

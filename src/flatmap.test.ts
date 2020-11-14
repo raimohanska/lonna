@@ -1,6 +1,6 @@
 import { flatMap } from "./flatmap";
 import { never } from "./never";
-import { constant } from "./property";
+import { constant } from "./toproperty";
 import { expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util";
 

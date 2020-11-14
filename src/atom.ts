@@ -1,11 +1,15 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, valueEvent, Scope } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, TypeBitfield, T_ATOM, T_SCOPED, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
+import { PropertyBase } from "./implementations";
 import * as L from "./lens";
-import { afterScope, beforeScope, checkScope, globalScope, OutOfScope } from "./scope";
-import { toString } from "./util"
+import { StatefulProperty } from "./property";
+import { globalScope } from "./scope";
+import { toString } from "./util";
+
 type AtomEvents<V> = { "change": V }
 
-class RootAtom<V> extends Atom<V> {    
+class RootAtom<V> extends PropertyBase<V> implements Atom<V> {    
+    _L: TypeBitfield = T_ATOM | T_SCOPED
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V
 
@@ -37,7 +41,8 @@ class RootAtom<V> extends Atom<V> {
 
 const uninitialized = {}
 
-export class LensedAtom<R, V> extends Atom<V> {
+export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
+    _L: TypeBitfield = T_ATOM | T_SCOPED
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
 
@@ -82,7 +87,8 @@ export class LensedAtom<R, V> extends Atom<V> {
     }
 }
 
-class DependentAtom<V> extends Atom<V> {
+class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
+    _L: TypeBitfield = T_ATOM | T_SCOPED
     private _input: Property<V>;
     set: (updatedValue: V) => void;
 
@@ -110,42 +116,12 @@ class DependentAtom<V> extends Atom<V> {
     
 }
 
-// TODO: looks identical to StatefulProperty
-export class StatefulDependentAtom<V> extends Atom<V> {
-    private _scope: Scope
-    private _dispatcher = new Dispatcher<AtomEvents<V>>();
-    private _value: V | OutOfScope = beforeScope
+export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Atom<V> {
+    _L: TypeBitfield = T_ATOM | T_SCOPED
 
     constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>>, scope: Scope) {
-        super(seed.desc)
-        this._scope = scope;
-        const source = seed.consume()
-        this.set = source.set.bind(this);
-        
-        const meAsObserver = (event: Event<V>) => {
-            if (isValue(event)) {
-                if (event.value !== this._value) {
-                    this._value = event.value
-                    this._dispatcher.dispatch("change", event)
-                }
-            } else {
-                this._dispatcher.dispatch("change", event)
-            }
-        }
-        scope.subscribe(
-            () => {                
-                const unsub = source.onChange(meAsObserver);
-                this._value = source.get();
-                return () => {
-                    this._value = afterScope; 
-                    unsub!()
-                }
-            }, 
-            this._dispatcher
-        )
-    }
-    get(): V {
-        return checkScope(this, this._value)
+        super(seed, scope)        
+        this.set = (this._source as AtomSource<V>).set.bind(this);
     }
 
     set: (updatedValue: V) => void;
@@ -153,13 +129,6 @@ export class StatefulDependentAtom<V> extends Atom<V> {
     modify(fn: (old: V) => V) {
         this.set(fn(this.get()))
     }
-    onChange(observer: Observer<Event<V>>) {
-        return this._dispatcher.on("change", observer)
-    }    
-    getScope() {
-        return this._scope
-    }
-
 }
 export function atom<A>(initial: A): Atom<A>;
 /**

@@ -1,12 +1,17 @@
-import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, Unsub } from "./abstractions";
+import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SCOPED, T_STREAM, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
-import { EventStreamSeedImpl } from "./implementations";
+import { EventStreamSeedImpl, ObservableBase } from "./implementations";
 
 type StreamEvents<V> = { "value": V }
 
+export abstract class EventStreamBase<V> extends ObservableBase<V> implements EventStream<V> {
+    _L: TypeBitfield = T_STREAM | T_SCOPED
+    abstract getScope(): Scope
+}
+
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
-export class StatefulEventStream<V> extends EventStream<V> {
+export class StatefulEventStream<V> extends EventStreamBase<V> {
     dispatcher = new Dispatcher<StreamEvents<V>>();
     private _scope: Scope;
     constructor(desc: string, scope: Scope) { 
@@ -22,7 +27,7 @@ export class StatefulEventStream<V> extends EventStream<V> {
     }
 }
 
-export class StatelessEventStream<V> extends EventStream<V> {
+export class StatelessEventStream<V> extends EventStreamBase<V> {
     private _scope: Scope;
     subscribe: (observer: Observer<Event<V>>) => Unsub;
 

@@ -1,6 +1,6 @@
 import { Event, EventStream, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
 import GlobalScheduler from "./scheduler";
-import { StreamTransformer, transform, Transformer } from "./transform";
+import { StreamTransformer, transform } from "./transform";
 import { nop } from "./util";
 
 export type VoidFunction = () => void

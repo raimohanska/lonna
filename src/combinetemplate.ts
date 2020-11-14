@@ -3,7 +3,7 @@ import { applyScopeMaybe } from "./applyscope";
 import { combineAsArray, PropertyLike } from "./combine";
 import { Predicate } from "./filter";
 import { map } from "./map";
-import { constant, toPropertySeed } from "./property";
+import { constant, toPropertySeed } from "./toproperty";
 import { rename } from "./util";
 
 export type GenericObjectTemplate<T, O extends ObservableSeed<any, any>> = { [K in keyof T]: T[K] extends ObservableSeed<infer I, any>

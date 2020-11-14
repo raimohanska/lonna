@@ -1,6 +1,6 @@
 import { atom } from "./atom";
 import { never } from "./never";
-import { toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { globalScope } from "./scope";
 import { skipDuplicates } from "./skipDuplicates";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";

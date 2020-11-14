@@ -1,4 +1,3 @@
-import { pipe } from "./pipe";
 import { Dispatcher } from "./dispatcher";
 import { Pipeable } from "./pipeable";
 
@@ -95,75 +94,39 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 
 export const endEvent: End = new End()
 
-export abstract class ObservableSeed<V, O extends Observable<any>> extends Pipeable {
-    abstract _L: TypeBitfield
+export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable {
+    _L: TypeBitfield
+
     desc: string
 
-    constructor(desc: string) {
-        super()
-        this.desc = desc
-    }
+    consume(): O;
 
-    abstract consume(): O;
+    toString(): string;
 
-    toString(): string {
-        return this.desc
-    }
+    forEach(observer: Observer<V>): Unsub;
 
-    forEach(observer: Observer<V>): Unsub {
-        return this.consume().subscribe(valueObserver(observer))
-    }
-
-    log(message?: string) {
-        this.forEach(v => message === undefined ? console.log(v) : console.log(message, v))
-    }
+    log(message?: string): Unsub;
 }
 
 
-export abstract class Observable<V> extends ObservableSeed<V, Observable<V>> {
-    abstract _L: TypeBitfield
-    constructor(desc: string) {
-        super(desc)
-    }
-
-    abstract subscribe(observer: Observer<Event<V>>): Unsub;
-
-    forEach(observer: Observer<V>): Unsub {
-        return this.subscribe(valueObserver(observer))
-    }
-
-    consume() {
-        return this
-    }
+export interface Observable<V> {
+    _L: TypeBitfield
+    subscribe(observer: Observer<Event<V>>): Unsub;
+    desc: string
 }
 
-export abstract class ScopedObservable<V> extends Observable<V> {
-    constructor(desc: string) {
-        super(desc)
-    }
-    abstract getScope(): Scope;  
+
+export interface ScopedObservable<V> extends Observable<V> {
+    getScope(): Scope;  
 }
 
 export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
 
-export abstract class Property<V> extends ScopedObservable<V> implements PropertySeed<V>, PropertySource<V> {
-    _L: TypeBitfield = T_PROPERTY | T_SCOPED
-
-    constructor(desc: string) {
-        super(desc)
-    }
-
-    abstract get(): V
-
-    abstract onChange(observer: Observer<Event<V>>): Unsub;
-
-    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
-    subscribe(observer: Observer<Event<V>>): Unsub {        
-        const unsub = this.onChange(observer)
-        observer(valueEvent(this.get()))
-        return unsub
-    }    
+export interface Property<V> extends ScopedObservable<V>, PropertySource<V> {
+    get(): V
+    onChange(observer: Observer<Event<V>>): Unsub;
 }
+
 
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
@@ -180,11 +143,7 @@ export type PropertySource<V> = Observable<V> & PropertySeed<V> & {
 }
 
 
-export abstract class EventStream<V> extends ScopedObservable<V> implements EventStreamSeed<V>, EventStreamSource<V> {
-    _L: TypeBitfield = T_STREAM | T_SCOPED
-    constructor(desc: string) { 
-        super(desc) 
-    }
+export interface EventStream<V> extends ScopedObservable<V>, EventStreamSource<V> {
 }
 
 export interface EventStreamSeed<V> extends ObservableSeed<V, EventStreamSource<V>> {
@@ -194,29 +153,18 @@ export interface EventStreamSeed<V> extends ObservableSeed<V, EventStreamSource<
 
 export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
 
+export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>>
 
-export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>>, AtomSeed<V>, AtomSource<V> {
-    _L: TypeBitfield = T_ATOM | T_SCOPED
-    constructor(desc: string) { 
-        super(desc) 
-    }
-    abstract set(newValue: V): void
-    abstract modify(fn: (old: V) => V): void
+export interface Atom<V> extends Property<V>, AtomSource<V> {
+    set(newValue: V): void
+    modify(fn: (old: V) => V): void
 }
 
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export interface AtomSeed<V> extends ObservableSeed<V, AtomSource<V>>{
-    
-}
-
-/**
- *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
- *  Must skip duplicates!
- **/
-export type AtomSource<V> = PropertySource<V> & AtomSeed<V> & Observable<V> & {
+export type AtomSource<V> = AtomSeed<V> & PropertySource<V> & {
     set(updatedValue: V): void;
 }
 

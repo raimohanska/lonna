@@ -1,6 +1,6 @@
 import { filter } from "./filter";
 import { never } from "./never";
-import { toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { globalScope } from "./scope";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
 import * as B from "./index"

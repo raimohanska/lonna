@@ -1,7 +1,7 @@
 import { later } from ".";
 import { combineTemplate, combineTemplateS } from "./combinetemplate";
 import { map } from "./map";
-import { constant, toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents } from "./test-utils";
 
 describe("combineTemplate", function() {

@@ -1,5 +1,5 @@
 import { later } from "./later";
-import { toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { repeat } from "./repeat";
 
 import { expectStreamEvents } from "./test-utils";

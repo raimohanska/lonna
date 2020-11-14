@@ -1,6 +1,6 @@
 import { later } from ".";
 import { never } from "./never";
-import { constant } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, testScope, series } from "./test-utils";
 import { update } from "./update";
 

@@ -1,6 +1,6 @@
 import { later } from "./later"
 import { map } from "./map"
-import { constant, toProperty } from "./property"
+import { constant, toProperty } from "./toproperty";
 import { atom } from "./atom"
 import { filter } from "./filter"
 import * as B from "./index"

@@ -1,5 +1,5 @@
-import { isObservableSeed, Observable, ObservableSeed } from "./abstractions"
-import { constant } from "./property"
+import { isObservableSeed, Observable, ObservableSeed } from "./abstractions";
+import { constant } from "./toproperty";
 
 /** @hidden */
 export function argumentsToObservables<V, P extends ObservableSeed<V, Observable<any>>>(args: (P | P[] | V)[]): P[] {
@@ -11,7 +11,7 @@ function singleToObservables<T>(x: (ObservableSeed<any, any> | ObservableSeed<an
   if (isObservableSeed(x)) {
     return [x.consume()]
   } else if (x instanceof Array) {
-    return argumentsToObservables(<any>x)
+    return argumentsToObservables(<any>x) as any
   } else {
     return <any>[constant(x)]
   }

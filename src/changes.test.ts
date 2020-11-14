@@ -1,6 +1,6 @@
 import { applyScope } from "./applyscope"
 import { changes } from "./changes"
-import { toProperty } from "./property"
+import { constant, toProperty } from "./toproperty";
 import { expectStreamEvents, series, testScope } from "./test-utils"
 
 describe("changes", () => {

@@ -1,15 +1,12 @@
-import { Event, EventStream, EventStreamSeed, Scope, isEventStream, isProperty, isPropertySeed, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Subscribe, Unsub } from "./abstractions";
-import { applyScopeMaybe } from "./applyscope";
+import { Event, isValue, ObservableSeed, Observer, Property, PropertySource, Scope, TypeBitfield, T_PROPERTY, T_SCOPED, Unsub } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { PropertySeedImpl } from "./implementations";
-import { mapSubscribe } from "./map";
-import { never } from "./never";
-import { afterScope, beforeScope, checkScope, globalScope, OutOfScope } from "./scope";
-import { rename, toString } from "./util";
+import { PropertyBase } from "./implementations";
+import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
 
 type PropertyEvents<V> = { "change": V }
 const uninitialized = {}
-export class StatelessProperty<V> extends Property<V> {
+export class StatelessProperty<V> extends PropertyBase<V> {
+    _L: TypeBitfield = T_PROPERTY | T_SCOPED
     get: () => V;
     private _onChange: (observer: Observer<Event<V>>) => Unsub;
     private _scope: Scope
@@ -42,14 +39,17 @@ export class StatelessProperty<V> extends Property<V> {
     }
 }
 
-export class StatefulProperty<V> extends Property<V> {
+export class StatefulProperty<V> extends PropertyBase<V> {
+    _L: TypeBitfield = T_PROPERTY | T_SCOPED
     private _dispatcher = new Dispatcher<PropertyEvents<V>>();
     private _scope: Scope
     private _value: V | OutOfScope  = beforeScope
+    protected _source: PropertySource<V>
 
     constructor(seed: ObservableSeed<V, PropertySource<V> | Property<V>>, scope: Scope) {
         super(seed.desc)
         this._scope = scope
+        this._source = seed.consume()
         
         const meAsObserver = (event: Event<V>) => {
             if (isValue(event)) {
@@ -63,9 +63,8 @@ export class StatefulProperty<V> extends Property<V> {
         }
         scope.subscribe(
             () => {
-                const source = seed.consume()
-                const unsub = source.onChange(meAsObserver);                
-                this._value = source.get();
+                const unsub = this._source.onChange(meAsObserver);                
+                this._value = this._source.get();
                 return () => {
                     this._value = afterScope; 
                     unsub!()
@@ -86,50 +85,4 @@ export class StatefulProperty<V> extends Property<V> {
     getScope() {
         return this._scope
     }
-}
-
-export interface ToStatelessPropertyOp<A> {
-    (stream: EventStream<any> | Subscribe<any>): Property<A>
-}
-export function toStatelessProperty<A>(get: () => A): ToStatelessPropertyOp<A>
-export function toStatelessProperty<A>(get: () => A) {
-    return (streamOrSubscribe: any) => {
-        if (isEventStream(streamOrSubscribe)) {        
-            return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
-        } else {
-            return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
-        }
-    }
-}
-
-export interface ToPropertyOp<A> {
-    <B>(stream: EventStream<B> | EventStreamSeed<B>): PropertySeed<A | B>;
-}
-export interface ToPropertyOpScoped<A> {
-    <B>(stream: EventStream<B> | EventStreamSeed<B>): Property<A | B>;    
-}
-
-export function toProperty<A>(initial: A): ToPropertyOp<A>;
-export function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
-export function toProperty(initial: any, scope?: Scope) {    
-    return (seed: EventStream<any> | EventStreamSeed<any>) => {
-        const source = seed.consume()
-        return applyScopeMaybe(new PropertySeedImpl(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
-            return source.subscribe(observer)
-        }), scope)    
-    }
-}
-
-export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): PropertySeed<A> {
-    if (!isProperty(property)) {
-        if (!isPropertySeed(property)) {
-            throw Error("Assertion fail")
-        }
-        return property;
-    }
-    return new PropertySeedImpl<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
-}
-
-export function constant<A>(value: A): Property<A> {
-    return rename(`constant(${toString(value)})`, toProperty(value, globalScope)(never()))
 }

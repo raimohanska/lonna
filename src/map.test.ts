@@ -1,7 +1,7 @@
 import * as B from "."
 import { map } from "./map";
 import { never } from "./never";
-import { constant, toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, expectStreamEvents, series, wait } from "./test-utils"
 
 const times2 = (x: number) => x * 2;

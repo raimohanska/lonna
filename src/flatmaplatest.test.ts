@@ -1,7 +1,7 @@
 import { Property } from "./abstractions";
 import { flatMapLatest } from "./flatmaplatest";
 import { never } from "./never";
-import { constant, toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util"
 

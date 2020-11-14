@@ -1,6 +1,6 @@
 import * as B from "."
 import { pipe } from "./pipe"
-import { toProperty } from "./property"
+import { constant, toProperty } from "./toproperty";
 import { autoScope } from "./scope"
 
 describe("autoScope", () => {

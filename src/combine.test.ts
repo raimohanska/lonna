@@ -1,5 +1,5 @@
 import { combine, combineAsArray } from "./combine"
-import { constant, toProperty, toPropertySeed } from "./property"
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, series } from "./test-utils"
 import { throttle } from "./throttle"
 

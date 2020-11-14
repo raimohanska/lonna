@@ -2,7 +2,7 @@ import { debounce } from ".";
 import { EventStream, isEventStream } from "./abstractions";
 import { applyScope } from "./applyscope";
 import { never } from "./never";
-import { constant, toProperty } from "./property";
+import { constant, toProperty } from "./toproperty";
 import { expectPropertyEvents, expectStreamEvents, expectStreamTimings, series, testScope } from "./test-utils";
 import { throttle } from "./throttle";
 
