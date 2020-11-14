@@ -4,7 +4,7 @@ import { Pipeable } from "./pipeable";
 
 export type TypeBitfield = number
 
-export const T_SCOPED = 0x0001;
+export const T_SCOPED = 0x0003; // scoped observables always implement seed interfaces as well
 export const T_SEED = 0x0002;
 export const T_COLD = 0x0004;
 export const T_PROPERTY = 0x0010;
@@ -147,7 +147,7 @@ export abstract class ScopedObservable<V> extends Observable<V> {
 export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
 
 export abstract class Property<V> extends ScopedObservable<V> implements PropertySeed<V>, PropertySource<V> {
-    _L: TypeBitfield = T_PROPERTY | T_SCOPED | T_SEED
+    _L: TypeBitfield = T_PROPERTY | T_SCOPED
 
     constructor(desc: string) {
         super(desc)
@@ -181,7 +181,7 @@ export type PropertySource<V> = Observable<V> & PropertySeed<V> & {
 
 
 export abstract class EventStream<V> extends ScopedObservable<V> implements EventStreamSeed<V>, EventStreamSource<V> {
-    _L: TypeBitfield = T_STREAM | T_SCOPED | T_SEED
+    _L: TypeBitfield = T_STREAM | T_SCOPED
     constructor(desc: string) { 
         super(desc) 
     }
@@ -196,7 +196,7 @@ export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
 
 
 export abstract class Atom<V> extends Property<V> implements ObservableSeed<V, Atom<V>>, AtomSeed<V>, AtomSource<V> {
-    _L: TypeBitfield = T_ATOM | T_SCOPED | T_SEED
+    _L: TypeBitfield = T_ATOM | T_SCOPED
     constructor(desc: string) { 
         super(desc) 
     }
