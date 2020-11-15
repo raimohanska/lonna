@@ -24,11 +24,12 @@ type OnOut = () => void
 
 export function createScope(): MutableScope {
     let started = false
+    let ended = false
     const ins: OnIn[] = []
     const outs: OnOut[] = []
     
     return new MutableScope(
-        (onIn: OnIn, dispatcher: Dispatcher<any>) => {
+        (onIn: OnIn, dispatcher?: Dispatcher<any>) => {
             let onOut : Unsub | null = null
             if (started) {
                 onOut = onIn()
@@ -47,6 +48,7 @@ export function createScope(): MutableScope {
         },
         () => {
             started = false
+            ended = true
             for (let o of outs) {
                 o()
             }
@@ -58,22 +60,35 @@ export function createScope(): MutableScope {
 /**
  *  Subscribe to source when there are observers. Use with care! 
  **/
-export const autoScope: Scope = mkScope((onIn, dispatcher) => {
-    let unsub : Unsub | null = null 
-    if (dispatcher.hasObservers()) {
-        unsub = onIn()
-    }
-    let ended = false
-    dispatcher.onObserverCount(count => {
-        if (count > 0) {
-            if (ended) throw new Error("autoScope reactivation attempted")
-            unsub = onIn()
-        } else {
-            ended = true
-            unsub!()
+export function autoScope(): Scope {
+    let d: Dispatcher<any> | null = null
+    return mkScope((onIn, dispatcher) => {
+        if (dispatcher) {
+            if (!d) {
+                d = dispatcher
+            } else {
+                if (d !== dispatcher) throw Error("Assertion failed")
+            }
         }
+        if (!d) {
+           throw Error("Not in scope yet")
+        }
+        let unsub : Unsub | null = null 
+        if (d.hasObservers()) {
+            unsub = onIn()
+        }
+        let ended = false
+        d.onObserverCount(count => {
+            if (count > 0) {
+                if (ended) throw new Error("autoScope reactivation attempted")
+                unsub = onIn()
+            } else {
+                ended = true
+                unsub!()
+            }
+        })
     })
-})
+}
 
 export const beforeScope = {}
 export const afterScope = {}

@@ -2,6 +2,7 @@ import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, Prope
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
 import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
+import { nop } from "./util";
 
 type PropertyEvents<V> = { "change": V }
 const uninitialized = {}
@@ -18,9 +19,14 @@ export abstract class PropertyBase<V> extends ObservableBase<V> implements Prope
     abstract onChange(observer: Observer<Event<V>>): Unsub;
 
     // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
-    subscribe(observer: Observer<Event<V>>): Unsub {        
-        const unsub = this.onChange(observer)
-        observer(valueEvent(this.get()))
+    subscribe(observer: Observer<Event<V>>): Unsub {
+        const unsub = this.onChange(observer) // onChange call needs to be before get() call for autoScope to work.
+
+        this.getScope().subscribe(() => {
+            observer(valueEvent(this.get()))
+            return nop
+        })
+        
         return unsub
     }    
 }
@@ -50,7 +56,10 @@ export class StatelessProperty<V> extends PropertyBase<V> {
                 observer(event)
             }
         })
-        current = this.get()
+        this.getScope().subscribe(() => {
+            current = this.get()
+            return nop
+        })        
         return unsub
     }
 

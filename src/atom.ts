@@ -4,7 +4,7 @@ import { ObservableSeedImpl } from "./observable";
 import * as L from "./lens";
 import { PropertySourceImpl, StatefulProperty, PropertyBase } from "./property";
 import { globalScope } from "./scope";
-import { toString } from "./util";
+import { nop, toString } from "./util";
 
 type AtomEvents<V> = { "change": V }
 
@@ -78,7 +78,10 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
                 observer(event)
             }
         })
-        current = this.get()
+        this.getScope().subscribe(() => {
+            current = this.get()
+            return nop
+        })
         return unsub
     }
 

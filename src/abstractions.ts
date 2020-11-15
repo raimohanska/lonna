@@ -153,7 +153,7 @@ export interface Bus<V> extends EventStream<V> {
  *  - autoScope: the observable will be active as long as it has observers (will throw if trying to re-activate)
  *  - custom scopes for, e.g. component lifetimes (between mount/unmount)
  **/ 
-export type ScopeFn = (onIn: () => Unsub, dispatcher: Dispatcher<any>) => void;
+export type ScopeFn = (onIn: () => Unsub, dispatcher?: Dispatcher<any>) => void;
 
 export class Scope {
     _L: TypeBitfield = T_SCOPE
