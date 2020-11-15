@@ -5,7 +5,7 @@ export type TypeBitfield = number
 
 export const T_SCOPED = 0x0007; // scoped observables always implement seed and source interfaces as well
 export const T_SEED = 0x0002;
-export const T_COLD = 0x0004;
+export const T_SOURCE = 0x0004;
 export const T_PROPERTY = 0x0010;
 export const T_STREAM = 0x0020;
 export const T_ATOM = 0x0050; // atoms are always properties
@@ -22,13 +22,13 @@ export function matchFlags(o: any, flags: TypeBitfield) {
 
 export function isProperty<V>(e: any): e is Property<V> { return matchFlags(e, T_SCOPED | T_PROPERTY) }
 export function isPropertySeed<V>(e: any): e is PropertySeed<V> { return matchFlags(e, T_SEED | T_PROPERTY) }
-export function isPropertySource<V>(e: any): e is PropertySource<V> { return matchFlags(e, T_COLD | T_PROPERTY) }
+export function isPropertySource<V>(e: any): e is PropertySource<V> { return matchFlags(e, T_SOURCE | T_PROPERTY) }
 export function isEventStream<V>(e: any): e is EventStream<V> { return matchFlags(e, T_SCOPED | T_STREAM) }
 export function isEventStreamSeed<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_SEED | T_STREAM) }
-export function isEventStreamSource<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_COLD | T_STREAM) }
+export function isEventStreamSource<V>(e: any): e is EventStreamSeed<V> { return matchFlags(e, T_SOURCE | T_STREAM) }
 export function isAtom<V>(e: any): e is Atom<V> { return matchFlags(e, T_SCOPED | T_ATOM) }
 export function isAtomSeed<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SEED | T_ATOM) }
-export function isAtomSource<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_COLD | T_ATOM) }
+export function isAtomSource<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SOURCE | T_ATOM) }
 
 export function isObservableSeed<V, O extends Observable<any>>(e: any): e is ObservableSeed<V, O> { 
     return e._L !== undefined

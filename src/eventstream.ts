@@ -1,7 +1,7 @@
-import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_COLD, T_SCOPED, T_SEED, T_STREAM, Unsub } from "./abstractions";
+import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SOURCE, T_SCOPED, T_SEED, T_STREAM, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
-import { ObservableBase, ObservableSeedImpl } from "./implementations";
+import { ObservableBase, ObservableSeedImpl } from "./observable";
 
 type StreamEvents<V> = { "value": V }
 
@@ -54,7 +54,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 }
 
 export class EventStreamSourceImpl<V> extends ObservableBase<V> {
-    _L: TypeBitfield = T_STREAM | T_COLD
+    _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: (observer: Observer<Event<V>>) => Unsub
 
     constructor(desc: string, subscribe: Subscribe<V>) {

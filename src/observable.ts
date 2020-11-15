@@ -1,4 +1,4 @@
-import { isValue, Event, Observable, ObservableSeed, Observer, PropertySeed, PropertySource, Subscribe, TypeBitfield, T_PROPERTY, T_SEED, T_COLD, Unsub, valueEvent, T_STREAM, EventStreamSource, EventStreamSeed, AtomSource, T_ATOM, AtomSeed, valueObserver, T_SCOPED, ScopedObservable, Property, Scope } from "./abstractions"
+import { Event, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
 import { Pipeable } from "./pipeable"
 
 export abstract class ObservableSeedBase<V, O extends Observable<any>> extends Pipeable implements ObservableSeed<V, O> {

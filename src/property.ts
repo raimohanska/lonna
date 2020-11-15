@@ -1,6 +1,6 @@
-import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_COLD, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent } from "./abstractions";
+import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_SOURCE, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { ObservableBase, ObservableSeedImpl } from "./implementations";
+import { ObservableBase, ObservableSeedImpl } from "./observable";
 import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
 
 type PropertyEvents<V> = { "change": V }
@@ -119,7 +119,7 @@ export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>
 }
 
 export class PropertySourceImpl<V> extends ObservableBase<V> implements PropertySource<V> {
-    _L: TypeBitfield = T_PROPERTY | T_COLD
+    _L: TypeBitfield = T_PROPERTY | T_SOURCE
     private _started = false
     private _subscribed = false
     private _get: () => V

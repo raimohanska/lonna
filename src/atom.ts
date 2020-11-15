@@ -1,6 +1,6 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_COLD, T_SCOPED, T_SEED, valueEvent } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_SOURCE, T_SCOPED, T_SEED, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { ObservableSeedImpl } from "./implementations";
+import { ObservableSeedImpl } from "./observable";
 import * as L from "./lens";
 import { PropertySourceImpl, StatefulProperty, PropertyBase } from "./property";
 import { globalScope } from "./scope";
@@ -148,7 +148,7 @@ export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
  *  Must skip duplicates!
  **/
 export class AtomSourceImpl<V> extends PropertySourceImpl<V> implements AtomSource<V> {
-    _L: TypeBitfield = T_ATOM | T_COLD
+    _L: TypeBitfield = T_ATOM | T_SOURCE
     set: (updatedValue: V) => void;
     constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(desc, get, subscribe)
