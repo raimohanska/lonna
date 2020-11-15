@@ -9,7 +9,6 @@ export const T_SOURCE = 0x0004;
 export const T_PROPERTY = 0x0010;
 export const T_STREAM = 0x0020;
 export const T_ATOM = 0x0050; // atoms are always properties
-
 export const T_EVENT = 0x0100
 export const T_SCOPE = 0x0200
 export const T_VALUE = 0x1100
@@ -37,6 +36,7 @@ export function isObservableSeed<V, O extends Observable<any>>(e: any): e is Obs
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
 export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
+export type Unsub = Callback
 
 export abstract class Event<V> {
     _L: TypeBitfield = T_EVENT
@@ -55,8 +55,6 @@ export class End extends Event<any> {
     _L: TypeBitfield = T_END
 }
 export type EventLike<V> = Event<V>[] | Event<V> | V
-
-export type Unsub = Callback
 
 export function toEvent<V>(value: Event<V> | V): Event<V> {
     if (isEvent<V>(value)) {
@@ -88,70 +86,55 @@ export function isEnd<V>(event: Event<V>): event is End {
     return matchFlags(event, T_END)
 }
 
+
+export const endEvent: End = new End()
+
 export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
     return event => { if (isValue(event)) observer(event.value) }
 }
 
-export const endEvent: End = new End()
 
-export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable {
+export interface ObservableIdentifiers {
     _L: TypeBitfield // Discriminator bitfield for detecting implemented interfaces runtime. Used by the is* methods above.
-
     desc: string
-
-    consume(): O;
-
     toString(): string;
+}
 
+export interface ForEach<V> {
     forEach(observer: Observer<V>): Unsub;
-
     log(message?: string): Unsub;
 }
 
-
-export interface Observable<V> {
-    _L: TypeBitfield
+export type Observable<V> = ObservableIdentifiers & ForEach<V> & {
     subscribe(observer: Observer<Event<V>>): Unsub;
-    desc: string
 }
 
+export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
+    consume(): O;
+}
 
-export interface ScopedObservable<V> extends Observable<V> {
+export type ScopedObservable<V> = Observable<V> & {
     getScope(): Scope;  
 }
 
-export type PropertySubscribe<V> = (observer: Observer<Event<V>>) => [V, Unsub]
-
-export interface Property<V> extends ScopedObservable<V>, PropertySource<V> {
+export interface PropertyMethods<V> {
     get(): V
     onChange(observer: Observer<Event<V>>): Unsub;
 }
 
+export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V>
+export type Property<V> = ScopedObservable<V> & PropertySource<V> & PropertyMethods<V>
+export type PropertySeed<V> = ObservableSeed<V, PropertySource<V>>
 
-/**
- *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
- *  Must skip duplicates!
- **/
-export interface PropertySeed<V> extends ObservableSeed<V, PropertySource<V>> {
- 
-}
-
-
-export type PropertySource<V> = Observable<V> & PropertySeed<V> & {
-    onChange(observer: Observer<Event<V>>): Unsub
-    get(): V 
-}
-
-
-export interface EventStream<V> extends ScopedObservable<V>, EventStreamSource<V> {
-}
-
-export interface EventStreamSeed<V> extends ObservableSeed<V, EventStreamSource<V>> {
-    
-}
 
 export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
+export type EventStream<V> = ScopedObservable<V> & EventStreamSource<V>
+export type EventStreamSeed<V> = ObservableSeed<V, EventStreamSource<V>>
 
+
+export type AtomSource<V> = PropertySource<V> & PropertySeed<V> & AtomSeed<V> & {
+    set(updatedValue: V): void;
+}
 export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>>
 
 export type Atom<V> = Property<V> & AtomSource<V> & {
@@ -159,19 +142,10 @@ export type Atom<V> = Property<V> & AtomSource<V> & {
     modify(fn: (old: V) => V): void
 }
 
-/**
- *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
- *  Must skip duplicates!
- **/
-export type AtomSource<V> = PropertySource<V> & PropertySeed<V> & AtomSeed<V> & {
-    set(updatedValue: V): void;
-}
-
 export interface Bus<V> extends EventStream<V> {
     push(newValue: V): void
     end(): void
 }
-
 
 /**
  *  Defines the active lifetime of an Observable. You can use 
