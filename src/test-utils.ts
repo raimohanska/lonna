@@ -15,12 +15,16 @@ let seqs: StatefulEventStream<any>[] = [];
 const verifyCleanup = () => {
     try {
         for (let seq of seqs) {
-            expect(seq.dispatcher.hasObservers()).toEqual(false);
+            expect(hasObservers(seq)).toEqual(false);
         }
     } finally {
         seqs = [];
     }
 };
+
+export function hasObservers(o: Observable<any>) {
+    return ((o as any).dispatcher).hasObservers()
+}
 
 let scope = createScope()
 

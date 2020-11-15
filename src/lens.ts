@@ -18,3 +18,10 @@ export function item<I>(index: number): Lens<I[], I | undefined> {
             : [...nums.slice(0, index), newValue, ...nums.slice(index+1)]
     }
 }
+
+export function identityLens<A>() {
+    return {
+        get: (root: A) => root,
+        set: (root: A, newValue: any) => newValue
+    }
+}

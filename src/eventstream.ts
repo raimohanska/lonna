@@ -12,7 +12,7 @@ export abstract class EventStreamBase<V> extends ObservableBase<V> implements Ev
 
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
 export class StatefulEventStream<V> extends EventStreamBase<V> {
-    dispatcher = new Dispatcher<StreamEvents<V>>();
+    protected dispatcher = new Dispatcher<StreamEvents<V>>();
     private _scope: Scope;
     constructor(desc: string, scope: Scope) { 
         super(desc) 
