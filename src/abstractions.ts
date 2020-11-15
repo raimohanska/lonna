@@ -3,7 +3,7 @@ import { Pipeable } from "./pipeable";
 
 export type TypeBitfield = number
 
-export const T_SCOPED = 0x0003; // scoped observables always implement seed interfaces as well
+export const T_SCOPED = 0x0007; // scoped observables always implement seed and source interfaces as well
 export const T_SEED = 0x0002;
 export const T_COLD = 0x0004;
 export const T_PROPERTY = 0x0010;
@@ -95,7 +95,7 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 export const endEvent: End = new End()
 
 export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable {
-    _L: TypeBitfield
+    _L: TypeBitfield // Discriminator bitfield for detecting implemented interfaces runtime. Used by the is* methods above.
 
     desc: string
 
@@ -150,12 +150,11 @@ export interface EventStreamSeed<V> extends ObservableSeed<V, EventStreamSource<
     
 }
 
-
 export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
 
 export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>>
 
-export interface Atom<V> extends Property<V>, AtomSource<V> {
+export type Atom<V> = Property<V> & AtomSource<V> & {
     set(newValue: V): void
     modify(fn: (old: V) => V): void
 }
@@ -164,7 +163,7 @@ export interface Atom<V> extends Property<V>, AtomSource<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export type AtomSource<V> = AtomSeed<V> & PropertySource<V> & {
+export type AtomSource<V> = PropertySource<V> & PropertySeed<V> & AtomSeed<V> & {
     set(updatedValue: V): void;
 }
 

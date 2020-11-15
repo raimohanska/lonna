@@ -1,6 +1,6 @@
 import { endEvent, Event, EventStream, EventStreamSeed, isEnd, Scope, ObservableSeed, Observer } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { fromSubscribe } from "./eventstream";
+import { fromSubscribe } from "./fromsubscribe";
 import { rename } from "./util";
 
 export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined): EventStreamSeed<V>;

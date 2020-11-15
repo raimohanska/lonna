@@ -1,10 +1,5 @@
-import { atom } from "./atom";
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
-import { globalScope } from "./scope";
-import { skipDuplicates } from "./skipDuplicates";
+import { atom, globalScope, never, skipDuplicates, toProperty } from "./index";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
-import * as B from "./index"
 
 const increasing = (a: number, b: number) => a <= b
 
@@ -33,7 +28,7 @@ describe("Property.skipDuplicates", function () {
 
 describe("Atom.skipDuplicates", () => {
     it("Skips duplicates", () => {
-        const root = B.atom(0)
+        const root = atom(0)
         const a = root.pipe(skipDuplicates(increasing, globalScope))
 
         a.set(1)

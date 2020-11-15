@@ -1,6 +1,7 @@
 import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { EventStreamSeedImpl, PropertySeedImpl } from "./implementations";
+import { PropertySeedImpl } from "./property";
+import { EventStreamSeedImpl } from "./eventstream";
 import { remove } from "./util";
 
 export type FlatMapOptions = {

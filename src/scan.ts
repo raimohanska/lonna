@@ -1,6 +1,6 @@
 import { Event, EventStream, EventStreamSeed, isValue, Observer, Property, PropertySeed, valueEvent, Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { PropertySeedImpl } from "./implementations";
+import { PropertySeedImpl } from "./property";
 
 export function scan<A, B>(initial: B, fn: (state: B, next: A) => B, scope: Scope): (stream: EventStream<A> | EventStreamSeed<A>) => Property<B>;
 export function scan<A, B>(initial: B, fn: (state: B, next: A) => B): (stream: EventStream<A> | EventStreamSeed<A>) => PropertySeed<B>;

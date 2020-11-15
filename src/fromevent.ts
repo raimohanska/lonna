@@ -1,7 +1,8 @@
-import { EventLike, EventStream, EventStreamSeed } from "./abstractions";
-import { fromSubscribe, StatelessEventStream, toFlexibleObserver } from "./eventstream";
+import { EventStream } from "./abstractions";
+import { StatelessEventStream } from "./eventstream";
+import { toFlexibleObserver } from "./fromsubscribe";
 import { globalScope } from "./scope";
-import { toString } from "./tostring"
+import { toString } from "./tostring";
 export type EventSourceFn = (binder: Function, listener: Function) => any
 
 function isEventSourceFn(x: any): x is EventSourceFn {

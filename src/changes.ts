@@ -1,6 +1,6 @@
 import { Event, EventStream, EventStreamSeed, EventStreamSource, isProperty, Observer, Property, PropertySeed } from "./abstractions";
 import { StatelessEventStream } from "./eventstream";
-import { EventStreamSeedImpl } from "./implementations";
+import { EventStreamSeedImpl } from "./eventstream";
 
 export function changes<O extends PropertySeed<any> | Property<any>>(property: O): O extends PropertySeed<infer A> ? EventStreamSeed<A> : O extends Property<infer A> ? EventStream<A>: never;
 

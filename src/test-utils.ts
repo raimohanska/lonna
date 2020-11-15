@@ -1,11 +1,7 @@
-import { Scope, endEvent, Event, EventStream, EventStreamSeed, isEnd, isEventStream, isProperty, isPropertySeed, isValue, Observable, Property, PropertySeed, toEvent, toEvents, valueEvent } from "./abstractions";
-import { StatefulEventStream, fromSubscribe } from "./eventstream";
-import { sequentially } from "./sequentially";
-import { createScope } from "./scope";
-import { applyScope } from "./applyscope";
+import { applyScope, createScope, endEvent, Event, EventStream, EventStreamSeed, fromSubscribe, isEnd, isEventStream, isProperty, isValue, Observable, Property, PropertySeed, Scope, sequentially, StatefulEventStream, toEvent, valueEvent } from ".";
+import { map } from "./map";
 import GlobalScheduler, { setScheduler } from "./scheduler";
 import TickScheduler from "./tickscheduler";
-import { map } from "./map";
 
 export function wait(delay: number): Promise<void> {
     return new Promise((resolve) => GlobalScheduler.scheduler.setTimeout(resolve, delay))

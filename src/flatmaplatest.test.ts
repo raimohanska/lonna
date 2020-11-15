@@ -1,9 +1,6 @@
-import { Property } from "./abstractions";
-import { flatMapLatest } from "./flatmaplatest";
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
+import { constant, flatMapLatest, never, toProperty } from ".";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
-import { nop } from "./util"
+import { nop } from "./util";
 
 
 describe("EventStream.flatMapLatest", () => {

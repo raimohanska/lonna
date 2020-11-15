@@ -1,6 +1,8 @@
 import { Atom, AtomSeed, Event, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { AtomSeedImpl, EventStreamSeedImpl, PropertySeedImpl } from "./implementations";
+import { EventStreamSeedImpl } from "./eventstream";
+import { PropertySeedImpl } from "./property";
+import { AtomSeedImpl } from "./atom";
 
 export type StreamTransformer<A, B> = (event: Event<A>, observer: Observer<Event<B>>) => void;
 

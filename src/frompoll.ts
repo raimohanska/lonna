@@ -2,7 +2,7 @@
  * A polled function used by [fromPoll](../globals.html#frompoll)
  */
 import { EventLike, EventStream, EventStreamSeed, isEnd, Scope, toEvents } from "./abstractions"
-import { fromSubscribe } from "./eventstream"
+import { fromSubscribe } from "./fromsubscribe"
 import GlobalScheduler from "./scheduler"
 import { rename } from "./util"
 

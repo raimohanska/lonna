@@ -1,6 +1,4 @@
-import { flatMap } from "./flatmap";
-import { never } from "./never";
-import { constant } from "./toproperty";
+import { constant, flatMap, never } from ".";
 import { expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util";
 

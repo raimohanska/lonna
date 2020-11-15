@@ -1,8 +1,8 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, TypeBitfield, T_ATOM, T_SCOPED, valueEvent } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_COLD, T_SCOPED, T_SEED, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { PropertyBase } from "./implementations";
+import { ObservableSeedImpl } from "./implementations";
 import * as L from "./lens";
-import { StatefulProperty } from "./property";
+import { PropertySourceImpl, StatefulProperty, PropertyBase } from "./property";
 import { globalScope } from "./scope";
 import { toString } from "./util";
 
@@ -130,6 +130,32 @@ export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Ato
         this.set(fn(this.get()))
     }
 }
+
+/**
+ *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
+ *  Must skip duplicates!
+ **/
+export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
+    _L: TypeBitfield = T_ATOM | T_SEED
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
+        super(new AtomSourceImpl(desc, get, subscribe, set))
+    }  
+}
+
+
+/**
+ *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
+ *  Must skip duplicates!
+ **/
+export class AtomSourceImpl<V> extends PropertySourceImpl<V> implements AtomSource<V> {
+    _L: TypeBitfield = T_ATOM | T_COLD
+    set: (updatedValue: V) => void;
+    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
+        super(desc, get, subscribe)
+        this.set = set
+    }
+}
+
 export function atom<A>(initial: A): Atom<A>;
 /**
  * Create a dependent atom that reflects the value of the given Property. The `onChange` function

@@ -1,8 +1,6 @@
 import { later } from ".";
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
-import { expectPropertyEvents, testScope, series } from "./test-utils";
-import { update } from "./update";
+import { constant, never, update } from "./index";
+import { expectPropertyEvents, testScope } from "./test-utils";
 
 describe("update", function() {
   describe("Updates value based on stream events", () =>

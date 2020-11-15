@@ -1,7 +1,7 @@
-import * as B from "."
-import { later } from "./later"
-import { constant, toProperty } from "./toproperty";
-import { expectPropertyEvents, expectStreamEvents, series, testScope } from "./test-utils"
+import * as B from ".";
+import { later } from "./later";
+import { expectPropertyEvents, expectStreamEvents } from "./test-utils";
+import { constant } from "./index";
 
 describe("Atom.view", () => {
     describe("Array index lenses", () => {
@@ -13,8 +13,7 @@ describe("Atom.view", () => {
         })
         it("Supports removal by setting to undefined", () => {
             const a = B.atom([1,2,3])
-            const view = B.view(a, 1)
-    
+            const view = B.view(a, 1)            
             view.set(undefined)
             expect(a.get()).toEqual([1, 3])            
         })    

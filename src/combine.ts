@@ -1,8 +1,7 @@
 import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed, Function0, Function1, Function2, Function3, Function4, Function5, Function6, isProperty } from "./abstractions";
-import { StatelessProperty } from "./property";
+import { StatelessProperty, PropertySeedImpl } from "./property";
 import { globalScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
-import { PropertySeedImpl } from "./implementations";
 import { cached } from "./cached";
 import { rename, toString } from "./util";
 

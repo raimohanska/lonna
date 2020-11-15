@@ -1,7 +1,8 @@
 import { EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, PropertySeed, Scope } from "./abstractions"
 import { applyScopeMaybe } from "./applyscope"
 import { changes } from "./changes"
-import { AtomSeedImpl, PropertySeedImpl } from "./implementations"
+import { AtomSeedImpl } from "./atom"
+import { PropertySeedImpl } from "./property"
 import { UnaryTransformOp, UnaryTransformOpScoped } from "./transform"
 import { rename } from "./util"
 

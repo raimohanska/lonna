@@ -1,6 +1,6 @@
 import { endEvent, EventStream, EventStreamSeed, isEventStream, isValue } from "./abstractions";
 import { applyScope } from "./applyscope";
-import { EventStreamSeedImpl } from "./implementations";
+import { EventStreamSeedImpl } from "./eventstream";
 
 export function merge<A>(a: EventStream<A>, b: EventStream<A>): EventStream<A>;
 export function merge<A, B>(a: EventStream<A>, b: EventStream<B>): EventStream<A | B>;

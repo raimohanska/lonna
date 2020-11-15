@@ -1,7 +1,7 @@
-import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SCOPED, T_STREAM, Unsub } from "./abstractions";
+import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_COLD, T_SCOPED, T_SEED, T_STREAM, Unsub } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
-import { EventStreamSeedImpl, ObservableBase } from "./implementations";
+import { ObservableBase, ObservableSeedImpl } from "./implementations";
 
 type StreamEvents<V> = { "value": V }
 
@@ -53,31 +53,20 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
     }
 }
 
-export function fromSubscribe<V>(subscribe: Subscribe<V>): EventStreamSeed<V>;
-export function fromSubscribe<V>(subscribe: Subscribe<V>, scope: Scope): EventStream<V>;
-export function fromSubscribe<V>(subscribe: Subscribe<V>, scope?: Scope): EventStream<V> | EventStreamSeed<V> {
-    return applyScopeMaybe(new EventStreamSeedImpl("fromSubscribe(fn)", subscribe), scope)
-}
+export class EventStreamSourceImpl<V> extends ObservableBase<V> {
+    _L: TypeBitfield = T_STREAM | T_COLD
+    subscribe: (observer: Observer<Event<V>>) => Unsub
 
-export type FlexibleObserver<V> = (event: EventLike<V>) => void
-export type FlexibleSubscribe<V> = (observer: FlexibleObserver<V>) => Unsub
-
-export function toFlexibleObserver<V>(observer: Observer<Event<V>>) {
-    return (eventLike: EventLike<V>) => {
-        const events = toEvents(eventLike)
-        for (const event of events) {
-            observer(event)
-            if (isEnd(event)) {
-                return
-            }
-        }
+    constructor(desc: string, subscribe: Subscribe<V>) {
+        super(desc)
+        this.subscribe = subscribe
     }
 }
 
-export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>): EventStreamSeed<V>;
-export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>, scope: Scope): EventStream<V>;
-export function fromFlexibleSubscibe<V>(subscribe: FlexibleSubscribe<V>, scope?: Scope): EventStream<V> | EventStreamSeed<V> {
-    return applyScopeMaybe(new EventStreamSeedImpl("fromSubscribe(fn)", observer =>
-        subscribe(toFlexibleObserver(observer))
-    ), scope)
+
+export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>> implements EventStreamSeed<V> {
+    _L: TypeBitfield = T_STREAM | T_SEED
+    constructor(desc: string, subscribe: Subscribe<V>) {
+        super(new EventStreamSourceImpl(desc, subscribe))
+    }
 }

@@ -1,4 +1,5 @@
 import * as B from "."
+import { isEventStream, isEventStreamSeed } from "./abstractions"
 
 describe("Atom", () => {
     describe("Basics", () => {
@@ -7,6 +8,10 @@ describe("Atom", () => {
             expect(B.isProperty(B.atom(1))).toEqual(true)
             expect(B.isAtomSeed(B.atom(1))).toEqual(true)
             expect(B.isPropertySeed(B.atom(1))).toEqual(true)
+            expect(B.isPropertySource(B.atom(1))).toEqual(true)
+            expect(B.isAtomSource(B.atom(1))).toEqual(true)
+            expect(isEventStream(B.constant(1))).toEqual(false)
+            expect(isEventStreamSeed(B.constant(1))).toEqual(false)
         })
 
         it ("Dispatches values", () => {

@@ -1,11 +1,8 @@
 import { EventStream, EventStreamSeed, isEventStream, isProperty, isPropertySeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
-import { PropertySeedImpl } from "./implementations";
 import { mapSubscribe } from "./map";
-import { never } from "./never";
-import { StatelessProperty } from "./property";
+import { PropertySeedImpl, StatelessProperty } from "./property";
 import { globalScope } from "./scope";
-import { rename, toString } from "./util";
 
 export interface ToStatelessPropertyOp<A> {
     (stream: EventStream<any> | Subscribe<any>): Property<A>
@@ -47,8 +44,4 @@ export function toPropertySeed<A>(property: Property<A> | PropertySeed<A>): Prop
         return property;
     }
     return new PropertySeedImpl<A>(property.desc, property.get.bind(property), property.onChange.bind(property))
-}
-
-export function constant<A>(value: A): Property<A> {
-    return rename(`constant(${toString(value)})`, toProperty(value, globalScope)(never()))
 }

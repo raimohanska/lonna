@@ -1,7 +1,5 @@
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
+import { constant, never, throttle, toProperty } from "./index";
 import { expectPropertyEvents, expectStreamTimings, series } from "./test-utils";
-import { throttle } from "./throttle";
 
 describe("EventStream.throttle(delay)", function() {
   describe("outputs at steady intervals, without waiting for quiet period", () =>

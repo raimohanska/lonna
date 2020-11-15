@@ -1,8 +1,6 @@
-import { later } from "./later";
-import { constant, toProperty } from "./toproperty";
-import { repeat } from "./repeat";
-
+import { later, repeat, toProperty } from "./index";
 import { expectStreamEvents } from "./test-utils";
+
 
 describe("repeat", function() {
   describe("Polls new streams from generator function until empty result", () =>

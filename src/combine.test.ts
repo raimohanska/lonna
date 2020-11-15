@@ -1,7 +1,5 @@
-import { combine, combineAsArray } from "./combine"
-import { constant, toProperty } from "./toproperty";
-import { expectPropertyEvents, series } from "./test-utils"
-import { throttle } from "./throttle"
+import { combine, combineAsArray, constant, throttle, toProperty } from "./index";
+import { expectPropertyEvents, series } from "./test-utils";
 
 describe("combine", () => {
     describe("Forms", () => {

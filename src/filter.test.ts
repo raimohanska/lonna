@@ -1,9 +1,5 @@
-import { filter } from "./filter";
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
-import { globalScope } from "./scope";
+import { atom, bus, map, filter, globalScope, never, toProperty } from "./index";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
-import * as B from "./index"
 const lessThan = (n: number) => (x: number) => x < n
 
 describe("EventStream.filter", function () {
@@ -28,8 +24,8 @@ describe("Property.filter", function () {
             [0, 1, 2])
     );
     it("preserves old current value if the updated value is non-matching", function () {
-        const a = B.atom(1)
-        const p = a.pipe(B.map((x: number) => x))
+        const a = atom(1)
+        const p = a.pipe(map((x: number) => x))
         const fp = p.pipe(filter(lessThan(2), globalScope));
         a.set(2)
         expect(fp.get()).toEqual(1)
@@ -39,8 +35,8 @@ describe("Property.filter", function () {
 describe("Atom.filter", () => {
     describe("Root atom", () => {
         it("Freezes on unwanted values", () => {
-            const root = B.atom<string | null>("hello")
-            const a = root.pipe(filter(a => a !== null, B.globalScope))
+            const root = atom<string | null>("hello")
+            const a = root.pipe(filter(a => a !== null, globalScope))
             
             a.set("world")
             expect(a.get()).toEqual("world")
@@ -53,37 +49,37 @@ describe("Atom.filter", () => {
         })
     
         it("Freezes on unwanted values (when not getting in between sets)", () => {
-            const atom = filter(a => a !== null, B.globalScope)(B.atom<string | null>("hello"))
+            const a = filter(a => a !== null, globalScope)(atom<string | null>("hello"))
             
-            atom.set("world")        
-            atom.set(null)
-            expect(atom.get()).toEqual("world") 
+            a.set("world")        
+            a.set(null)
+            expect(a.get()).toEqual("world") 
         })   
     })
     
 
     describe("Dependent atom", () => {
         it("Freezes on unwanted values", () => {
-            const b = B.bus<string | null>()
-            const prop = toProperty("1", B.globalScope)(b)
-            const root = B.atom(prop, newValue => b.push(newValue))
-            const atom = filter(a => a !== null, B.globalScope)(root)
+            const b = bus<string | null>()
+            const prop = toProperty("1", globalScope)(b)
+            const root = atom(prop, newValue => b.push(newValue))
+            const a = filter(a => a !== null, globalScope)(root)
 
-            atom.set("world")
-            expect(atom.get()).toEqual("world")
-            atom.set(null)
-            expect(atom.get()).toEqual("world")
+            a.set("world")
+            expect(a.get()).toEqual("world")
+            a.set(null)
+            expect(a.get()).toEqual("world")
         })
 
         it("Freezes on unwanted values (when not getting in between sets)", () => {
-            const b = B.bus<string | null>()
-            const prop = toProperty("1", B.globalScope)(b)
-            const root = B.atom(prop, newValue => b.push(newValue))
-            const atom = filter(a => a !== null, B.globalScope)(root)
+            const b = bus<string | null>()
+            const prop = toProperty("1", globalScope)(b)
+            const root = atom(prop, newValue => b.push(newValue))
+            const a = filter(a => a !== null, globalScope)(root)
 
-            atom.set("world")        
-            atom.set(null)
-            expect(atom.get()).toEqual("world")        
+            a.set("world")        
+            a.set(null)
+            expect(a.get()).toEqual("world")        
         })     
     })
 })

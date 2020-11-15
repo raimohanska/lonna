@@ -1,7 +1,8 @@
 import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent, AtomSeed, Subscribe, isProperty, isEventStream, isEventStreamSeed, isPropertySeed } from "./abstractions";
 import { cached } from "./cached";
 import { StatelessEventStream } from "./eventstream";
-import { EventStreamSeedImpl, PropertySeedImpl } from "./implementations";
+import { EventStreamSeedImpl } from "./eventstream";
+import { PropertySeedImpl } from "./property";
 import { StatelessProperty } from "./property";
 
 export type MapResult<A, B, O> = O extends Property<any> 

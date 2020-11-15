@@ -1,10 +1,30 @@
-import { Event, isValue, ObservableSeed, Observer, Property, PropertySource, Scope, TypeBitfield, T_PROPERTY, T_SCOPED, Unsub } from "./abstractions";
+import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_COLD, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { PropertyBase } from "./implementations";
+import { ObservableBase, ObservableSeedImpl } from "./implementations";
 import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
 
 type PropertyEvents<V> = { "change": V }
 const uninitialized = {}
+
+export abstract class PropertyBase<V> extends ObservableBase<V> implements Property<V>, PropertySeed<V>, PropertySource<V> {
+    constructor(desc: string) {
+        super(desc)
+    }
+
+    abstract getScope(): Scope;
+
+    abstract get(): V
+
+    abstract onChange(observer: Observer<Event<V>>): Unsub;
+
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
+    subscribe(observer: Observer<Event<V>>): Unsub {        
+        const unsub = this.onChange(observer)
+        observer(valueEvent(this.get()))
+        return unsub
+    }    
+}
+
 export class StatelessProperty<V> extends PropertyBase<V> {
     _L: TypeBitfield = T_PROPERTY | T_SCOPED
     get: () => V;
@@ -85,4 +105,53 @@ export class StatefulProperty<V> extends PropertyBase<V> {
     getScope() {
         return this._scope
     }
+}
+
+/**
+ *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
+ *  Must skip duplicates!
+ **/
+export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>> implements PropertySeed<V> {
+    _L: TypeBitfield = T_PROPERTY | T_SEED
+    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
+        super(new PropertySourceImpl(desc, get, onChange))
+    }  
+}
+
+export class PropertySourceImpl<V> extends ObservableBase<V> implements PropertySource<V> {
+    _L: TypeBitfield = T_PROPERTY | T_COLD
+    private _started = false
+    private _subscribed = false
+    private _get: () => V
+
+    onChange_: Subscribe<V>;
+
+    get() {
+        if (this._started) throw Error("PropertySeed started already: " + this)
+        return this._get()
+    }
+
+    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
+        super(desc)
+        this._get = get;
+        this.onChange_ = onChange;
+    }
+
+    onChange(observer: Observer<Event<V>>): Unsub {                
+        if (this._subscribed) throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this)
+        this._subscribed = true
+        return this.onChange_(event => {
+            if (isValue(event)) {
+                this._started = true
+            }
+            observer(event)
+        })
+    }
+
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
+    subscribe(observer: Observer<Event<V>>): Unsub {        
+        const unsub = this.onChange(observer)
+        observer(valueEvent(this.get()))
+        return unsub
+    }       
 }

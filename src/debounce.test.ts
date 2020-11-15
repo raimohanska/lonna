@@ -1,10 +1,5 @@
-import { debounce } from ".";
-import { EventStream, isEventStream } from "./abstractions";
-import { applyScope } from "./applyscope";
-import { never } from "./never";
-import { constant, toProperty } from "./toproperty";
+import { applyScope, constant, debounce, isEventStream, never, toProperty } from ".";
 import { expectPropertyEvents, expectStreamEvents, expectStreamTimings, series, testScope } from "./test-utils";
-import { throttle } from "./throttle";
 
 describe("EventStream.debounce(delay)", function () {
     describe("throttles input by given delay", () =>

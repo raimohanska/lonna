@@ -1,7 +1,5 @@
-import * as B from "."
-import { pipe } from "./pipe"
-import { constant, toProperty } from "./toproperty";
-import { autoScope } from "./scope"
+import * as B from ".";
+import { autoScope } from "./index";
 
 describe("autoScope", () => {
     it("works in example scenario", () => {

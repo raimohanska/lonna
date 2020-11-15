@@ -1,5 +1,5 @@
-import { isObservableSeed, Observable, ObservableSeed } from "./abstractions";
-import { constant } from "./toproperty";
+import { isObservableSeed, Observable, ObservableSeed } from "./index";
+import { constant } from "./index";
 
 /** @hidden */
 export function argumentsToObservables<V, P extends ObservableSeed<V, Observable<any>>>(args: (P | P[] | V)[]): P[] {

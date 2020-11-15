@@ -1,7 +1,7 @@
 import { EventStream, EventStreamSeed } from "."
 import { valueEvent, Scope } from "./abstractions"
 import { applyScopeMaybe } from "./applyscope"
-import { EventStreamSeedImpl } from "./implementations"
+import { EventStreamSeedImpl } from "./eventstream"
 import GlobalScheduler from "./scheduler"
 
 export function interval<V>(delay: number, value: V, scope: Scope): EventStream<V>

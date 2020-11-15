@@ -1,9 +1,4 @@
-import { later } from "./later"
-import { map } from "./map"
-import { constant, toProperty } from "./toproperty";
-import { atom } from "./atom"
-import { filter } from "./filter"
-import * as B from "./index"
+import { atom, filter, later, map, toProperty } from ".";
 
 describe("PropertySeed",() => {
     it("Can be used only once", () => {
