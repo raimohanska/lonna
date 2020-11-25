@@ -13,7 +13,7 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V
 
-    constructor(desc: string, initialValue: V) {
+    constructor(desc: string, initialValue: V, public readonly asdf?: string) {
         super(desc)
         this._value = initialValue        
         this.set = this.set.bind(this)

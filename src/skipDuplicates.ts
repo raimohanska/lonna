@@ -15,7 +15,7 @@ function skipDuplicatesT<A>(fn: Predicate2<A>): Transformer<A, A> {
     return {
         changes: (event: Event<A>, observer: Observer<Event<A>>) => {
             if (isValue(event)) {
-                if (current === uninitialized || fn(current, event.value)) {
+                if (current === uninitialized || !fn(current, event.value)) {
                     current = event.value
                     observer(event)
                 }
