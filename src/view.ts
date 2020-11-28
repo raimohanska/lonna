@@ -21,10 +21,11 @@ async function importOptics() {
     }
 }
 importOptics()
+const supportedOpticsTags = ["Lens", "Equivalence", "Iso"]
 
 export function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
 export function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
-export function view<A, B>(a: Atom<A>, lens: Optics.Lens<A, any, B>): Atom<B>;
+export function view<A, B>(a: Atom<A>, lens: Optics.Lens<A, any, B> | Optics.Equivalence<A, any, B> | Optics.Iso<A, any, B>): Atom<B>;
 export function view<A, K extends keyof A>(a: Property<A>, key: K): K extends number ? Property<A[K] | undefined> : Property<A[K]>;
 export function view<A, B>(a: Property<A>, lens: L.Lens<A, B>): Property<B>;
 
@@ -80,8 +81,9 @@ export function view<A, B>(...args: any[]): any {
         let lens = mkView(view)
         if (lens._tag) {
             // Optics.ts lens
-            if (lens._tag !== "Lens") {
-                throw Error(`Only Lens optics supported from optics-ts. Given optic is a ${lens._tag}.`)
+            
+            if (!supportedOpticsTags.includes(lens._tag)) {
+                throw Error(`Only ${supportedOpticsTags.join("/")} optics supported from optics-ts. Given optic is a ${lens._tag}.`)
             }
             const opticsLens = lens as Optics.Lens<A, any, B>
             lens = {
