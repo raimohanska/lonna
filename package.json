@@ -12,9 +12,11 @@
   "devDependencies": {
     "@types/jest": "^26.0.10",
     "babel-jest": "^26.3.0",
+    "concurrently": "^5.3.0",
     "jest": "^26.4.0",
     "optics-ts": "^1.2.0",
     "ts-jest": "^26.4.0",
+    "tsc-watch": "^4.2.9",
     "typescript": "^4"
   },
   "dependencies": {},
@@ -23,8 +25,10 @@
     "node": ">13.0"
   },
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.esm.json",
-    "build:watch": "tsc --watch",
+    "build": "concurrently \"yarn build:esm\" \"yarn build:cjs\"",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc",
+    "build:watch": "tsc-watch --onSuccess \"yarn build:esm\"",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "prepublishOnly": "rm -rf dist && yarn build"
