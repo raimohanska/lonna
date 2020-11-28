@@ -1,6 +1,6 @@
 {
   "name": "lonna",
-  "version": "0.5.2",
+  "version": "optics-ts-0.5.2",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
