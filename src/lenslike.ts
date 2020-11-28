@@ -1,7 +1,7 @@
 import * as Optics from "optics-ts"
 import * as L from "./lens"
 
-const opticsMissing = () => { throw Error("optics-ts not found") }
+const opticsMissing = () => { throw Error("Failed to import optics-ts. Make sure to have the optics-ts package installed.") }
 let O: typeof Optics = {
     get: opticsMissing,
     set: opticsMissing
