@@ -1,6 +1,7 @@
 import { Atom, EventStream, EventStreamSeed, isAtom, ObservableSeed, Property, PropertySeed } from "./abstractions";
 import { LensedAtom } from "./atom";
 import * as L from "./lens";
+import * as O from "optics-ts"
 import { map } from "./map";
 import { rename, toString } from "./util";
 import { Function1, Function2, Function3, Function4, Function5, Function6 } from "./abstractions";
@@ -8,6 +9,7 @@ import { combine } from "./combine";
 
 export function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
 export function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
+export function view<A, B>(a: Atom<A>, lens: O.Lens<A, any, B>): Atom<B>;
 export function view<A, K extends keyof A>(a: Property<A>, key: K): K extends number ? Property<A[K] | undefined> : Property<A[K]>;
 export function view<A, B>(a: Property<A>, lens: L.Lens<A, B>): Property<B>;
 
@@ -61,7 +63,18 @@ export function view<A, B>(...args: any[]): any {
         // property/atom + lens
         const atom = args[0]
         const view = args[1]
-        const lens = mkView(view)
+        let lens = mkView(view)
+        if (lens._tag) {
+            // Optics.ts lens
+            if (lens._tag !== "Lens") {
+                throw Error(`Only Lens optics supported from optics-ts. Given optic is a ${lens._tag}.`)
+            }
+            const opticsLens = lens as O.Lens<A, any, B>
+            lens = {
+                get: O.get(opticsLens),
+                set: (current: A, data: B) => O.set(opticsLens)(data)(current)
+            }
+        }
         const desc = `${atom}.view(${toString(view)})`
         if (isAtom<A>(atom)) {
             return new LensedAtom<A, B>(desc, atom, lens)     
