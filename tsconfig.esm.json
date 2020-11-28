@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist/esm",
     "target": "es6",
-    "module": "es6",
+    "module": "es2020",
     "declaration": false
   }
 }

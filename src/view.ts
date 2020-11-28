@@ -1,15 +1,30 @@
 import { Atom, EventStream, EventStreamSeed, isAtom, ObservableSeed, Property, PropertySeed } from "./abstractions";
 import { LensedAtom } from "./atom";
 import * as L from "./lens";
-import * as O from "optics-ts"
+import * as Optics from "optics-ts"
 import { map } from "./map";
 import { rename, toString } from "./util";
 import { Function1, Function2, Function3, Function4, Function5, Function6 } from "./abstractions";
 import { combine } from "./combine";
 
+const opticsMissing = () => { throw Error("optics-ts not found") }
+let O: typeof Optics = {
+    get: opticsMissing,
+    set: opticsMissing
+} as any
+
+async function importOptics() {
+    try {
+        O = await import("optics-ts")
+    } catch (e) {
+        
+    }
+}
+importOptics()
+
 export function view<A, K extends keyof A>(a: Atom<A>, key: K): K extends number ? Atom<A[K] | undefined> : Atom<A[K]>;
 export function view<A, B>(a: Atom<A>, lens: L.Lens<A, B>): Atom<B>;
-export function view<A, B>(a: Atom<A>, lens: O.Lens<A, any, B>): Atom<B>;
+export function view<A, B>(a: Atom<A>, lens: Optics.Lens<A, any, B>): Atom<B>;
 export function view<A, K extends keyof A>(a: Property<A>, key: K): K extends number ? Property<A[K] | undefined> : Property<A[K]>;
 export function view<A, B>(a: Property<A>, lens: L.Lens<A, B>): Property<B>;
 
@@ -40,7 +55,6 @@ export function view<V, R>(a: EventStreamSeed<V>, fn: Function1<V, R>): EventStr
 export function view<V, V2, R>(a: EventStreamSeed<V>, fn1: Function1<V, V2>, fn2: Function1<V2, R>): EventStreamSeed<R>
 export function view<V, V2, V3, R>(a: EventStreamSeed<V>, fn1: Function1<V, V2>, fn2: Function1<V2, V3>, fn3: Function1<V3, R>): EventStreamSeed<R>
 
-
 export function view<A, B>(...args: any[]): any {
     if (args[args.length - 1] instanceof Function) {
         // properties + function
@@ -69,7 +83,7 @@ export function view<A, B>(...args: any[]): any {
             if (lens._tag !== "Lens") {
                 throw Error(`Only Lens optics supported from optics-ts. Given optic is a ${lens._tag}.`)
             }
-            const opticsLens = lens as O.Lens<A, any, B>
+            const opticsLens = lens as Optics.Lens<A, any, B>
             lens = {
                 get: O.get(opticsLens),
                 set: (current: A, data: B) => O.set(opticsLens)(data)(current)
