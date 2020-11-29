@@ -1,8 +1,12 @@
 ## Lonna
 
-Experimental FRP library for Graphical User Interfaces. To be used in my [Harmaja](https://github.com/raimohanska/harmaja) project.
+Experimental FRP library for Graphical User Interfaces. Used in my [Harmaja](https://github.com/raimohanska/harmaja) project.
 
-Compared to Bacon.js
+I have written this library to be more suitable than [Bacon.js](https://github.com/baconjs/bacon.js/) for my current UI programming needs. For context, I am the original author of the Bacon.js library so well so I know its limitations intimately.
+
+Some day there may be a proper README, API docs and Tutorials for Lonna, but at the moment, this readme and the test cases in the [src] folder is all there is. Sorry for that! Help appreciated.
+
+Here are the essential differences to Bacon.js.
 
 - Stateful Properties and EventStreams have an explicit `scope` which guarantees that they stay up-to-date for the required period. Scope can be global (active forever) or more limited, such as a GUI component lifetime. Access outside the explicit scope will cause thrown Errors.
 - `EventStreamSeed` and `PropertySeed` abstractions for streams and properties that don't have a `scope`. These can be mapped, filtered etc, but need to be scoped before accessing the value. They are very lightweight which may prove to be a major performance improvement: when creating temporary streams in flatMap, for instance, there's no need to create a Dispatcher for everything.
