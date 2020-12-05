@@ -1,3 +1,4 @@
+import { EventStream, isEventStream } from "./abstractions";
 import { applyScope, changes, toProperty } from "./index";
 import { expectStreamEvents, series, testScope } from "./test-utils";
 
@@ -14,4 +15,9 @@ describe("changes", () => {
         },
         [1,2]
     )
+    it("types", () => {
+        const p = series(1, [1,2]).pipe(toProperty(0, testScope()))
+        const c: EventStream<number> = p.pipe(changes) // explicit type to ensure correct typing
+        expect(isEventStream(c)).toEqual(true)
+    })
 })
