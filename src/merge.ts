@@ -4,9 +4,16 @@ import { EventStreamSeedImpl } from "./eventstream";
 
 export function merge<A>(a: EventStream<A>, b: EventStream<A>): EventStream<A>;
 export function merge<A, B>(a: EventStream<A>, b: EventStream<B>): EventStream<A | B>;
+export function merge<A, B, C>(a: EventStream<A>, b: EventStream<B>, c: EventStream<C>): EventStream<A | B | C>;
+export function merge<A, B, C, D>(a: EventStream<A>, b: EventStream<B>, c: EventStream<C>, d: EventStream<D>): EventStream<A | B | C | D>;
+export function merge<A, B, C, D, E>(a: EventStream<A>, b: EventStream<B>, c: EventStream<C>, d: EventStream<D>, e: EventStream<E>): EventStream<A | B | C | D | E>;
 export function merge<A>(a: EventStreamSeed<A>, b: EventStreamSeed<A>): EventStreamSeed<A>;
 export function merge<A, B>(a: EventStreamSeed<A>, b: EventStreamSeed<B>): EventStreamSeed<A | B>;
+export function merge<A, B, C>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>): EventStreamSeed<A | B | C>;
+export function merge<A, B, C, D>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>, d: EventStreamSeed<D>): EventStreamSeed<A | B | C | D>;
+export function merge<A, B, C, D, E>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>, d: EventStreamSeed<D>, e: EventStreamSeed<E>): EventStreamSeed<A | B | C | D | E>;
 export function merge<A>(streams: EventStreamSeed<A>[]): EventStreamSeed<A>
+export function merge<A>(streams: EventStream<A>[]): EventStream<A>
 export function merge<A>(...args: any[]) {
     let streams: (EventStream<any> | EventStreamSeed<any>)[]
     if (args[0] instanceof Array) {
@@ -30,7 +37,7 @@ export function merge<A>(...args: any[]) {
         }))
         return () => unsubs.forEach(f => f())
     })
-    if (isEventStream(sources[0])) {
+    if (sources.every(isEventStream)) {
         return applyScope(sources[0].getScope())(seed)
     }
     return seed
