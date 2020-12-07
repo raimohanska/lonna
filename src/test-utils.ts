@@ -58,15 +58,11 @@ export const expectStreamTimings = <V>(src: () => EventStream<any> | EventStream
 
 const verifySingleSubscriber = (srcF: () => EventStream<any> | EventStreamSeed<any>, expectedEvents: any[]): void => {
     verifyStreamWith("(single subscriber)", srcF, expectedEvents, (src, events, done) => {
-        const unsub = src.subscribe((event: Event<any>) => {
-            if (isValue(event)) {
-                events.push(toValue(event));
-            } else if (isEnd(event)) {
-                unsub && unsub()
-                done();
-            } else {
-                throw Error("Unknown event " + event)
-            }
+        const unsub = src.subscribe((value: any) => {
+            events.push(value);
+        }, () => {
+            unsub && unsub()
+            done();
         })
     })
 };
@@ -102,15 +98,11 @@ export const expectPropertyEvents = (src: () => Property<any> | PropertySeed<any
 
 var verifyPSingleSubscriber = (srcF: () => Property<any> | PropertySeed<any>, expectedEvents: Event<any>[], extraCheck: (Function | undefined) = undefined) =>
     verifyPropertyWith("(single subscriber)", srcF, expectedEvents, ((src: Property<any>, events: Event<any>[], done: (err: (Error | void)) => any) => {
-        src.subscribe((event: Event<any>) => {
-            if (isValue(event)) {
-                events.push(event);
-                expect(src.get()).toEqual(event.value)
-            } else if (isEnd(event)) {
-                done(undefined);
-            } else {
-                throw Error("Unknown event " + event)
-            }
+        src.subscribe((value: any) => {
+            events.push(value);
+            expect(src.get()).toEqual(value)            
+        }, () => {
+            done(undefined);
         });
     }), extraCheck)
     ;
@@ -145,11 +137,10 @@ var verifyFinalState = (property: Property<any>, value: any) => {
 
 const verifyExhausted = (src: Observable<any>) => {
     const events: Event<any>[] = [];
-    src.subscribe((event: Event<any>) => {
-        if (event === undefined) {
-            throw new Error("got undefined event");
-        }
-        events.push(event);
+    src.subscribe((value: any) => {
+        events.push(valueEvent(value));
+    }, () => {
+        events.push(endEvent);
     });
     if (events.length === 0) {
         throw new Error("got zero events");
@@ -165,7 +156,7 @@ const toValue = (x: Event<any> | any) => {
 
 export function atGivenTimes<V>(timesAndValues: [number, V][]): EventStreamSeed<V> {
     const startTime = sc.now();
-    return fromSubscribe((sink) => {
+    return fromSubscribe((onValue, onEnd) => {
         let shouldStop = false;
         var schedule = (timeOffset: number, index: number) => {
             const first = timesAndValues[index];
@@ -176,11 +167,11 @@ export function atGivenTimes<V>(timesAndValues: [number, V][]): EventStreamSeed<
                     return;
                 }
                 const value = first[1];
-                sink(valueEvent(value));
+                onValue(value)
                 if (!shouldStop && ((index + 1) < timesAndValues.length)) {
                     return schedule(scheduledTime, index + 1);
                 } else {
-                    return sink(endEvent);
+                    return onEnd();
                 }
             };
             return sc.setTimeout(push, delay);

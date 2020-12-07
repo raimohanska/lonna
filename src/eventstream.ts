@@ -19,8 +19,8 @@ export class StatefulEventStream<V> extends EventStreamBase<V> {
         this._scope = scope
     }
 
-    subscribe(observer: Observer<Event<V>>) {
-        return this.dispatcher.on("value", observer)
+    subscribe(onValue: Observer<V>, onEnd: Observer<void>) {
+        return this.dispatcher.on("value", onValue, onEnd)
     }
     getScope() {
         return this._scope
@@ -29,9 +29,9 @@ export class StatefulEventStream<V> extends EventStreamBase<V> {
 
 export class StatelessEventStream<V> extends EventStreamBase<V> {
     private _scope: Scope;
-    subscribe: (observer: Observer<Event<V>>) => Unsub;
+    subscribe: Subscribe<V>;
 
-    constructor(desc: string, subscribe: (observer: Observer<Event<V>>) => Unsub, scope: Scope) {
+    constructor(desc: string, subscribe: Subscribe<V>, scope: Scope) {
         super(desc) 
         this._scope = scope
         this.subscribe = subscribe
@@ -47,7 +47,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
         super(seed.desc, scope)
         const source = seed.consume()
         scope.subscribe(
-            () => source.subscribe(v => this.dispatcher.dispatch("value", v)),
+            () => source.subscribe(v => this.dispatcher.dispatch("value", v), () => this.dispatcher.dispatchEnd("value")),
             this.dispatcher            
         )
     }
@@ -55,7 +55,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 
 export class EventStreamSourceImpl<V> extends ObservableBase<V> {
     _L: TypeBitfield = T_STREAM | T_SOURCE
-    subscribe: (observer: Observer<Event<V>>) => Unsub
+    subscribe: Subscribe<V>
 
     constructor(desc: string, subscribe: Subscribe<V>) {
         super(desc)

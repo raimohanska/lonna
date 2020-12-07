@@ -26,12 +26,12 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
         }
     )   
 
-    const onChange = (o: PromiseObserver<I>) => {
-        let observer: PromiseObserver<I> | null = o
+    const onChange = (_onValue: PromiseObserver<I>, onEnd: Observer<void>) => {
+        let onValue: PromiseObserver<I> | null = _onValue
         function update(state: PromiseState<I>) {
-            if (observer) {
-                observer(valueEvent(state))
-                observer(endEvent)
+            if (onValue) {
+                onValue(state)
+                onEnd()
             }
         }
         if (currentState.state === "pending") {
@@ -44,10 +44,10 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
                 }
             )   
         } else {
-            observer(endEvent)
+            onEnd()
         }
         return () => {
-            observer = null
+            onValue = null
         }
     }
 
@@ -66,4 +66,4 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
     return property
 }
 
-type PromiseObserver<I> = Observer<Event<PromiseState<I>>>
+type PromiseObserver<I> = Observer<PromiseState<I>>

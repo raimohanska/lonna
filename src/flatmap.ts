@@ -2,7 +2,7 @@ import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySo
 import { applyScopeMaybe } from "./applyscope";
 import { PropertySeedImpl } from "./property";
 import { EventStreamSeedImpl } from "./eventstream";
-import { remove } from "./util";
+import { nop, remove } from "./util";
 
 export type FlatMapOptions = {
     latest?: boolean;
@@ -41,9 +41,9 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
         const source = isProperty(src) ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
-        const subscribeWithInitial = (observer: Observer<Event<A>>) => {
-            const unsub = source.onChange(observer)
-            observer(valueEvent(source.get())) // To spawn property for initial value
+        const subscribeWithInitial = (onValue: Observer<A>, onEnd: Observer<void>) => {
+            const unsub = source.onChange(onValue, onEnd)
+            onValue(source.get()) // To spawn property for initial value
             initializing = false
             return unsub
         }
@@ -59,51 +59,47 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
                 throw Error("Observable returned by the spawner function if flatMapLatest for Properties must return a Property. This one is not a Property: " + observable)
             }            
         }
-        super(desc, get, observer => subscribe(value => {
-            if (!initializing) observer(value)
+        super(desc, get, (onValue, onEnd) => subscribe(value => {
+            if (!initializing) onValue(value)
+        }, () => {
+            if (!initializing) onEnd()
         }))
     }
 }
 
 function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<B, Observable<B>>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
     const children: FlatMapChild<Observable<B>>[] = []
-    return [children, (observer: Observer<Event<B>>) => {            
+    return [children, (onValue: Observer<B>, onEnd: Observer<void>) => {            
         let rootEnded = false
         const unsubThis = subscribe(rootEvent => {
-            if (isValue(rootEvent)) {
-                if (options.latest) {
-                    for (let child of children) {
-                        child.unsub!()
-                    }
-                    children.splice(0)
+            if (options.latest) {
+                for (let child of children) {
+                    child.unsub!()
                 }
-                const child = { observable: fn(rootEvent.value).consume() } as FlatMapChild<Observable<B>>
-                children.push(child)
-                let ended = false
-                child.unsub = child.observable.subscribe(childEvent => {
-                    if (isValue(childEvent)) {
-                        observer(childEvent)
-                    } else {
-                        remove(children, child)
-                        if (child.unsub) {                            
-                            child.unsub()
-                        } else {
-                            ended = true
-                        }
-                        if (children.length === 0 && rootEnded) {
-                            observer(endEvent)
-                        }
-                    }
-                })
-                if (ended) {
+                children.splice(0)
+            }
+            const child = { observable: fn(rootEvent).consume() } as FlatMapChild<Observable<B>>
+            children.push(child)
+            let ended = false
+            child.unsub = child.observable.subscribe(onValue, () => {
+                remove(children, child)
+                if (child.unsub) {                            
                     child.unsub()
+                } else {
+                    ended = true
                 }
-            } else {
-                rootEnded = true
+                if (children.length === 0 && rootEnded) {
+                    onEnd()
+                }
+            })
+            if (ended) {
+                child.unsub()
+            }
+        }, () => {
+            rootEnded = true
                 
-                if (children.length === 0) {
-                    observer(endEvent)
-                }
+            if (children.length === 0) {
+                onEnd()
             }
         })
         return () => {

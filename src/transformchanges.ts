@@ -20,13 +20,13 @@ export function transformChanges<A, B>(descSuffix: string, transformer: EventStr
             r = rename(desc, transformer(x))
         } else if (isAtomSeed<A>(x)) {
             const source = x.consume()
-            r = new AtomSeedImpl(desc, () => source.get(), observer => {
-                return transformer(changes(source)).consume().subscribe(observer)
+            r = new AtomSeedImpl(desc, () => source.get(), (onValue, onEnd) => {
+                return transformer(changes(source)).consume().subscribe(onValue, onEnd)
             }, source.set)
         } else if (isPropertySeed<A>(x)) {
             const source = x.consume()
-            r = new PropertySeedImpl(desc, () => source.get(), observer => {
-                return transformer(changes(source)).consume().subscribe(observer)
+            r = new PropertySeedImpl(desc, () => source.get(), (onValue, onEnd) => {
+                return transformer(changes(source)).consume().subscribe(onValue, onEnd)
             })
         } else {
             throw Error("Unknown observable " + x)

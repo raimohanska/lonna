@@ -11,21 +11,22 @@ export function take<A>(count: number, scope?: Scope): any {
 
 function takeT<A>(count: number): Transformer<A, A> {
     return {
-        changes: (e: Event<A>, observer: Observer<Event<A>>) => {
-            
-            if (!isValue(e)) {
-                observer(e);
-            } else {
-                count--;
-                if (count > 0) {
-                    observer(e);
-                } else {
-                    if (count === 0) { 
-                        observer(e) 
-                        observer(endEvent);
-                    }               
-                }
-            }
+        changes: subscribe => (onValue, onEnd) => {
+            if (!onEnd) throw Error("Assertion fail")
+            return subscribe(
+                value => {
+                    count--;
+                    if (count > 0) {
+                        onValue(value);
+                    } else {
+                        if (count === 0) { 
+                            onValue(value) 
+                            onEnd()
+                        }               
+                    }
+                },
+                onEnd // TODO: shielding for double ends missing
+            )
         },
         init: (value: A) => {
             return value

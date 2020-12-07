@@ -14,10 +14,10 @@ class BusImpl<V> extends StatefulEventStream<V> implements Bus<V> {
     }
 
     push(newValue: V) {
-        this.dispatcher.dispatch("value", valueEvent(newValue))
+        this.dispatcher.dispatch("value", newValue)
     }
 
     end() {
-        this.dispatcher.dispatch("value", endEvent)
+        this.dispatcher.dispatchEnd("value")
     }
 }

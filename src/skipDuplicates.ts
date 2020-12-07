@@ -13,16 +13,15 @@ export function skipDuplicates<A>(fn: Predicate2<A>, scope?: Scope): any {
 function skipDuplicatesT<A>(fn: Predicate2<A>): Transformer<A, A> {
     let current: A | typeof uninitialized = uninitialized
     return {
-        changes: (event: Event<A>, observer: Observer<Event<A>>) => {
-            if (isValue(event)) {
-                if (current === uninitialized || !fn(current, event.value)) {
-                    current = event.value
-                    observer(event)
+        changes: subscribe => (onValue, onEnd) => subscribe(
+            value => {
+                if (current === uninitialized || !fn(current, value)) {
+                    current = value
+                    onValue(value)
                 }
-            } else {
-                observer(event)
-            }
-        },
+            },
+            onEnd
+        ),
         init: (value: A) => {
             current = value
             return value

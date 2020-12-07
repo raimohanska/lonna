@@ -4,8 +4,8 @@ import { globalScope } from "./scope";
 import { nop } from "./util";
 
 export function never<A>(): EventStream<A> {
-    return new StatelessEventStream<A>("never", observer => {
-        observer(endEvent)
+    return new StatelessEventStream<A>("never", (onValue, onEnd) => {
+        onEnd()
         return nop
     }, globalScope)
 }

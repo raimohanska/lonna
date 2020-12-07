@@ -68,19 +68,17 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   }
   
   const get = () => combinator(...getCurrentArray())
-  function subscribe(observer: Observer<Event<Out>>) {
+  function subscribe(onValue: Observer<Out>, onEnd: Observer<void>) {
     let endCount = 0
     const unsubs = properties.map((src, i) => {
-      return src.onChange((event: Event<any>) => {
-          if (isValue(event)) {
-            currentArray[i] = event.value
-            observer(valueEvent(combinator(...currentArray)))
-          } else {
-            endCount++
-            if (endCount == properties.length) {
-              observer(endEvent)
-            }
-          }
+      return src.onChange(value => {
+        currentArray[i] = value
+        onValue(combinator(...currentArray))
+      }, () => {
+        endCount++
+        if (endCount == properties.length) {
+          onEnd()
+        }
       })
     })        
     let currentArray = getCurrentArray()

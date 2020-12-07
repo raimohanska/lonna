@@ -1,7 +1,7 @@
 /**
  * A polled function used by [fromPoll](../globals.html#frompoll)
  */
-import { EventLike, EventStream, EventStreamSeed, isEnd, Scope, toEvents } from "./abstractions"
+import { EventLike, EventStream, EventStreamSeed, isEnd, isValue, Scope, toEvents, valueEvent } from "./abstractions"
 import { fromSubscribe } from "./fromsubscribe"
 import GlobalScheduler from "./scheduler"
 import { rename } from "./util"
@@ -21,14 +21,16 @@ export function fromPoll<V>(delay: number, poll: PollFunction<V>, scope: Scope):
 export function fromPoll<V>(delay: number, poll: PollFunction<V>): EventStreamSeed<V>
 
 export function fromPoll<V>(delay: number, poll: PollFunction<V>, scope?: Scope): any {
-  return rename(`fromPoll(${delay},fn)`, fromSubscribe((observer) => {
+  return rename(`fromPoll(${delay},fn)`, fromSubscribe((onValue, onEnd) => {
         const interval = GlobalScheduler.scheduler.setInterval(() => {
             const events = toEvents(poll())
             for (const event of events) {
-                if (isEnd(event)) {
+                if (isValue(event)) {
+                    onValue(event.value)
+                } else {
                     GlobalScheduler.scheduler.clearInterval(interval)
+                    onEnd()
                 }
-                observer(event)
             }
         }, delay)
         return () => GlobalScheduler.scheduler.clearInterval(interval)

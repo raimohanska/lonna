@@ -17,14 +17,14 @@ describe("Property", () => {
             // Making sure the methods are available through these interfaces
             p.forEach(nop);
             (p as Observable<number>).forEach(nop);
-            (p as Observable<number>).subscribe(nop);
+            (p as Observable<number>).subscribe(nop, nop);
             (p as Observable<number>).log;
             (p as Observable<number>).desc;
             (p as PropertySeed<number>).forEach(nop);
             (p as PropertySeed<number>).log;
             (p as PropertySeed<number>).desc;
             (p as PropertySource<number>).forEach(nop);
-            (p as PropertySource<number>).subscribe(nop);
+            (p as PropertySource<number>).subscribe(nop, nop);
             (p as PropertySource<number>).log;
             (p as PropertySource<number>).desc;
         })

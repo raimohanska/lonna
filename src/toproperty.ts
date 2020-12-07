@@ -30,8 +30,8 @@ export function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
 export function toProperty(initial: any, scope?: Scope) {    
     return (seed: EventStream<any> | EventStreamSeed<any>) => {
         const source = seed.consume()
-        return applyScopeMaybe(new PropertySeedImpl(seed + `.toProperty(${initial})`, () => initial, (observer: Observer<any>) => {        
-            return source.subscribe(observer)
+        return applyScopeMaybe(new PropertySeedImpl(seed + `.toProperty(${initial})`, () => initial, (onValue, onEnd) => {        
+            return source.subscribe(onValue, onEnd)
         }), scope)    
     }
 }

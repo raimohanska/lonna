@@ -10,19 +10,16 @@ export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, an
 export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined, scope?: Scope): any {
     var index = 0;
 
-    return applyScopeMaybe(rename("repeat(fn)", fromSubscribe<V>(function(sink: Observer<Event<V>>) {
+    return applyScopeMaybe(rename("repeat(fn)", fromSubscribe<V>(function(onValue: Observer<V>, onEnd: Observer<void>) {
       var flag = false;
       
       var unsub = function() {};
-      function handleEvent(event: Event<V>) {
-        if (isEnd(event)) {
-          if (!flag) {
-            flag = true;
-          } else {
-            subscribeNext();
-          }
+
+      function handleEnd() {
+        if (!flag) {
+          flag = true;
         } else {
-          sink(event);
+          subscribeNext();
         }
       }
       function subscribeNext() {
@@ -32,9 +29,9 @@ export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, an
           next = generator(index++);
           flag = false;
           if (next) {
-            unsub = next.consume().subscribe(handleEvent);
+            unsub = next.consume().subscribe(onValue, handleEnd);
           } else {
-            sink(endEvent);
+            onEnd()
           }
         }
         flag = true;

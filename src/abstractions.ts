@@ -35,7 +35,7 @@ export function isObservableSeed<V, O extends Observable<any>>(e: any): e is Obs
 
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
-export type Subscribe<V> = (observer: Observer<Event<V>>) => Unsub
+export type Subscribe<V> = (onValue: Observer<V>, onEnd: Observer<void>) => Unsub
 export type Unsub = Callback
 
 export abstract class Event<V> {
@@ -93,7 +93,6 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
     return event => { if (isValue(event)) observer(event.value) }
 }
 
-
 export interface ObservableIdentifiers {
     _L: TypeBitfield // Discriminator bitfield for detecting implemented interfaces runtime. Used by the is* methods above.
     desc: string
@@ -106,7 +105,7 @@ export interface ForEach<V> {
 }
 
 export type Observable<V> = ObservableIdentifiers & ForEach<V> & {
-    subscribe(observer: Observer<Event<V>>): Unsub;
+    subscribe(onValue: Observer<V>, onEnd: Observer<void>): Unsub; // TODO: make optional
 }
 
 export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
@@ -119,7 +118,7 @@ export type ScopedObservable<V> = Observable<V> & {
 
 export interface PropertyMethods<V> {
     get(): V
-    onChange(observer: Observer<Event<V>>): Unsub;
+    onChange(onValue: Observer<V>, onEnd: Observer<void> | undefined): Unsub; // TODO: make optional
 }
 
 export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V>

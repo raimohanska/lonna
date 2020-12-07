@@ -1,4 +1,4 @@
-import { Event, isValue, Observer, Scope } from "./abstractions";
+import { Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { transform, Transformer, UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
 
@@ -15,15 +15,11 @@ export function filter<A>(fn: Predicate<A>, scope?: Scope): any {
 
 function filterT<A>(fn: Predicate<A>): Transformer<A, A> {
     return {
-        changes: (event: Event<A>, observer: Observer<Event<A>>) => {
-            if (isValue(event)) {
-                if (fn(event.value)) {
-                    observer(event)
+        changes: (subscribe) => (onValue, onEnd) => subscribe(value => {
+                if (fn(value)) {
+                    onValue(value)
                 }
-            } else {
-                observer(event)
-            }
-        },
+            }, onEnd),
         init: (value: A) => {
             if (!fn(value)) {
                 throw Error(`Initial value not matching filter`)

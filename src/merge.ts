@@ -23,16 +23,14 @@ export function merge<A>(...args: any[]) {
     }
 
     const sources = streams.map(s => s.consume())
-    const seed = new EventStreamSeedImpl<A>(`merge(${streams})`, observer => {
+    const seed = new EventStreamSeedImpl<A>(`merge(${streams})`, (onValue, onEnd) => {
         let endCount = 0
         const unsubs = sources.map(s => s.subscribe(event => {
-            if (isValue(event)) {
-                observer(event)
-            } else {
-                endCount++
-                if (endCount === sources.length) {
-                    observer(endEvent)
-                }
+            onValue(event)
+        }, () => {
+            endCount++
+            if (endCount === sources.length) {
+                onEnd()
             }
         }))
         return () => unsubs.forEach(f => f())

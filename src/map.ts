@@ -22,9 +22,9 @@ export function map<A, B>(x: ((value: A) => B) | Property<B>): any {
     return (o: any) => {
         const desc = o + `.map(fn)`;
         let fn = isProperty(x) ? () => x.get() : x
-        if (isEventStream(o)) {
+        if (isEventStream<A>(o)) {
             return new StatelessEventStream(desc, mapSubscribe(o.subscribe.bind(o), fn), o.getScope())
-        } else if (isEventStreamSeed(o)) {
+        } else if (isEventStreamSeed<A>(o)) {
             const source = o.consume()
             return new EventStreamSeedImpl(desc, mapSubscribe(source.subscribe.bind(source), fn))
         } else if (isProperty<A>(o)) {
@@ -39,12 +39,12 @@ export function map<A, B>(x: ((value: A) => B) | Property<B>): any {
     }
 }
 
-export function mapSubscribe<A, B>(subscribe: Subscribe<Event<A>>, fn: (value: A) => B): Subscribe<B> {
-    return observer => subscribe(mapObserver(observer, fn))
+export function mapSubscribe<A, B>(subscribe: Subscribe<A>, fn: (value: A) => B): Subscribe<B> {
+    return (onValue, onEnd) => subscribe(mapObserver(onValue, fn), onEnd)
 }
 
-export function mapObserver<A, B>(observer: Observer<Event<B>>, fn: (value: A) => B): Observer<Event<A>> {
-    return (event: Event<A>) => observer(mapEvent(event, fn))
+export function mapObserver<A, B>(observer: Observer<B>, fn: (value: A) => B): Observer<A> {
+    return (event: A) => observer(fn(event))
 }
 
 export function mapEvent<A, B>(event: Event<A>, fn: (value: A) => B): Event<B> {

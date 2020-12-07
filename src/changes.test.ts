@@ -2,7 +2,7 @@ import { EventStream, isEventStream } from "./abstractions";
 import { applyScope, changes, toProperty } from "./index";
 import { expectStreamEvents, series, testScope } from "./test-utils";
 
-describe("changes", () => {
+describe("Property.changes", () => {
     expectStreamEvents(() => {
         const c = series(1, [1,2]).pipe(toProperty(0), changes)
         return c

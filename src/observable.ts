@@ -1,5 +1,6 @@
 import { Event, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
 import { Pipeable } from "./pipeable"
+import { nop } from "./util"
 
 export abstract class ObservableSeedBase<V, O extends Observable<any>> extends Pipeable implements ObservableSeed<V, O> {
     abstract _L: TypeBitfield
@@ -17,7 +18,7 @@ export abstract class ObservableSeedBase<V, O extends Observable<any>> extends P
     }
 
     forEach(observer: Observer<V>): Unsub {
-        return this.consume().subscribe(valueObserver(observer))
+        return this.consume().subscribe(observer, nop) // TODO: remove nop if optional
     }
 
     log(message?: string) {
@@ -31,10 +32,10 @@ export abstract class ObservableBase<V> extends ObservableSeedBase<V, Observable
         super(desc)
     }
 
-    abstract subscribe(observer: Observer<Event<V>>): Unsub;
+    abstract subscribe(onValue: Observer<V>, onEnd: Observer<void>): Unsub; // TODO: make optional
 
     forEach(observer: Observer<V>): Unsub {
-        return this.subscribe(valueObserver(observer))
+        return this.subscribe(observer, nop) // TODO: remove nop if optional
     }
 
     consume() {

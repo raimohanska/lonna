@@ -42,9 +42,10 @@ class Buffer<V> {
   delay?: DelayFunction
   onInput: BufferHandler<V>
   onFlush: BufferHandler<V>
-  push: Observer<Event<V[]>> = (e) => undefined
+  onValue: Observer<V[]> = (e) => undefined
+  onEnd: Observer<void> = (e) => undefined
   scheduled: number | null = null
-  end: Event<V[]> | undefined = undefined
+  ended: boolean = false
   values: V[] = []
   flush() {
     if (this.scheduled) {
@@ -55,14 +56,14 @@ class Buffer<V> {
       //console.log Bacon.scheduler.now() + ": flush " + @values
       var valuesToPush = this.values;
       this.values = [];
-      this.push(valueEvent(valuesToPush));
-      if ((this.end != null)) {
-        return this.push(this.end);
+      this.onValue(valuesToPush);
+      if ((this.ended)) {
+        return this.onEnd();
       } else {
         return this.onFlush(this);
       }
     } else {
-      if ((this.end != null)) { return this.push(this.end); }
+      if ((this.ended)) { return this.onEnd(); }
     }
   }
   schedule(delay: DelayFunction) {
@@ -92,23 +93,22 @@ function toDelayFunction(delay: number | DelayFunction | undefined): DelayFuncti
 
 type BufferHandler<V> = (buffer: Buffer<V>) => any
 
-/** @hidden */
 function buffer<V>(desc: string, src: EventStream<V> | EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
-  //var reply = more;
-  var buffer = new Buffer<V>(onFlush, onInput)
-  const transformer: StreamTransformer<V, V[]> = (event: Event<V>, sink: Observer<Event<V[]>>) => {
-    buffer.push = sink
-    if (isValue(event)) {
-      buffer.values.push(event.value);
-      //console.log Bacon.scheduler.now() + ": input " + event.value
-      onInput(buffer);
-    } else {
-      buffer.end = event;
-      if (!buffer.scheduled) {
-        //console.log Bacon.scheduler.now() + ": end-flush"
-        buffer.flush();
-      }
-    }
-  }
+  const transformer: StreamTransformer<V, V[]> = subscribe => (onValue, onEnd) => {
+    var buffer = new Buffer<V>(onFlush, onInput)
+    buffer.onValue = onValue
+      buffer.onEnd = onEnd
+      return subscribe(value => {
+        buffer.values.push(value);
+        //console.log Bacon.scheduler.now() + ": input " + event.value
+        onInput(buffer);
+      }, () => {
+        buffer.ended = true;
+        if (!buffer.scheduled) {
+          //console.log Bacon.scheduler.now() + ": end-flush"
+          buffer.flush();
+        }
+      })
+  }  
   return transform<V, V[]>(desc, transformer)(src)
 };

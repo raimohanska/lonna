@@ -9,15 +9,11 @@ export function scan<A, B>(initial: B, fn: (state: B, next: A) => B, scope?: Sco
     return (seed: EventStream<A> | EventStreamSeed<A>) => {
         const source = seed.consume()
         let current = initial
-        return applyScopeMaybe(new PropertySeedImpl(source + `.scan(fn)`, () => initial, (observer: Observer<Event<B>>) => {
+        return applyScopeMaybe(new PropertySeedImpl(source + `.scan(fn)`, () => initial, (onValue: Observer<B>, onEnd: Observer<void>) => {
             const unsub = source.subscribe(event => {
-                if (isValue(event)) {
-                    current = fn(current, event.value)
-                    observer(valueEvent(current))
-                } else {
-                    observer(event)
-                }
-            })
+                current = fn(current, event)
+                onValue(current)
+            }, onEnd)
             return unsub
         }), scope)
     }

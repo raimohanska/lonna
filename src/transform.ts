@@ -4,7 +4,9 @@ import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
 import { AtomSeedImpl } from "./atom";
 
-export type StreamTransformer<A, B> = (event: Event<A>, observer: Observer<Event<B>>) => void;
+export type SubscriptionTransformer<A, B> = (subscribe: Subscribe<A>) => Subscribe<B>
+
+export type StreamTransformer<A, B> = SubscriptionTransformer<A, B>
 
 export type Transformer<A, B> = {
     changes: StreamTransformer<A, B>;
@@ -100,7 +102,7 @@ export function transform<A, B>(desc: string, transformer: Transformer<A, B> | S
         if (isEventStreamSeed<A>(x)) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes
             const source = x.consume()
-            return applyScopeMaybe(new EventStreamSeedImpl(desc, observer => source.subscribe((value: Event<A>) => transformFn(value, observer))), scope)    
+            return applyScopeMaybe(new EventStreamSeedImpl(desc, transformFn(source.subscribe.bind(source))), scope) // TODO: should we always bind?
         } 
         const t = transformer as Transformer<A, B>        
         if (isAtomSeed<A>(x)) {
@@ -117,5 +119,5 @@ export function transform<A, B>(desc: string, transformer: Transformer<A, B> | S
 
 function transformPropertySubscribe<A, B>(src: { onChange: Subscribe<A> }, transformer: Transformer<A, B>): Subscribe<B> {
     if (src === undefined) throw Error("Assertion failed")
-    return (observer: Observer<Event<B>>) => src.onChange(value => transformer.changes(value, observer))
+    return transformer.changes(src.onChange.bind(src)) // TODO: should we always bind?
 }

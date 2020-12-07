@@ -19,8 +19,8 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
         this.set = this.set.bind(this)
     }
 
-    onChange(observer: Observer<Event<V>>) {
-        return this._dispatcher.on("change", observer)        
+    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+        return this._dispatcher.on("change", onValue, onEnd)        
     }
 
     get(): V {
@@ -28,7 +28,7 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
     }
     set(newValue: V): void {
         this._value = newValue;
-        this._dispatcher.dispatch("change", valueEvent(newValue))
+        this._dispatcher.dispatch("change", newValue)
     }
 
     modify(fn: (old: V) => V): void {
@@ -65,19 +65,15 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
         this._root.modify(oldRoot => this._lens.set(oldRoot, fn(this._lens.get(oldRoot))))
     }
 
-    onChange(observer: Observer<Event<V>>) {
+    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
         let current = uninitialized
         const unsub = this._root.onChange(event => {
-            if (isValue(event)) {
-                const value = this._lens.get(event.value)
-                if (value !== current) {
-                    current = value
-                    observer(valueEvent(value))
-                }
-            } else {
-                observer(event)
+            const value = this._lens.get(event)
+            if (value !== current) {
+                current = value
+                onValue(value)
             }
-        })
+        }, onEnd)
         this.getScope().subscribe(() => {
             current = this.get()
             return nop
@@ -101,8 +97,8 @@ class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
         this.set = set.bind(this)
     }
 
-    onChange(observer: Observer<Event<V>>) {
-        return this._input.onChange(observer)
+    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+        return this._input.onChange(onValue, onEnd)
     }
 
     get() {
