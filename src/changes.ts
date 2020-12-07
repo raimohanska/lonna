@@ -7,7 +7,7 @@ export function changes<O extends PropertySeed<any> | Property<any>>(property: O
 export function changes<T>(property: Property<T> | PropertySeed<T>): EventStream<T> | EventStreamSeed<T> {
     const desc = property + ".changes"
     const source = property.consume()
-    const sub = (onValue: Observer<T>, onEnd: Observer<void>) => {
+    const sub = (onValue: Observer<T>, onEnd?: Observer<void>) => {
         return source.onChange(onValue, onEnd)
     }
     if (isProperty<T>(source)) {

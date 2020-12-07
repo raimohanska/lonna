@@ -3,6 +3,7 @@ import { map } from "./map"
 import { StatelessProperty } from "./property"
 import { globalScope } from "./scope"
 import { toString } from "./tostring"
+import { nop } from "./util"
 
 // TODO: flatmap cases would work better with stream semantics (no need for init)
 // TODO: type inference doesn't really work with mapper
@@ -26,7 +27,7 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
         }
     )   
 
-    const onChange = (_onValue: PromiseObserver<I>, onEnd: Observer<void>) => {
+    const onChange = (_onValue: PromiseObserver<I>, onEnd: Observer<void> = nop) => {
         let onValue: PromiseObserver<I> | null = _onValue
         function update(state: PromiseState<I>) {
             if (onValue) {

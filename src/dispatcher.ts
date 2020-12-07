@@ -25,11 +25,11 @@ export class Dispatcher<E extends Dict> {
         this._ended = true
     }
 
-    on<X extends keyof E & string>(key: X, onValue: Observer<E[X]>, onEnd: Observer<void> | undefined): Unsub {
+    on<X extends keyof E & string>(key: X, onValue: Observer<E[X]>, onEnd: Observer<void> = nop): Unsub {
         if (!this._observers[key]) this._observers[key] = [];
         const pair = [onValue, onEnd] as [Observer<any>, Observer<void>]
         if (this._ended) {
-            onEnd && onEnd()
+            onEnd()
             return nop
         } else {
             this._observers[key]!.push(pair)

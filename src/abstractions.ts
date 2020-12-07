@@ -35,7 +35,7 @@ export function isObservableSeed<V, O extends Observable<any>>(e: any): e is Obs
 
 export type Callback = () => void
 export type Observer<V> = (value: V) => void
-export type Subscribe<V> = (onValue: Observer<V>, onEnd: Observer<void>) => Unsub
+export type Subscribe<V> = (onValue: Observer<V>, onEnd?: Observer<void>) => Unsub
 export type Unsub = Callback
 
 export abstract class Event<V> {
@@ -105,7 +105,7 @@ export interface ForEach<V> {
 }
 
 export type Observable<V> = ObservableIdentifiers & ForEach<V> & {
-    subscribe(onValue: Observer<V>, onEnd: Observer<void>): Unsub; // TODO: make optional
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub;
 }
 
 export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
@@ -118,7 +118,7 @@ export type ScopedObservable<V> = Observable<V> & {
 
 export interface PropertyMethods<V> {
     get(): V
-    onChange(onValue: Observer<V>, onEnd: Observer<void> | undefined): Unsub; // TODO: make optional
+    onChange(onValue: Observer<V>, onEnd?: Observer<void> | undefined): Unsub;
 }
 
 export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V>

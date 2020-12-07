@@ -2,6 +2,7 @@ import { applyScope, createScope, endEvent, Event, EventStream, EventStreamSeed,
 import { map } from "./map";
 import GlobalScheduler, { setScheduler } from "./scheduler";
 import TickScheduler from "./tickscheduler";
+import { nop } from "./util";
 
 export function wait(delay: number): Promise<void> {
     return new Promise((resolve) => GlobalScheduler.scheduler.setTimeout(resolve, delay))
@@ -156,7 +157,7 @@ const toValue = (x: Event<any> | any) => {
 
 export function atGivenTimes<V>(timesAndValues: [number, V][]): EventStreamSeed<V> {
     const startTime = sc.now();
-    return fromSubscribe((onValue, onEnd) => {
+    return fromSubscribe((onValue, onEnd = nop) => {
         let shouldStop = false;
         var schedule = (timeOffset: number, index: number) => {
             const first = timesAndValues[index];

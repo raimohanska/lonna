@@ -16,10 +16,10 @@ export abstract class PropertyBase<V> extends ObservableBase<V> implements Prope
 
     abstract get(): V
 
-    abstract onChange(onValue: Observer<V>, onEnd: Observer<void>): Unsub;
+    abstract onChange(onValue: Observer<V>, onEnd?: Observer<void>): Unsub;
 
     // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
-    subscribe(onValue: Observer<V>, onEnd: Observer<void>): Unsub {
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {
         const unsub = this.onChange(onValue, onEnd) // onChange call needs to be before get() call for autoScope to work.
 
         this.getScope().subscribe(() => {
@@ -44,8 +44,7 @@ export class StatelessProperty<V> extends PropertyBase<V> {
         this._scope = scope
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
-        if (!onEnd) throw Error("Assertion fail")
+    onChange(onValue: Observer<V>, onEnd: Observer<void> = nop) {
         let current = uninitialized
         const unsub = this._onChange(event => {
             if (event !== current) {
@@ -95,7 +94,7 @@ export class StatefulProperty<V> extends PropertyBase<V> {
         );
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>) {
         return this._dispatcher.on("change", onValue, onEnd)
     }
     
@@ -138,7 +137,7 @@ export class PropertySourceImpl<V> extends ObservableBase<V> implements Property
         this.onChange_ = onChange;
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>): Unsub {                
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {                
         if (this._subscribed) throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this)
         this._subscribed = true
         return this.onChange_(event => {
@@ -148,7 +147,7 @@ export class PropertySourceImpl<V> extends ObservableBase<V> implements Property
     }
 
     // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
-    subscribe(onValue: Observer<V>, onEnd: Observer<void>): Unsub {        
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {        
         const unsub = this.onChange(onValue, onEnd)
         onValue(this.get())
         return unsub

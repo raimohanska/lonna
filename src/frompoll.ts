@@ -21,7 +21,7 @@ export function fromPoll<V>(delay: number, poll: PollFunction<V>, scope: Scope):
 export function fromPoll<V>(delay: number, poll: PollFunction<V>): EventStreamSeed<V>
 
 export function fromPoll<V>(delay: number, poll: PollFunction<V>, scope?: Scope): any {
-  return rename(`fromPoll(${delay},fn)`, fromSubscribe((onValue, onEnd) => {
+  return rename(`fromPoll(${delay},fn)`, fromSubscribe((onValue, onEnd = nop) => {
         const interval = GlobalScheduler.scheduler.setInterval(() => {
             const events = toEvents(poll())
             for (const event of events) {

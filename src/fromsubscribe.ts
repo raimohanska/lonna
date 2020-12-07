@@ -1,6 +1,7 @@
 import { Event, EventLike, EventStream, EventStreamSeed, isEnd, isValue, Observer, Scope, Subscribe, toEvents, Unsub } from "./abstractions"
 import { applyScopeMaybe } from "./applyscope"
 import { EventStreamSeedImpl } from "./eventstream"
+import { nop } from "./util"
 
 export function fromSubscribe<V>(subscribe: Subscribe<V>): EventStreamSeed<V>;
 export function fromSubscribe<V>(subscribe: Subscribe<V>, scope: Scope): EventStream<V>;
@@ -11,7 +12,7 @@ export function fromSubscribe<V>(subscribe: Subscribe<V>, scope?: Scope): EventS
 export type FlexibleObserver<V> = (event: EventLike<V>) => void
 export type FlexibleSubscribe<V> = (observer: FlexibleObserver<V>) => Unsub
 
-export function toFlexibleObserver<V>(onValue: Observer<V>, onEnd: Observer<void>): FlexibleObserver<V> {
+export function toFlexibleObserver<V>(onValue: Observer<V>, onEnd: Observer<void> = nop): FlexibleObserver<V> {
     return (eventLike: EventLike<V>) => {
         const events = toEvents(eventLike)
         for (const event of events) {

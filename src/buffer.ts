@@ -58,12 +58,12 @@ class Buffer<V> {
       this.values = [];
       this.onValue(valuesToPush);
       if ((this.ended)) {
-        return this.onEnd();
+        this.onEnd();
       } else {
-        return this.onFlush(this);
+        this.onFlush(this);
       }
     } else {
-      if ((this.ended)) { return this.onEnd(); }
+      if ((this.ended)) { this.onEnd(); }
     }
   }
   schedule(delay: DelayFunction) {
@@ -94,7 +94,7 @@ function toDelayFunction(delay: number | DelayFunction | undefined): DelayFuncti
 type BufferHandler<V> = (buffer: Buffer<V>) => any
 
 function buffer<V>(desc: string, src: EventStream<V> | EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
-  const transformer: StreamTransformer<V, V[]> = subscribe => (onValue, onEnd) => {
+  const transformer: StreamTransformer<V, V[]> = subscribe => (onValue, onEnd = nop) => {
     var buffer = new Buffer<V>(onFlush, onInput)
     buffer.onValue = onValue
       buffer.onEnd = onEnd

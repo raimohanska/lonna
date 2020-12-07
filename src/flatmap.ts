@@ -41,7 +41,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
     constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
         const source = isProperty(src) ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
-        const subscribeWithInitial = (onValue: Observer<A>, onEnd: Observer<void>) => {
+        const subscribeWithInitial = (onValue: Observer<A>, onEnd: Observer<void> = nop) => {
             const unsub = source.onChange(onValue, onEnd)
             onValue(source.get()) // To spawn property for initial value
             initializing = false
@@ -59,7 +59,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
                 throw Error("Observable returned by the spawner function if flatMapLatest for Properties must return a Property. This one is not a Property: " + observable)
             }            
         }
-        super(desc, get, (onValue, onEnd) => subscribe(value => {
+        super(desc, get, (onValue, onEnd = nop) => subscribe(value => {
             if (!initializing) onValue(value)
         }, () => {
             if (!initializing) onEnd()
@@ -69,7 +69,7 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
 
 function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<B, Observable<B>>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
     const children: FlatMapChild<Observable<B>>[] = []
-    return [children, (onValue: Observer<B>, onEnd: Observer<void>) => {            
+    return [children, (onValue: Observer<B>, onEnd: Observer<void> = nop) => {            
         let rootEnded = false
         const unsubThis = subscribe(rootEvent => {
             if (options.latest) {

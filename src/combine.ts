@@ -3,7 +3,7 @@ import { StatelessProperty, PropertySeedImpl } from "./property";
 import { globalScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
 import { cached } from "./cached";
-import { rename, toString } from "./util";
+import { nop, rename, toString } from "./util";
 
 /**
   Combines given *n* Properties and
@@ -68,7 +68,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   }
   
   const get = () => combinator(...getCurrentArray())
-  function subscribe(onValue: Observer<Out>, onEnd: Observer<void>) {
+  function subscribe(onValue: Observer<Out>, onEnd: Observer<void> = nop) {
     let endCount = 0
     const unsubs = properties.map((src, i) => {
       return src.onChange(value => {

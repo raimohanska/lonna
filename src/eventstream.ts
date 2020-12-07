@@ -19,7 +19,7 @@ export class StatefulEventStream<V> extends EventStreamBase<V> {
         this._scope = scope
     }
 
-    subscribe(onValue: Observer<V>, onEnd: Observer<void>) {
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>) {
         return this.dispatcher.on("value", onValue, onEnd)
     }
     getScope() {

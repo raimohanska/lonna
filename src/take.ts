@@ -1,6 +1,7 @@
 import { endEvent, Event, isValue, Observer, Scope } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped } from "./transform";
+import { nop } from "./util";
 
 export function take<A>(count: number): GenericTransformOp
 export function take<A>(count: number, scope: Scope): GenericTransformOpScoped
@@ -11,8 +12,7 @@ export function take<A>(count: number, scope?: Scope): any {
 
 function takeT<A>(count: number): Transformer<A, A> {
     return {
-        changes: subscribe => (onValue, onEnd) => {
-            if (!onEnd) throw Error("Assertion fail")
+        changes: subscribe => (onValue, onEnd = nop) => {
             return subscribe(
                 value => {
                     count--;

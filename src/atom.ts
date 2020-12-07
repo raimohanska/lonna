@@ -19,7 +19,7 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
         this.set = this.set.bind(this)
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>) {
         return this._dispatcher.on("change", onValue, onEnd)        
     }
 
@@ -65,7 +65,7 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
         this._root.modify(oldRoot => this._lens.set(oldRoot, fn(this._lens.get(oldRoot))))
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>) {
         let current = uninitialized
         const unsub = this._root.onChange(event => {
             const value = this._lens.get(event)
@@ -97,7 +97,7 @@ class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
         this.set = set.bind(this)
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void>) {
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>) {
         return this._input.onChange(onValue, onEnd)
     }
 
