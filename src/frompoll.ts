@@ -4,7 +4,7 @@
 import { EventLike, EventStream, EventStreamSeed, isEnd, isValue, Scope, toEvents, valueEvent } from "./abstractions"
 import { fromSubscribe } from "./fromsubscribe"
 import GlobalScheduler from "./scheduler"
-import { rename } from "./util"
+import { nop, rename } from "./util"
 
 export type PollFunction<V> = () => EventLike<V>
 
