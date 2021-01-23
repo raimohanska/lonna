@@ -120,7 +120,7 @@ export function update<Out>(...args: any[]): any {
         }))(trigger as EventStreamSeed<any>)
     })
 
-    return rename(() => `update(${toString(initial)},${toString(patterns)})`, applyScopeMaybe(scan<Mutation<Out>, Out>(initial, (state, mutation) => mutation(state))(merge(mutators)), scope))
+    return rename(["update", [initial, patterns]], applyScopeMaybe(scan<Mutation<Out>, Out>(initial, (state, mutation) => mutation(state))(merge(mutators)), scope))
 }
 
 type Mutation<V> = (prev: V) => V

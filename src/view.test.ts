@@ -48,7 +48,7 @@ describe("Property.view", () => {
           ["bar lol"]
         )
         it("toString", () => {
-          expect(B.view(constant(fooBar), v => v.foo + " lol").toString()).toEqual("constant({foo:bar}).view([fn])")
+          expect(B.view(constant(fooBar), v => v.foo + " lol").toString()).toEqual("Property constant({foo:bar}).view(fn)")
         })
     })
 
@@ -74,7 +74,7 @@ describe("Property.view", () => {
     })
   
     it("toString", () => {
-        expect(B.view(constant(fooBar), "foo").toString()).toEqual("constant({foo:bar}).view(foo)")
+        expect(B.view(constant(fooBar), "foo").toString()).toEqual("Property constant({foo:bar}).view(foo)")
     });    
 });
 
@@ -94,6 +94,6 @@ describe("EventStream.view", () => {
     })
   
     it("toString", () => {
-        expect(B.view(later(1, fooBar), "foo").toString()).toEqual("later(1,{foo:bar}).view(foo)")
+        expect(B.view(later(1, fooBar), "foo").toString()).toEqual("EventStreamSeed later(1,{foo:bar}).view(foo)")
     });    
 });

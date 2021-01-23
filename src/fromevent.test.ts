@@ -101,7 +101,7 @@ describe("Bacon.fromEvent", function() {
 
     });
 
-    it("toString", () => expect(fromEvent(onOffSource(), "click").toString()).toEqual("fromEvent({cleaned:false,on:fn,off:fn},click)"));
+    it("toString", () => expect(fromEvent(onOffSource(), "click").toString()).toEqual("EventStream fromEvent({cleaned:false,on:fn,off:fn},click)"));
   });
 
   describe("eventSource is a function (a custom bind/unbind handler)", function() {
@@ -170,7 +170,7 @@ describe("Bacon.fromEvent", function() {
 
     it("toString", () =>
       expect(fromEvent(onOffSource(), (binder, listener) => binder("click", listener)).toString())
-        .toEqual("fromEvent({cleaned:false,on:fn,off:fn},fn)")
+        .toEqual("EventStream fromEvent({cleaned:false,on:fn,off:fn},fn)")
     );
   });
 });

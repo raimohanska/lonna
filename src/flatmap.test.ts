@@ -17,5 +17,5 @@ describe("EventStream.flatMap", function() {
       () => flatMap(constant)(series(1, [1,2])),
       [1,2])
   );
-  it("toString", () => expect(flatMap(nop as any)(never()).toString()).toEqual("never.flatMap(fn)"));
+  it("toString", () => expect(flatMap(nop as any)(never()).toString()).toEqual("EventStreamSeed never.flatMap(fn)"));
 });

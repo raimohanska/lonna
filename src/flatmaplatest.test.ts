@@ -12,7 +12,7 @@ describe("EventStream.flatMapLatest", () => {
       } ,
       [1, 2, 2])
   );
-  it("toString", () => expect(flatMapLatest(nop as any)(never()).toString()).toEqual("never.flatMapLatest(fn)"));
+  it("toString", () => expect(flatMapLatest(nop as any)(never()).toString()).toEqual("EventStreamSeed never.flatMapLatest(fn)"));
 });
 
 describe("Property.flatMapLatest", function() {
@@ -25,5 +25,5 @@ describe("Property.flatMapLatest", function() {
       }, 
       ["0.0", "0.1", "1.0", "1.1", "2.0", "2.1", "2.2"])
   );
-  it("toString", () => expect(flatMapLatest(nop as any)(constant(1)).toString()).toEqual("constant(1).flatMapLatest(fn)"));
+  it("toString", () => expect(flatMapLatest(nop as any)(constant(1)).toString()).toEqual("PropertySeed constant(1).flatMapLatest(fn)"));
 })

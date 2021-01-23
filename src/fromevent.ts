@@ -84,7 +84,7 @@ var findHandlerMethods = function(target: any): [Function, Function] {
  */
 export function fromEvent<V>(target: any, eventSource: string | EventSourceFn): EventStream<V> {
   var [sub, unsub] = findHandlerMethods(target);
-  return new StatelessEventStream(() => `fromEvent(${toString(target)},${toString(eventSource)})`, (onValue, onEnd) => {
+  return new StatelessEventStream(["fromEvent", [target, eventSource]], (onValue, onEnd) => {
     const handler = toFlexibleObserver(onValue, onEnd)
     if (isEventSourceFn(eventSource)) {
       eventSource(sub.bind(target), handler);

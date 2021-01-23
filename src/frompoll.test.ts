@@ -21,5 +21,5 @@ describe("Bacon.fromPoll", () => {
       [1, 1])
   );
   */
-  it("toString", () => expect(fromPoll(1, (() => {})).toString()).toEqual("fromPoll(1,fn)"));
+  it("toString", () => expect(fromPoll(1, (() => {})).toString()).toEqual("EventStreamSeed fromPoll(1,fn)"));
 });

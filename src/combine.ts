@@ -1,4 +1,4 @@
-import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed, Function0, Function1, Function2, Function3, Function4, Function5, Function6, isProperty } from "./abstractions";
+import { Observer, Property, Event, isValue, valueEvent, endEvent, PropertySeed, Function0, Function1, Function2, Function3, Function4, Function5, Function6, isProperty, Desc } from "./abstractions";
 import { StatelessProperty, PropertySeedImpl } from "./property";
 import { globalScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
@@ -22,7 +22,7 @@ export function combineAsArray<V>(observables: Property<V>[]): Property<V[]>;
 export function combineAsArray<V>(observables: PropertySeed<V>[]): PropertySeed<V[]>;
 
 export function combineAsArray<V>(observables: Property<V>[] | PropertySeed<V>[]): PropertyLike<V[]> {
-  return rename(() => "combineAsArray(" + toString(observables) + ")", combine(observables as any, (...xs: V[]) => xs))
+  return rename(["combineAsArray", observables], combine(observables as any, (...xs: V[]) => xs))
 }
 
 export function combine<R>(fn: Function0<R>): Property<R>
@@ -88,7 +88,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
     }    
   }
 
-  const desc = () => `combine(${properties},fn)`
+  const desc = ["combine", [properties, combinator]] as Desc
   if (properties.length === 0 || isProperty(properties[0])) {
     const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
     return new StatelessProperty<Out>(desc, get, subscribe, scope);

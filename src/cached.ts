@@ -8,7 +8,7 @@ export function cached<A>(scope: Scope): UnaryTransformOpScoped<A>
 export function cached(f?: Function | Scope): any {
     if (!f || isScope(f)) {
         // cache for observables
-        return transform("cached", IdentityTransformer, f as Scope)
+        return transform(["cached", []], IdentityTransformer, f as Scope)
     } else {
         // cache function
         let previous: [any[], any] | null = null

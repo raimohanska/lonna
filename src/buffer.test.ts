@@ -36,7 +36,7 @@ describe("EventStream.bufferWithTime", function() {
       () => bufferWithTime(sync)(atGivenTimes([[0, "a"], [2, "b"]])),
       [[0, ["a"]], [2, ["b"]]]);
   });
-  it("toString", () => expect(never().pipe(bufferWithTime(1)).toString()).toEqual("never.bufferWithTime(1)"));
+  it("toString", () => expect(never().pipe(bufferWithTime(1)).toString()).toEqual("EventStreamSeed never.bufferWithTime(1)"));
 });
 
 describe("EventStream.bufferWithCount", function() {
@@ -45,5 +45,5 @@ describe("EventStream.bufferWithCount", function() {
       () => bufferWithCount(2)(series(1, [1, 2, 3, 4, 5])),
       [[1, 2], [3, 4], [5]])
   );
-  it("toString", () => expect(bufferWithCount(1)(never()).toString()).toEqual("never.bufferWithCount(1)"));
+  it("toString", () => expect(bufferWithCount(1)(never()).toString()).toEqual("EventStreamSeed never.bufferWithCount(1)"));
 });

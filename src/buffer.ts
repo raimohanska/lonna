@@ -1,4 +1,4 @@
-import { Desc, Event, EventStream, EventStreamSeed, isValue, Observer, valueEvent } from "./abstractions";
+import { Desc, Event, EventStream, EventStreamSeed, isValue, MethodDesc, Observer, valueEvent } from "./abstractions";
 import GlobalScheduler from "./scheduler";
 import { StreamTransformer, transform } from "./transform";
 import { nop } from "./util";
@@ -11,15 +11,15 @@ export type VoidFunction = () => void
 export type DelayFunction = (f: VoidFunction) => any
 
 export function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
-  return src => bufferWithTimeOrCount(() => `bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
+  return src => bufferWithTimeOrCount(["bufferWithTime", [delay]], src, delay, Number.MAX_VALUE)
 };
 
 export function bufferWithCount<V>(count: number): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
-  return src => bufferWithTimeOrCount(() => `bufferWithCount(${count})`, src, undefined, count)
+  return src => bufferWithTimeOrCount(["bufferWithCount", [count]], src, undefined, count)
 };
 
 
-function bufferWithTimeOrCount<V>(desc: Desc, src: EventStream<V> | EventStreamSeed<V>, delay?: number | DelayFunction, count?: number): EventStreamSeed<V[]> {
+function bufferWithTimeOrCount<V>(desc: MethodDesc, src: EventStream<V> | EventStreamSeed<V>, delay?: number | DelayFunction, count?: number): EventStreamSeed<V[]> {
   const delayFunc = toDelayFunction(delay)
   function flushOrSchedule(buffer: Buffer<V>) {
     if (buffer.values.length === count) {
@@ -87,7 +87,7 @@ function toDelayFunction(delay: number | DelayFunction | undefined): DelayFuncti
 
 type BufferHandler<V> = (buffer: Buffer<V>) => any
 
-function buffer<V>(desc: Desc, src: EventStream<V> | EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
+function buffer<V>(desc: MethodDesc, src: EventStream<V> | EventStreamSeed<V>, onInput: BufferHandler<V> = nop, onFlush: BufferHandler<V> = nop): EventStreamSeed<V[]> {
   const transformer: StreamTransformer<V, V[]> = subscribe => (onValue, onEnd = nop) => {
     var buffer = new Buffer<V>(onFlush, onInput)
     buffer.onValue = onValue

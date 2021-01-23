@@ -63,6 +63,6 @@ describe("Scoped version", () =>
 it("toString", () => {
   expect(
       update(0, [never(), (state, v) => state]
-    ).toString()).toEqual("update(0,[[never,fn]])")
+    ).toString()).toEqual("PropertySeed update(0,[[never,fn]])")
   });
 });

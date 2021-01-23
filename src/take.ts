@@ -6,7 +6,7 @@ import { nop } from "./util";
 export function take<A>(count: number): GenericTransformOp
 export function take<A>(count: number, scope: Scope): GenericTransformOpScoped
 export function take<A>(count: number, scope?: Scope): any {
-    return transform("map(fn)", takeT(count), scope as Scope)
+    return transform(["take", [count]], takeT(count), scope as Scope)
 }
 
 function takeT<A>(count: number): Transformer<A, A> {

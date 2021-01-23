@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, Desc, descToString, Event, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
+import { Atom, AtomSeed, composeDesc, Desc, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, MethodDesc, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
@@ -95,16 +95,16 @@ export const IdentityTransformer = {
     init: <A>(value: A) => value
 }
 
-export function transform<A>(desc: Desc, transformer: Transformer<A, A>): UnaryTransformOp<A>
-export function transform<A>(desc: Desc, transformer: Transformer<A, A>, scope: Scope): UnaryTransformOpScoped<A>
-export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>): BinaryTransformOp<A, B>
-export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>, scope: Scope): BinaryTransformOpScoped<A, B>
-export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>): StreamTransformOp<A, B>
-export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>, scope: Scope): StreamTransformOpScoped<A, B>
+export function transform<A>(desc: MethodDesc, transformer: Transformer<A, A>): UnaryTransformOp<A>
+export function transform<A>(desc: MethodDesc, transformer: Transformer<A, A>, scope: Scope): UnaryTransformOpScoped<A>
+export function transform<A, B>(desc: MethodDesc, transformer: Transformer<A, B>): BinaryTransformOp<A, B>
+export function transform<A, B>(desc: MethodDesc, transformer: Transformer<A, B>, scope: Scope): BinaryTransformOpScoped<A, B>
+export function transform<A, B>(desc: MethodDesc, transformer: StreamTransformer<A, B>): StreamTransformOp<A, B>
+export function transform<A, B>(desc: MethodDesc, transformer: StreamTransformer<A, B>, scope: Scope): StreamTransformOpScoped<A, B>
 
-export function transform<A, B>(desc1: Desc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
-    return (x: any) => {
-        const desc = () => `${x}.${descToString(desc1)}`
+export function transform<A, B>(methodCallDesc: MethodDesc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
+    return (x: ObservableSeed<any, any>) => {
+        const desc = composeDesc(x, methodCallDesc)
         if (isEventStreamSeed<A>(x)) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes
             const source = x.consume()

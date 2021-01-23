@@ -41,6 +41,6 @@ describe("cached", () => {
     })
     it("tostring", () => {
         const p = L.constant(1).pipe(L.cached())
-        expect(p.toString()).toEqual("constant(1).cached")
+        expect(p.toString()).toEqual("PropertySeed constant(1).cached()")
     })
 })

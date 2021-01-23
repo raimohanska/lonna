@@ -12,7 +12,7 @@ describe("EventStream.skipDuplicates", function () {
             },
             [1, -1, 2])
     );
-    it("toString", () => expect(skipDuplicates(() => false)(never()).toString()).toEqual("never.skipDuplicates(fn)"));
+    it("toString", () => expect(skipDuplicates(() => false)(never()).toString()).toEqual("EventStreamSeed never.skipDuplicates(fn)"));
 });
 
 describe("Property.skipDuplicates", function () {

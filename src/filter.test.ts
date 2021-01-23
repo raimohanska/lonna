@@ -11,7 +11,7 @@ describe("EventStream.filter", function () {
             },
             [1, 2])
     );
-    it("toString", () => expect(filter(() => false)(never()).toString()).toEqual("never.filter(fn)"));
+    it("toString", () => expect(filter(() => false)(never()).toString()).toEqual("EventStreamSeed never.filter(fn)"));
 });
 
 describe("Property.filter", function () {

@@ -44,7 +44,7 @@ describe("combine", () => {
         expect(count).toEqual(1)
       })
 
-    it("toString", () => expect(combine(constant(1), constant(2), () => {}).toString()).toEqual("combine(constant(1),constant(2),fn)"));
+    it("toString", () => expect(combine(constant(1), constant(2), () => {}).toString()).toEqual("Property combine([constant(1),constant(2)],fn)"));
 })
 
 describe("combineAsArray", () => {
@@ -58,5 +58,5 @@ describe("combineAsArray", () => {
         [[0,0], [1, 0], [1, 4]])
     );
 
-    it("toString", () => expect(combineAsArray([constant(1), constant(2)]).toString()).toEqual("combineAsArray([constant(1),constant(2)])"));
+    it("toString", () => expect(combineAsArray([constant(1), constant(2)]).toString()).toEqual("Property combineAsArray(constant(1),constant(2))"));
 })

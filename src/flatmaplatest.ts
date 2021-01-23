@@ -11,9 +11,9 @@ export function flatMapLatest<A, B>(fn: Spawner<A, PropertySeed<B> | Property<B>
 export function flatMapLatest<A>(fn: Spawner<A, any>, scope?: Scope): any {
     return (s: any) => {
         if (isPropertySeed<A>(s)) {
-            return applyScopeMaybe(new FlatMapPropertySeed(() => `${s}.flatMapLatest(fn)`, s, fn, { latest: true }), scope)
+            return applyScopeMaybe(new FlatMapPropertySeed([s, "flatMapLatest", [fn]], s, fn, { latest: true }), scope)
         } else {
-            return applyScopeMaybe(new FlatMapStreamSeed(() => `${s}.flatMapLatest(fn)`, s, fn, { latest: true }), scope)
+            return applyScopeMaybe(new FlatMapStreamSeed([s, "flatMapLatest", [fn]], s, fn, { latest: true }), scope)
         }    
     }
 }

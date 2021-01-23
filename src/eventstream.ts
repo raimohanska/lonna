@@ -6,6 +6,7 @@ import { ObservableBase, ObservableSeedImpl } from "./observable";
 type StreamEvents<V> = { "value": V }
 
 export abstract class EventStreamBase<V> extends ObservableBase<V> implements EventStream<V> {
+    observableType() { return "EventStream" }
     _L: TypeBitfield = T_STREAM | T_SCOPED
     abstract getScope(): Scope
 }
@@ -54,6 +55,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 }
 
 export class EventStreamSourceImpl<V> extends ObservableBase<V> {
+    observableType() { return "EventStreamSource" }
     _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: Subscribe<V>
 
@@ -65,6 +67,7 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V> {
 
 
 export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>> implements EventStreamSeed<V> {
+    observableType() { return "EventStreamSeed" }
     _L: TypeBitfield = T_STREAM | T_SEED
     constructor(desc: Desc, subscribe: Subscribe<V>) {
         super(new EventStreamSourceImpl(desc, subscribe))

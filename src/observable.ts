@@ -1,20 +1,21 @@
-import { Desc, descToString, Event, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
+import { Desc, Description, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
 import { Pipeable } from "./pipeable"
 import { nop } from "./util"
 
 export abstract class ObservableSeedBase<V, O extends Observable<any>> extends Pipeable implements ObservableSeed<V, O> {
     abstract _L: TypeBitfield
-    desc: Desc
+    abstract observableType(): string
+    desc: Description
 
     constructor(desc: Desc) {
         super()
-        this.desc = desc
+        this.desc = new Description(desc)
     }
 
     abstract consume(): O;
 
     toString(): string {
-        return descToString(this.desc)
+        return this.observableType() + " " + (this.desc)
     }
 
     forEach(observer: Observer<V>): Unsub {

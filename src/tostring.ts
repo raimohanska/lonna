@@ -1,8 +1,13 @@
+import { ObservableSeedBase, ObservableSeedImpl } from "./observable";
+
 export function toString(obj: any): string {
     var hasProp = {}.hasOwnProperty;
     try {
       recursionDepth++;
-      if (obj == null) {
+      if (obj instanceof ObservableSeedBase) {
+        return toString(obj.desc)
+      }
+      else if (obj == null) {
         return "undefined";
       } else if (obj instanceof Function) {
         return "fn";
@@ -11,7 +16,7 @@ export function toString(obj: any): string {
           return "[..]";
         }
         return "[" + obj.map(toString).toString() + "]";
-      } else if (((obj != null ? obj.toString : void 0) != null) && obj.toString !== Object.prototype.toString) {
+      } else if (obj.toString && obj.constructor !== Object) {
         return obj.toString();
       } else if (typeof obj === "object") {
         if (recursionDepth > 5) {

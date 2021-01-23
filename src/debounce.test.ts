@@ -21,7 +21,7 @@ describe("EventStream.debounce(delay)", function () {
         expect(isEventStream(s)).toEqual(true)
     })
 
-    it("toString", () => expect(debounce(1)(never()).toString()).toEqual("never.debounce(1)"));
+    it("toString", () => expect(debounce(1)(never()).toString()).toEqual("EventStreamSeed never.debounce(1)"));
 });
 
 describe("Property.debounce", function () {
@@ -33,5 +33,5 @@ describe("Property.debounce", function () {
             },
             [0, 3])
     );
-    it("toString", () => expect(debounce(1)(constant(0)).toString()).toEqual("constant(0).debounce(1)"));
+    it("toString", () => expect(debounce(1)(constant(0)).toString()).toEqual("PropertySeed constant(0).debounce(1)"));
 });

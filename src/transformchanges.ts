@@ -1,4 +1,4 @@
-import { Desc, descToString, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, PropertySeed, Scope } from "./abstractions"
+import { composeDesc, Desc, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, MethodDesc, PropertySeed, Scope } from "./abstractions"
 import { applyScopeMaybe } from "./applyscope"
 import { changes } from "./changes"
 import { AtomSeedImpl } from "./atom"
@@ -9,12 +9,12 @@ import { rename } from "./util"
 
 export type EventStreamDelay<V> = (stream: EventStreamSeed<V>) => EventStreamSeed<V>
 
-export function transformChanges<A>(descSuffix: Desc, transformer: EventStreamDelay<A>): UnaryTransformOp<A>
-export function transformChanges<A>(descSuffix: Desc, transformer: EventStreamDelay<A>, scope: Scope): UnaryTransformOpScoped<A>
+export function transformChanges<A>(methodCallDesc: MethodDesc, transformer: EventStreamDelay<A>): UnaryTransformOp<A>
+export function transformChanges<A>(methodCallDesc: MethodDesc, transformer: EventStreamDelay<A>, scope: Scope): UnaryTransformOpScoped<A>
 
-export function transformChanges<A, B>(descSuffix: Desc, transformer: EventStreamDelay<A>, scope?: Scope): any {
+export function transformChanges<A, B>(methodCallDesc: MethodDesc, transformer: EventStreamDelay<A>, scope?: Scope): any {
     return (x: any) => {
-        const desc = () => `${x}.${descToString(descSuffix)}`
+        const desc = composeDesc(x, methodCallDesc)
         let r;
         if (isEventStreamSeed<A>(x)) {
             r = rename(desc, transformer(x))

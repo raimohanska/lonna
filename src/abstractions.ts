@@ -1,5 +1,6 @@
 import { Dispatcher } from "./dispatcher";
 import { Pipeable } from "./pipeable";
+import { toString } from "./tostring";
 
 export type TypeBitfield = number
 
@@ -37,10 +38,33 @@ export type Callback = () => void
 export type Observer<V> = (value: V) => void
 export type Subscribe<V> = (onValue: Observer<V>, onEnd?: Observer<void>) => Unsub
 export type Unsub = Callback
-export type Desc = string | (() => string)
-export function descToString(desc: Desc) {
-    return typeof desc == "string" ? desc : desc()
+export class Description {
+    desc: Desc
+    constructor(desc: Desc) {
+        this.desc = desc
+    }    
+    toString(): string {
+        if (typeof this.desc === "string") {
+            return this.desc
+        } else if (this.desc instanceof Description) {
+            return this.desc.toString()
+        } else if (this.desc.length == 2) {
+            return `${toString(this.desc[0])}(${this.desc[1].map(toString).join(",")})`
+        } else if (this.desc.length === 3) {
+            return `${toString(this.desc[0])}.${this.desc[1]}(${this.desc[2].map(toString).join(",")})`
+        } else {
+            throw Error("Unexpected desc: " + toString(this.desc))
+        }
+    }
 }
+export type Desc = Description | DescWithContext | MethodDesc | string
+export type MethodDesc = [string, any[]]
+export type DescWithContext = [any, string, any[]] 
+export function composeDesc(context: any, methodCall: MethodDesc): DescWithContext {
+    const [method, args] = methodCall
+    return [context, method, args]
+}
+
 export abstract class Event<V> {
     _L: TypeBitfield = T_EVENT
 }
@@ -98,7 +122,7 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 
 export interface ObservableIdentifiers {
     _L: TypeBitfield // Discriminator bitfield for detecting implemented interfaces runtime. Used by the is* methods above.
-    desc: Desc
+    desc: Description
     toString(): string;
 }
 

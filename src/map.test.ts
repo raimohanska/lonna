@@ -41,6 +41,6 @@ describe("EventStream.map", () => {
       [2,2,2])
   });  
   it("toString", () => {
-      expect(map(() => true)(never()).toString()).toEqual("never.map(fn)")
+      expect(map(() => true)(never()).toString()).toEqual("EventStream never.map(fn)")
   });
 });

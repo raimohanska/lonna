@@ -9,6 +9,7 @@ import { nop, toString } from "./util";
 type AtomEvents<V> = { "change": V }
 
 class RootAtom<V> extends PropertyBase<V> implements Atom<V> {    
+    observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V
@@ -42,6 +43,7 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
 const uninitialized = {}
 
 export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
+    observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
@@ -87,6 +89,7 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
 }
 
 class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
+    observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _input: Property<V>;
     set: (updatedValue: V) => void;
@@ -116,6 +119,7 @@ class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
 }
 
 export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Atom<V> {
+    observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
 
     constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>>, scope: Scope) {
@@ -135,6 +139,7 @@ export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Ato
  *  Must skip duplicates!
  **/
 export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
+    observableType() { return "AtomSeed" }
     _L: TypeBitfield = T_ATOM | T_SEED
     constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(new AtomSourceImpl(desc, get, subscribe, set))
@@ -147,6 +152,7 @@ export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
  *  Must skip duplicates!
  **/
 export class AtomSourceImpl<V> extends PropertySourceImpl<V> implements AtomSource<V> {
+    observableType() { return "AtomSource" }
     _L: TypeBitfield = T_ATOM | T_SOURCE
     set: (updatedValue: V) => void;
     constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
@@ -175,8 +181,8 @@ export function atom<A>(x: any, y?: any): Atom<A> {
     if (arguments.length == 1) {
         // TODO: construct desciptions in a structured manner like in Bacon
         // TODO: dynamic toString for atoms and properties (current value)
-        return new RootAtom<A>(() => `Atom(${toString(x)})`, x)
+        return new RootAtom<A>(["Atom", [x]], x)
     } else {
-        return new DependentAtom(() => `DependentAtom(${toString(x)},${toString(y)})`, x, y)
+        return new DependentAtom(["DependentAtom", [x, y]], x, y)
     }
 }

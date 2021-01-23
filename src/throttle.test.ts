@@ -10,7 +10,7 @@ describe("EventStream.throttle(delay)", function() {
       },
       [[5, 2], [8, 3]])
   );
-  it("toString", () => expect(throttle(1)(never()).toString()).toEqual("never.throttle(1)"));
+  it("toString", () => expect(never().pipe(throttle(1)).toString()).toEqual("EventStreamSeed never.throttle(1)"));
 });
 
 describe("Property.throttle", function() {
@@ -19,5 +19,5 @@ describe("Property.throttle", function() {
       () => series(1, [1,2,3]).pipe(toProperty(0), throttle(4)),
       [0,3])
   );
-  it("toString", () => expect(throttle(1)(constant(0)).toString()).toEqual("constant(0).throttle(1)"));
+  it("toString", () => expect(throttle(1)(constant(0)).toString()).toEqual("PropertySeed constant(0).throttle(1)"));
 });

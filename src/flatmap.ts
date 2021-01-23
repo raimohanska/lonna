@@ -22,7 +22,7 @@ export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>
 
 export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
     return (s: EventStream<A> | EventStreamSeed<A>) => 
-        applyScopeMaybe(new FlatMapStreamSeed(() => `${s}.flatMap(fn)`, s, fn, {}), scope)
+        applyScopeMaybe(new FlatMapStreamSeed([s, "flatMap", [fn]], s, fn, {}), scope)
 }
 
 export type FlatMapChild<B extends Observable<any>> = {

@@ -8,6 +8,7 @@ type PropertyEvents<V> = { "change": V, "end": void }
 const uninitialized = {}
 
 export abstract class PropertyBase<V> extends ObservableBase<V> implements Property<V>, PropertySeed<V>, PropertySource<V> {
+    observableType() { return "Property" }
     constructor(desc: Desc) {
         super(desc)
     }
@@ -64,7 +65,7 @@ export class StatelessProperty<V> extends PropertyBase<V> {
     }
 }
 
-export class StatefulProperty<V> extends PropertyBase<V> {
+export class StatefulProperty<V> extends PropertyBase<V> {    
     _L: TypeBitfield = T_PROPERTY | T_SCOPED
     private _dispatcher = new Dispatcher<PropertyEvents<V>>();
     private _scope: Scope
@@ -112,6 +113,7 @@ export class StatefulProperty<V> extends PropertyBase<V> {
  *  Must skip duplicates!
  **/
 export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>> implements PropertySeed<V> {
+    observableType() { return "PropertySeed" }
     _L: TypeBitfield = T_PROPERTY | T_SEED
     constructor(desc: Desc, get: () => V, onChange: Subscribe<V>) {
         super(new PropertySourceImpl(desc, get, onChange))
@@ -120,6 +122,7 @@ export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>
 
 export class PropertySourceImpl<V> extends ObservableBase<V> implements PropertySource<V> {
     _L: TypeBitfield = T_PROPERTY | T_SOURCE
+    observableType() { return "PropertySource" }
     private _started = false
     private _subscribed = false
     private _get: () => V

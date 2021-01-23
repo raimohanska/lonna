@@ -24,7 +24,7 @@ export function merge<A>(...args: any[]) {
     }
 
     const sources = streams.map(s => s.consume())
-    const seed = new EventStreamSeedImpl<A>(() => `merge(${streams})`, (onValue, onEnd = nop) => {
+    const seed = new EventStreamSeedImpl<A>(["merge", streams], (onValue, onEnd = nop) => {
         let endCount = 0
         const unsubs = sources.map(s => s.subscribe(event => {
             onValue(event)
