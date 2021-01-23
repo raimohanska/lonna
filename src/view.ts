@@ -55,12 +55,13 @@ export function view<A, B>(...args: any[]): any {
         while (!(args[fnIndex] instanceof Function)) fnIndex++
         const properties = args.slice(0, fnIndex)        
         if (properties.length === 1) {
-            let o = properties[0]
+            const property = properties[0]
+            let o = property
             for (let i = fnIndex; i < args.length; i++) {
                 const fn = args[i]                
                 o = map(fn)(o)
             }
-            const desc = () => `${o}.view(${toString(args.slice(fnIndex))})`
+            const desc = () => `${property}.view(${toString(args.slice(fnIndex))})`
             return rename(desc, o)
         } else {
             const fn = args[args.length - 1]

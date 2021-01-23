@@ -47,6 +47,9 @@ describe("Property.view", () => {
           () => B.view(constant(fooBar), v => v.foo + " lol"),
           ["bar lol"]
         )
+        it("toString", () => {
+          expect(B.view(constant(fooBar), v => v.foo + " lol").toString()).toEqual("constant({foo:bar}).view([fn])")
+        })
     })
 
     it("maps property values by unary function chain, skipping duplicates on every step", () => {
