@@ -1,4 +1,4 @@
-import { Atom, AtomSeed, Desc, Event, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
+import { Atom, AtomSeed, Desc, descToString, Event, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
@@ -101,9 +101,10 @@ export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>): Bin
 export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>, scope: Scope): BinaryTransformOpScoped<A, B>
 export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>): StreamTransformOp<A, B>
 export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>, scope: Scope): StreamTransformOpScoped<A, B>
-// TODO: desc should only contain the part after dot.
-export function transform<A, B>(desc: Desc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
+
+export function transform<A, B>(desc1: Desc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
     return (x: any) => {
+        const desc = () => `${x}.${descToString(desc1)}`
         if (isEventStreamSeed<A>(x)) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes
             const source = x.consume()

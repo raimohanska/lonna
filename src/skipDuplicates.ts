@@ -7,7 +7,7 @@ export type Predicate2<A> = (prev: A, next: A) => boolean
 export function skipDuplicates<A>(fn: Predicate2<A>): UnaryTransformOp<A>
 export function skipDuplicates<A>(fn: Predicate2<A>, scope: Scope): UnaryTransformOpScoped<A>
 export function skipDuplicates<A>(fn: Predicate2<A>, scope?: Scope): any {
-    return (s: any) => applyScopeMaybe(transform(() => s + `.skipDuplicates(fn)`, skipDuplicatesT(fn))(s), scope)
+    return transform("skipDuplicates(fn)", skipDuplicatesT(fn), scope as Scope)
 }
 
 function skipDuplicatesT<A>(fn: Predicate2<A>): Transformer<A, A> {

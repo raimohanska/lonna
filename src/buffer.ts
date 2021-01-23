@@ -11,11 +11,11 @@ export type VoidFunction = () => void
 export type DelayFunction = (f: VoidFunction) => any
 
 export function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
-  return src => bufferWithTimeOrCount(() => src + `.bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
+  return src => bufferWithTimeOrCount(() => `bufferWithTime(${delay})`, src, delay, Number.MAX_VALUE)
 };
 
 export function bufferWithCount<V>(count: number): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
-  return src => bufferWithTimeOrCount(() => src + `.bufferWithCount(${count})`, src, undefined, count)
+  return src => bufferWithTimeOrCount(() => `bufferWithCount(${count})`, src, undefined, count)
 };
 
 
