@@ -90,13 +90,18 @@ export interface UnaryTransformOpScoped<A, B extends A = A> {
     <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScopedFor<O, B>;
 }
 
+export const IdentityTransformer = {        
+    changes: <A>(subscribe: Subscribe<A>) => subscribe,
+    init: <A>(value: A) => value
+}
+
 export function transform<A>(desc: Desc, transformer: Transformer<A, A>): UnaryTransformOp<A>
 export function transform<A>(desc: Desc, transformer: Transformer<A, A>, scope: Scope): UnaryTransformOpScoped<A>
 export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>): BinaryTransformOp<A, B>
 export function transform<A, B>(desc: Desc, transformer: Transformer<A, B>, scope: Scope): BinaryTransformOpScoped<A, B>
 export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>): StreamTransformOp<A, B>
 export function transform<A, B>(desc: Desc, transformer: StreamTransformer<A, B>, scope: Scope): StreamTransformOpScoped<A, B>
-
+// TODO: desc should only contain the part after dot.
 export function transform<A, B>(desc: Desc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
     return (x: any) => {
         if (isEventStreamSeed<A>(x)) {
