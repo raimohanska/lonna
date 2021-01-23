@@ -1,4 +1,4 @@
-import { endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe, Unsub, valueEvent } from "./abstractions";
+import { Desc, endEvent, Event, EventStream, EventStreamSeed, isProperty, isPropertySource, isValue, Observable, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe, Unsub, valueEvent } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { PropertySeedImpl } from "./property";
 import { EventStreamSeedImpl } from "./eventstream";
@@ -22,7 +22,7 @@ export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>
 
 export function flatMap<A, B>(fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, scope?: Scope): any {
     return (s: EventStream<A> | EventStreamSeed<A>) => 
-        applyScopeMaybe(new FlatMapStreamSeed(`${s}.flatMap(fn)`, s, fn, {}), scope)
+        applyScopeMaybe(new FlatMapStreamSeed(() => `${s}.flatMap(fn)`, s, fn, {}), scope)
 }
 
 export type FlatMapChild<B extends Observable<any>> = {
@@ -31,14 +31,14 @@ export type FlatMapChild<B extends Observable<any>> = {
 }
 
 export class FlatMapStreamSeed<A, B> extends EventStreamSeedImpl<B> {
-    constructor(desc: string, s: EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, options: FlatMapOptions = {}) {
+    constructor(desc: Desc, s: EventStreamSeed<A>, fn: Spawner<A, EventStream<B> | EventStreamSeed<B>>, options: FlatMapOptions = {}) {
         const [children, subscribe] = flatMapSubscribe(s.consume().subscribe.bind(s), fn, options)
         super(desc, subscribe)
     }
 }
 
 export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
-    constructor(desc: string, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
+    constructor(desc: Desc, src: Property<A> | PropertySeed<A>, fn: Spawner<A, PropertySeed<B> | Property<B>>, options: FlatMapOptions = {}) {
         const source = isProperty(src) ? src : src.consume()
         let initializing = true // Flag used to prevent the initial value from leaking to the external subscriber. Yes, this is hack.
         const subscribeWithInitial = (onValue: Observer<A>, onEnd: Observer<void> = nop) => {

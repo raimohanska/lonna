@@ -60,7 +60,7 @@ export function view<A, B>(...args: any[]): any {
                 const fn = args[i]                
                 o = map(fn)(o)
             }
-            const desc = `${o}.view(${toString(args.slice(fnIndex))})`
+            const desc = () => `${o}.view(${toString(args.slice(fnIndex))})`
             return rename(desc, o)
         } else {
             const fn = args[args.length - 1]
@@ -71,7 +71,7 @@ export function view<A, B>(...args: any[]): any {
         const atom = args[0]
         const view = args[1]
         let lens = keyOrLens2Lens(view)        
-        const desc = `${atom}.view(${toString(view)})`
+        const desc = () => `${atom}.view(${toString(view)})`
         if (isAtom<A>(atom)) {
             return new LensedAtom<A, B>(desc, atom, lens)     
         } else {

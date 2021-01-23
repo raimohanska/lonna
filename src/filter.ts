@@ -10,7 +10,7 @@ export function filter<A>(fn: Predicate<A>): UnaryTransformOp<A>
 export function filter<A, B extends A>(fn: TypeGuard<A, B>, scope: Scope): UnaryTransformOpScoped<A, B>
 export function filter<A>(fn: Predicate<A>, scope: Scope): UnaryTransformOpScoped<A>
 export function filter<A>(fn: Predicate<A>, scope?: Scope): any {
-    return (s: any) => applyScopeMaybe(transform(s + `.filter(fn)`, filterT(fn))(s), scope)
+    return (s: any) => applyScopeMaybe(transform(() => s + `.filter(fn)`, filterT(fn))(s), scope)
 }
 
 function filterT<A>(fn: Predicate<A>): Transformer<A, A> {

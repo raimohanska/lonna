@@ -1,4 +1,4 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_SOURCE, T_SCOPED, T_SEED, valueEvent } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_SOURCE, T_SCOPED, T_SEED, valueEvent, Desc } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { ObservableSeedImpl } from "./observable";
 import * as L from "./lens";
@@ -13,7 +13,7 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V
 
-    constructor(desc: string, initialValue: V) {
+    constructor(desc: Desc, initialValue: V) {
         super(desc)
         this._value = initialValue        
         this.set = this.set.bind(this)
@@ -46,7 +46,7 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
 
-    constructor(desc: string, root: Atom<R>, view: L.Lens<R, V>) {
+    constructor(desc: Desc, root: Atom<R>, view: L.Lens<R, V>) {
         super(desc)
         this._root = root;
         this._lens = view;
@@ -91,7 +91,7 @@ class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
     private _input: Property<V>;
     set: (updatedValue: V) => void;
 
-    constructor(desc: string, input: Property<V>, set: (updatedValue: V) => void) {
+    constructor(desc: Desc, input: Property<V>, set: (updatedValue: V) => void) {
         super(desc)
         this._input = input;
         this.set = set.bind(this)
@@ -136,7 +136,7 @@ export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Ato
  **/
 export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
     _L: TypeBitfield = T_ATOM | T_SEED
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
+    constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(new AtomSourceImpl(desc, get, subscribe, set))
     }  
 }
@@ -149,7 +149,7 @@ export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
 export class AtomSourceImpl<V> extends PropertySourceImpl<V> implements AtomSource<V> {
     _L: TypeBitfield = T_ATOM | T_SOURCE
     set: (updatedValue: V) => void;
-    constructor(desc: string, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
+    constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(desc, get, subscribe)
         this.set = set
     }
@@ -175,8 +175,8 @@ export function atom<A>(x: any, y?: any): Atom<A> {
     if (arguments.length == 1) {
         // TODO: construct desciptions in a structured manner like in Bacon
         // TODO: dynamic toString for atoms and properties (current value)
-        return new RootAtom<A>(`Atom(${toString(x)})`, x)
+        return new RootAtom<A>(() => `Atom(${toString(x)})`, x)
     } else {
-        return new DependentAtom(`DependentAtom(${toString(x)},${toString(y)})`, x, y)
+        return new DependentAtom(() => `DependentAtom(${toString(x)},${toString(y)})`, x, y)
     }
 }

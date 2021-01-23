@@ -22,7 +22,7 @@ export function combineAsArray<V>(observables: Property<V>[]): Property<V[]>;
 export function combineAsArray<V>(observables: PropertySeed<V>[]): PropertySeed<V[]>;
 
 export function combineAsArray<V>(observables: Property<V>[] | PropertySeed<V>[]): PropertyLike<V[]> {
-  return rename("combineAsArray(" + toString(observables) + ")", combine(observables as any, (...xs: V[]) => xs))
+  return rename(() => "combineAsArray(" + toString(observables) + ")", combine(observables as any, (...xs: V[]) => xs))
 }
 
 export function combine<R>(fn: Function0<R>): Property<R>
@@ -88,7 +88,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
     }    
   }
 
-  const desc = `combine(${properties},fn)`
+  const desc = () => `combine(${properties},fn)`
   if (properties.length === 0 || isProperty(properties[0])) {
     const scope = (properties.length === 0) ? globalScope :properties[0].getScope()
     return new StatelessProperty<Out>(desc, get, subscribe, scope);

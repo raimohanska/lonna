@@ -37,7 +37,10 @@ export type Callback = () => void
 export type Observer<V> = (value: V) => void
 export type Subscribe<V> = (onValue: Observer<V>, onEnd?: Observer<void>) => Unsub
 export type Unsub = Callback
-
+export type Desc = string | (() => string)
+export function descToString(desc: Desc) {
+    return typeof desc == "string" ? desc : desc()
+}
 export abstract class Event<V> {
     _L: TypeBitfield = T_EVENT
 }
@@ -95,7 +98,7 @@ export function valueObserver<V>(observer: Observer<V>): Observer<Event<V>> {
 
 export interface ObservableIdentifiers {
     _L: TypeBitfield // Discriminator bitfield for detecting implemented interfaces runtime. Used by the is* methods above.
-    desc: string
+    desc: Desc
     toString(): string;
 }
 

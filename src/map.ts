@@ -20,7 +20,7 @@ export function map<A, B>(fn: (value: A) => B): MapOp<A, B>
 export function map<A, B>(sampledProperty: Property<B>): MapOp<A, B>
 export function map<A, B>(x: ((value: A) => B) | Property<B>): any {
     return (o: any) => {
-        const desc = o + `.map(fn)`;
+        const desc = () => o + `.map(fn)`;
         let fn = isProperty(x) ? () => x.get() : x
         if (isEventStream<A>(o)) {
             return new StatelessEventStream(desc, mapSubscribe(o.subscribe.bind(o), fn), o.getScope())

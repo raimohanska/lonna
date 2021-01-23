@@ -54,7 +54,7 @@ export function fromPromise<I>(promise: Promise<any>, ...mapper: any): any {
 
     const get = () => currentState
 
-    const property = new StatelessProperty(`fromPromise(${toString(promise)})`, get, onChange, globalScope)
+    const property = new StatelessProperty(() => `fromPromise(${toString(promise)})`, get, onChange, globalScope)
 
     if (mapper.length > 0) {
         return map((state: PromiseState<any>) => {

@@ -13,7 +13,7 @@ export function toStatelessProperty<A>(get: () => A) {
         if (isEventStream(streamOrSubscribe)) {        
             return new StatelessProperty(streamOrSubscribe.desc, get, mapSubscribe(streamOrSubscribe.subscribe.bind(streamOrSubscribe), get), streamOrSubscribe.getScope())
         } else {
-            return new StatelessProperty(`toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
+            return new StatelessProperty(() => `toStatelessProperty(${streamOrSubscribe},${get}`, get, mapSubscribe(streamOrSubscribe, get), globalScope)
         }
     }
 }
@@ -30,7 +30,7 @@ export function toProperty<A>(initial: A, scope: Scope): ToPropertyOpScoped<A>;
 export function toProperty(initial: any, scope?: Scope) {    
     return (seed: EventStream<any> | EventStreamSeed<any>) => {
         const source = seed.consume()
-        return applyScopeMaybe(new PropertySeedImpl(seed + `.toProperty(${initial})`, () => initial, (onValue, onEnd) => {        
+        return applyScopeMaybe(new PropertySeedImpl(() => seed + `.toProperty(${initial})`, () => initial, (onValue, onEnd) => {        
             return source.subscribe(onValue, onEnd)
         }), scope)    
     }

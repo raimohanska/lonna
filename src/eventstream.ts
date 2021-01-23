@@ -1,4 +1,4 @@
-import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SOURCE, T_SCOPED, T_SEED, T_STREAM, Unsub } from "./abstractions";
+import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SOURCE, T_SCOPED, T_SEED, T_STREAM, Unsub, Desc } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
@@ -14,7 +14,7 @@ export abstract class EventStreamBase<V> extends ObservableBase<V> implements Ev
 export class StatefulEventStream<V> extends EventStreamBase<V> {
     protected dispatcher = new Dispatcher<StreamEvents<V>>();
     private _scope: Scope;
-    constructor(desc: string, scope: Scope) { 
+    constructor(desc: Desc, scope: Scope) { 
         super(desc) 
         this._scope = scope
     }
@@ -31,7 +31,7 @@ export class StatelessEventStream<V> extends EventStreamBase<V> {
     private _scope: Scope;
     subscribe: Subscribe<V>;
 
-    constructor(desc: string, subscribe: Subscribe<V>, scope: Scope) {
+    constructor(desc: Desc, subscribe: Subscribe<V>, scope: Scope) {
         super(desc) 
         this._scope = scope
         this.subscribe = subscribe
@@ -57,7 +57,7 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V> {
     _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: Subscribe<V>
 
-    constructor(desc: string, subscribe: Subscribe<V>) {
+    constructor(desc: Desc, subscribe: Subscribe<V>) {
         super(desc)
         this.subscribe = subscribe
     }
@@ -66,7 +66,7 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V> {
 
 export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>> implements EventStreamSeed<V> {
     _L: TypeBitfield = T_STREAM | T_SEED
-    constructor(desc: string, subscribe: Subscribe<V>) {
+    constructor(desc: Desc, subscribe: Subscribe<V>) {
         super(new EventStreamSourceImpl(desc, subscribe))
     }
 }

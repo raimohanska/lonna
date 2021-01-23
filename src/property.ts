@@ -1,4 +1,4 @@
-import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_SOURCE, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent } from "./abstractions";
+import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_SOURCE, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent, Desc } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
 import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
@@ -8,7 +8,7 @@ type PropertyEvents<V> = { "change": V, "end": void }
 const uninitialized = {}
 
 export abstract class PropertyBase<V> extends ObservableBase<V> implements Property<V>, PropertySeed<V>, PropertySource<V> {
-    constructor(desc: string) {
+    constructor(desc: Desc) {
         super(desc)
     }
 
@@ -37,7 +37,7 @@ export class StatelessProperty<V> extends PropertyBase<V> {
     private _onChange: Subscribe<V>;
     private _scope: Scope
 
-    constructor(desc: string, get: () => V, onChange: Subscribe<V>, scope: Scope) {
+    constructor(desc: Desc, get: () => V, onChange: Subscribe<V>, scope: Scope) {
         super(desc)
         this.get = get
         this._onChange = onChange
@@ -113,7 +113,7 @@ export class StatefulProperty<V> extends PropertyBase<V> {
  **/
 export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>> implements PropertySeed<V> {
     _L: TypeBitfield = T_PROPERTY | T_SEED
-    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
+    constructor(desc: Desc, get: () => V, onChange: Subscribe<V>) {
         super(new PropertySourceImpl(desc, get, onChange))
     }  
 }
@@ -131,7 +131,7 @@ export class PropertySourceImpl<V> extends ObservableBase<V> implements Property
         return this._get()
     }
 
-    constructor(desc: string, get: () => V, onChange: Subscribe<V>) {
+    constructor(desc: Desc, get: () => V, onChange: Subscribe<V>) {
         super(desc)
         this._get = get;
         this.onChange_ = onChange;

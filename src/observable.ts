@@ -1,12 +1,12 @@
-import { Event, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
+import { Desc, descToString, Event, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
 import { Pipeable } from "./pipeable"
 import { nop } from "./util"
 
 export abstract class ObservableSeedBase<V, O extends Observable<any>> extends Pipeable implements ObservableSeed<V, O> {
     abstract _L: TypeBitfield
-    desc: string
+    desc: Desc
 
-    constructor(desc: string) {
+    constructor(desc: Desc) {
         super()
         this.desc = desc
     }
@@ -14,7 +14,7 @@ export abstract class ObservableSeedBase<V, O extends Observable<any>> extends P
     abstract consume(): O;
 
     toString(): string {
-        return this.desc
+        return descToString(this.desc)
     }
 
     forEach(observer: Observer<V>): Unsub {
@@ -28,7 +28,7 @@ export abstract class ObservableSeedBase<V, O extends Observable<any>> extends P
 
 export abstract class ObservableBase<V> extends ObservableSeedBase<V, Observable<V>> {
     abstract _L: TypeBitfield
-    constructor(desc: string) {
+    constructor(desc: Desc) {
         super(desc)
     }
 
@@ -52,7 +52,7 @@ export abstract class ObservableSeedImpl<V, O extends Observable<any>> extends O
     }
 
     consume(): O {
-        if (this._source === null) throw Error(`Seed ${this.desc} already consumed`)
+        if (this._source === null) throw Error(`Seed ${this.toString()} already consumed`)
         const result = this._source
         this._source = null
         return result

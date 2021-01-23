@@ -80,7 +80,7 @@ export function combineTemplate<T>(template: T): Property<GenericObjectTemplate<
         throw Error("Unsupported observable: " + x)
     })
     
-    return rename(`combineTemplate(..)`, map(combinator as any)(combineAsArray(observables as Property<any>[])) as any) 
+    return rename("combineTemplate(..)", map(combinator as any)(combineAsArray(observables as Property<any>[])) as any) 
 }
 
 export function combineTemplateS<T>(template: T, scope: Scope): Property<GenericObjectTemplate<T, PropertySeed<any> | Property<any>>>;
@@ -95,7 +95,7 @@ export function combineTemplateS<T>(template: T, scope?: Scope): ObservableSeed<
         throw Error("Unsupported observable: " + x)
     })
     const mapped = map(combinator as any)(combineAsArray(observables))
-    return applyScopeMaybe(rename(`combineTemplate(..)`, mapped), scope)
+    return applyScopeMaybe(rename("combineTemplate(..)", mapped), scope)
 }
 
 function processTemplate<T, Prop>(template: T, mapObservable: (o: ObservableSeed<any, any>) => Prop): [Prop[], Function] {
