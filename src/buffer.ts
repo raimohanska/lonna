@@ -23,7 +23,6 @@ function bufferWithTimeOrCount<V>(desc: Desc, src: EventStream<V> | EventStreamS
   const delayFunc = toDelayFunction(delay)
   function flushOrSchedule(buffer: Buffer<V>) {
     if (buffer.values.length === count) {
-      //console.log Bacon.scheduler.now() + ": count-flush"
       return buffer.flush();
     } else if (delayFunc !== undefined) {
       return buffer.schedule(delayFunc);
@@ -31,8 +30,6 @@ function bufferWithTimeOrCount<V>(desc: Desc, src: EventStream<V> | EventStreamS
   }
   return buffer(desc, src, flushOrSchedule, flushOrSchedule)
 }
-
-// Commented-out end handling from Bacon
 
 class Buffer<V> {
   constructor(onFlush: BufferHandler<V>, onInput: BufferHandler<V>) {
@@ -53,7 +50,6 @@ class Buffer<V> {
       this.scheduled = null;
     }
     if (this.values.length > 0) {
-      //console.log Bacon.scheduler.now() + ": flush " + @values
       var valuesToPush = this.values;
       this.values = [];
       this.onValue(valuesToPush);
@@ -69,7 +65,6 @@ class Buffer<V> {
   schedule(delay: DelayFunction) {
     if (!this.scheduled) {
       return this.scheduled = delay(() => {
-        //console.log Bacon.scheduler.now() + ": scheduled flush"
         return this.flush();
       });
     }
@@ -84,7 +79,6 @@ function toDelayFunction(delay: number | DelayFunction | undefined): DelayFuncti
   if (typeof delay === "number") {
     var delayMs = delay;
     return function(f) {
-      //console.log Bacon.scheduler.now() + ": schedule for " + (Bacon.scheduler.now() + delayMs)
       return GlobalScheduler.scheduler.setTimeout(f, delayMs);
     };
   }
@@ -100,12 +94,10 @@ function buffer<V>(desc: Desc, src: EventStream<V> | EventStreamSeed<V>, onInput
       buffer.onEnd = onEnd
       return subscribe(value => {
         buffer.values.push(value);
-        //console.log Bacon.scheduler.now() + ": input " + event.value
         onInput(buffer);
       }, () => {
         buffer.ended = true;
         if (!buffer.scheduled) {
-          //console.log Bacon.scheduler.now() + ": end-flush"
           buffer.flush();
         }
       })
