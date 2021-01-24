@@ -10,7 +10,7 @@ Some day there may be a proper README, API docs and Tutorials for Lonna, but at 
 
 Here's a couple of simple examples on CodeSandbox.
 
-- [Simple Contact List App](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l) using React Hooks + Lonna
+- [Simple Contact List App](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l) using React Hooks + Lonna. This is a conversion of the code introduced in my [Make React reactive by using Hooks](https://www.reaktor.com/blog/make-react-reactive-by-using-hooks/) blog post.
 - [Todo Application](https://codesandbox.io/s/todoapp-harmaja-lonna-9xqw5?file=/src/App.tsx) using Harmaja + Lonna
 
 Then there's a whole application written with Harmaja and Lonna.
