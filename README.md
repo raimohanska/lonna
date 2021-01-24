@@ -112,6 +112,31 @@ Duplicates in the result value are skipped just like for any Properties and Atom
 
 TODO
 
+### Values based on external events
+
+You can use Lonna Properties to represent all kinds of state. Not just "application state" but also, for instance, cursor position, window scroll position, WebSocket connection status. Anything that has a current value, can change, and needs to be observed. Then you can view, transform and combine these values just like all other Properties.
+
+Here's how to get the [Window](https://developer.mozilla.org/en-US/docs/Web/API/Window) vertical scroll position "scrollY" as
+an observable Property:
+
+```typescript
+const scrollPos: L.Property<number> = L.fromEvent(window, "scroll")
+    .pipe(L.toStatelessProperty(() => Math.floor(window.scrollY)))
+
+```
+
+To break this down a bit, we start with `L.fromEvent(window, "scroll")` which gives us an `L.EventStream` that represents the 
+Window "scroll" events as an observable stream. See EventStream chapter. Then we use `L.toStatelessProperty` which creates a
+Property that's updated each time an event occurs in the given EventStream and gets it's current value using the given function. In this case the value is got from `window.scrollY`.
+
+### Statefull values based on external events
+
+TODO
+
+### EventStream
+
+TODO
+
 ### Alternative Take: Events and Reducers
 
 For now, see [Unidirectional data flow](https://github.com/raimohanska/harmaja#unidirectional-data-flow) in Harmaja Readme.
