@@ -6,6 +6,17 @@ I have written this library to be more suitable than [Bacon.js](https://github.c
 
 Some day there may be a proper README, API docs and Tutorials for Lonna, but at the moment, this readme and the test cases in the [src] folder is all there is. Sorry for that! Help appreciated.
 
+## Running examples
+
+Here's a couple of simple examples on CodeSandbox.
+
+- [Simple Contact List App](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l) using React Hooks + Lonna
+- [Todo Application](https://codesandbox.io/s/todoapp-harmaja-lonna-9xqw5?file=/src/App.tsx) using Harmaja + Lonna
+
+Then there's a whole application written with Harmaja and Lonna.
+
+- [R-Board online whiteboard](https://r-board.herokuapp.com/) is made with Lonna and Harmaja. Codebase [here](https://github.com/raimohanska/r-board).
+
 ## Tutorial
 
 I assume you can read TypeScript, which I'm using the examples and which also is the native language of Lonna. 
@@ -106,6 +117,38 @@ const namesakes: L.Property<Person[]> = L.view(myName, friends, (n, fs) => {
 The views that are based on multiple inputs are, of course, updated when any of the inputs is changed. Then your "combinator function" is run for the new values. 
 
 Duplicates in the result value are skipped just like for any Properties and Atoms. Lonna checks for equality using `===` internally. If you want to skip duplicates with a custom equality operator, such as deep equality, you can do so by using [`skipDuplicates`](https://github.com/raimohanska/lonna/blob/master/src/skipDuplicates.ts) like `value.pipe(T.skipDuplicates(equals))` assuming you had [equals](https://ramdajs.com/docs/#equals) imported from from Ramda.
+
+### Subscription lifecycle
+
+When you subscribe for the values of a `Property` or an `Atom` you may use the `forEach` method. In case your subscribing in essentially global code, you can leave it at that. If though you're subscribing in a Component that has a lifetime after which it is disposed, you'll need to pay attention. Just like for subscribing to any events using a method like [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener), there needs to be away of *un*subscribing.
+
+And indeed the `forEach` method provides a way to unsubscribe, by returning an `Unsub` function, like here:
+
+```typescript
+interface ForEach<V> {
+    forEach(observer: Observer<V>): Unsub;
+}
+type Unsub = () => void
+```
+
+So you can unsubscribe like this.
+
+```typescript
+const unsub: L.Unsub = numberOfFriends.forEach(n => console.log(`You have ${n} friends.`));
+// at some later phase we'll unsubscibe simply thus:
+
+unsub();
+```
+
+Not unsubscribing can lead to memory leaks as well as unwanted behavior, when Lonna calls your callbacks while the UI 
+component is already disposed.
+
+But.
+
+In most cases you don't need to worry about this.
+
+And this is because you're likely to use Lonna with some helper facilities that will take care of subscription and unsubscription based on your UI components' lifecycle. For instance, with [Harmaja](https://github.com/raimohanska/harmaja) you
+will just embed Properties into your UI and Harmaja will take of subscription and unsubscription when your DOM elements are mounted and unmounted. Similarly you can use a React Hook to take care of (un)subscription as in this [example](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l).
 
 
 ### Stateful views and Lifetimes
