@@ -151,15 +151,22 @@ And this is because you're likely to use Lonna with some helper facilities that 
 will just embed Properties into your UI and Harmaja will take of subscription and unsubscription when your DOM elements are mounted and unmounted. Similarly you can use a React Hook to take care of (un)subscription as in this [example](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l).
 
 
-### Stateful views and Lifetimes
-
-TODO
-
 ### Values based on external events
 
 You can use Lonna Properties to represent all kinds of state. Not just "application state" but also, for instance, cursor position, window scroll position, WebSocket connection status. Anything that has a current value, can change, and needs to be observed. Then you can view, transform and combine these values just like all other Properties.
 
-Here's how to get the [Window](https://developer.mozilla.org/en-US/docs/Web/API/Window) vertical scroll position "scrollY" as
+You can, of course, create an Atom and update it's value based on external events, like here:
+
+```typescript
+const getScrollPos = () => Math.floor(window.scrollY);
+const scrollPos: L.Property<number> = L.atom(getScrollPos());
+window.addEventListener("scroll", () => scrollPos.set(getScrollPos());
+```
+
+And this is fine, in case you don't have to worry about removing that event listener. So, in a global context it's ok, but if you add this code in the constructor
+of a UI component and instances of these components are created and disposed during your application lifetime, you'll have a resource leak unless you also call `window.removeEventListener` appropriately.
+
+Hence, for values based on events, you may want to consider using `L.toStatelessProperty`. Here's how to get the [Window](https://developer.mozilla.org/en-US/docs/Web/API/Window) vertical scroll position "scrollY" as
 an observable Property:
 
 ```typescript
@@ -172,9 +179,84 @@ To break this down a bit, we start with `L.fromEvent(window, "scroll")` which gi
 Window "scroll" events as an observable stream. See EventStream chapter. Then we use `L.toStatelessProperty` which creates a
 Property that's updated each time an event occurs in the given EventStream and gets it's current value using the given function. In this case the value is got from `window.scrollY`.
 
-### Statefull values based on external events
+### Unidirectional data flow
+
+Unidirectional data flow, popularized by Redux, is a leading state management pattern in web frontends today. In short, it means that you have a (usually essentially) global data *store* or stores that represent pretty much the entire application state. Changes to this state are not effected directly by UI components but instead by dispacthing *events* or *actions* which then are processed by *reducers* and applied to the global state. The state is treated as an immutable object and every time the reducers applies a new change to state, it effectively creates an entire new state object. 
+
+In Typescript, you could represent these concepts in the context of a Todo App like this:
+
+```typescript
+type Item = {}
+type Event = {type:"add", item:Item } | {type:"remove", item:Item }
+type State = {items: Item[]}
+type Reducer = (currentState: State, event: Event) => State
+interface Store {
+    dispatch(event: Event)
+    subscribe(observer: (event: Event) => void)
+}
+```
+
+In this scenario, UI components will `subscribe` to changes in the `Store` and `dispatch` events to effect state changes. The store will apply its `Reducer` to incoming events and the notify the observer components on updated state.
+
+The benefits are (to many, nowadays) obvious. These come from the top of my mind.
+
+- Reasoning about state changes is straightforward, as only reducers change state. You can statically backtrack all possible causes of a change to a particular part of application state.
+- The immutable global state object makes persisting and restoring application state easier, and makes it possible to create and audit trail of all events and state history. It also makes it easier to pass the application state for browser-side hydration after a server-side render.
+- Generally, reasoning about application logic is easier if there is a pattern, instead of a patchwork of ad hoc solutions
+
+Implementations such as Redux allow components to *react* to a select part of global state (instead of all changes) to avoid expensive updates. With React hooks, you can conveniently just `useSelector(state => pick interesting parts)` and you're done.
+
+It's not a silver bullet though. Especially when using a single global store with React / Redux
+
+- There is no solution for local or scoped state. Sometimes you need scoped state that applies, for instance, to the checkout process of your web store. Or to widely used components such as an address selector. Or for storing pending changes to, say, user preferences before applying them to the global state.
+- This leads to either using React local state or some "corner" of the global state for these transient pieces of state
+- Refactoring state from local to global is tedious and error-prone because you use an entirely different mechanism for each
+- You cannot encapsulate functionalities (store checkout) into self-sustaining components because they are dependent on reducers which lively somewhere else completely
+
+Other interesting examples of Unidirectional data flow include [Elm](https://elm-lang.org/) and [Cycle.js](https://cycle.js.org/).
+
+### Unidirectional data flow with Lonna
+
+In Lonna, you can implement Unidirectional data flow too. Sticking with the Todo App example, you define your events as [*buses*](https://github.com/raimohanska/lonna/blob/master/src/abstractions.ts#L145):
+
+```typescript
+import * as L from "lonna"
+
+type AppEvent = { action: "add", name: string } | { action: "remove", id: Id }
+const appEvents = L.bus<AppEvent>()
+```
+
+The bus objects allow you to dispatch an event by calling their `push` method. From the events, the application state can be reduced using [`L.scan`](https://github.com/raimohanska/lonna/blob/master/src/scan.ts) like thus:
+
+```typescript
+const initialItems: TodoItem[] = []
+function reducer(items: TodoItem[], event: AppEvent): TodoItem[] {
+  switch (event.action) {
+    case "add": return items.concat(todoItem(event.name))
+    case "remove": return items.filter(i => i.id !== event.id)
+  }
+}
+const allItems = appEvents.pipe(L.scan(initialItems, reducer, L.globalScope))
+```
+
+The `L.globalScope` parameter is used to specify the lifetime of the `allItems` property, i.e. how long it will be kept up-to-date. When using `globalScope` the property updates will never stop. See the [Stateful views and Lifetimes](#stateful-views-and-lifetimes) chapter for more.
+When creating statetul Properties within [Harmaja](https://github.com/raimohanska/harmaja) components, you can also use `componentScope()` from `import { componentScope } from "harmaja"`, to stop updates after the components has been unmounted.
+
+You can, if you like, then encapsulate all this into something like
+
+```typescript
+interface TodoStore {
+    dispatch: (action: AppEvent) => void
+    items: L.Property<TodoItem[]>
+}
+```
+
+...so you have an encapsulation of this piece of application state, and you can pass this store to your UI components.
+
+### Stateful views and Lifetimes
 
 TODO
+TODO: Lifetimes in React Applications is unproven ground at the moment. Write a Hooks POC for this.
 
 ### EventStream
 
