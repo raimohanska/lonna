@@ -118,39 +118,6 @@ The views that are based on multiple inputs are, of course, updated when any of 
 
 Duplicates in the result value are skipped just like for any Properties and Atoms. Lonna checks for equality using `===` internally. If you want to skip duplicates with a custom equality operator, such as deep equality, you can do so by using [`skipDuplicates`](https://github.com/raimohanska/lonna/blob/master/src/skipDuplicates.ts) like `value.pipe(T.skipDuplicates(equals))` assuming you had [equals](https://ramdajs.com/docs/#equals) imported from from Ramda.
 
-### Subscription lifecycle
-
-When you subscribe for the values of a `Property` or an `Atom` you may use the `forEach` method. In case your subscribing in essentially global code, you can leave it at that. If though you're subscribing in a Component that has a lifetime after which it is disposed, you'll need to pay attention. Just like for subscribing to any events using a method like [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener), there needs to be away of *un*subscribing.
-
-And indeed the `forEach` method provides a way to unsubscribe, by returning an `Unsub` function, like here:
-
-```typescript
-interface ForEach<V> {
-    forEach(observer: Observer<V>): Unsub;
-}
-type Unsub = () => void
-```
-
-So you can unsubscribe like this.
-
-```typescript
-const unsub: L.Unsub = numberOfFriends.forEach(n => console.log(`You have ${n} friends.`));
-// at some later phase we'll unsubscibe simply thus:
-
-unsub();
-```
-
-Not unsubscribing can lead to memory leaks as well as unwanted behavior, when Lonna calls your callbacks while the UI 
-component is already disposed.
-
-But.
-
-In most cases you don't need to worry about this.
-
-And this is because you're likely to use Lonna with some helper facilities that will take care of subscription and unsubscription based on your UI components' lifecycle. For instance, with [Harmaja](https://github.com/raimohanska/harmaja) you
-will just embed Properties into your UI and Harmaja will take of subscription and unsubscription when your DOM elements are mounted and unmounted. Similarly you can use a React Hook to take care of (un)subscription as in this [example](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l).
-
-
 ### Values based on external events
 
 You can use Lonna Properties to represent all kinds of state. Not just "application state" but also, for instance, cursor position, window scroll position, WebSocket connection status. Anything that has a current value, can change, and needs to be observed. Then you can view, transform and combine these values just like all other Properties.
@@ -176,8 +143,10 @@ const scrollPos: L.Property<number> = L.fromEvent(window, "scroll")
 ```
 
 To break this down a bit, we start with `L.fromEvent(window, "scroll")` which gives us an `L.EventStream` that represents the 
-Window "scroll" events as an observable stream. See EventStream chapter. Then we use `L.toStatelessProperty` which creates a
+Window "scroll" events as an observable stream. See the [EventStream](#eventstream) chapter for more. Then we use `L.toStatelessProperty` which creates a
 Property that's updated each time an event occurs in the given EventStream and gets it's current value using the given function. In this case the value is got from `window.scrollY`.
+
+Now because the Property created by `L.toStatelessProperty` is stateless and extracts its value from an external source on demand, there's no need for cleaning up listeners like in the Atom-based approach above. The result Property will start and stop listening to events based on the subscribers added to the Property itself. Which of course means that you'll need to deal with subscription lifecycle but that's something you'll have to deal with anyway and depending on your toolkit this will be more or less automated. See [Subscription Lifecycle](#subscription-lifecycle) for more.
 
 ### Unidirectional data flow
 
@@ -186,13 +155,16 @@ Unidirectional data flow, popularized by Redux, is a leading state management pa
 In Typescript, you could represent these concepts in the context of a Todo App like this:
 
 ```typescript
-type Item = {}
-type Event = {type:"add", item:Item } | {type:"remove", item:Item }
+type Item = { id: Id, name: string }
+type AppEvent = 
+    { action: "add", name: string } | 
+    { action: "remove", id: Id } |
+    { action: "update", item: Item }
 type State = {items: Item[]}
-type Reducer = (currentState: State, event: Event) => State
+type Reducer = (currentState: State, event: AppEvent) => State
 interface Store {
-    dispatch(event: Event)
-    subscribe(observer: (event: Event) => void)
+    dispatch(event: AppEvent)
+    subscribe(observer: (event: AppEvent) => void)
 }
 ```
 
@@ -222,7 +194,11 @@ In Lonna, you can implement Unidirectional data flow too. Sticking with the Todo
 ```typescript
 import * as L from "lonna"
 
-type AppEvent = { action: "add", name: string } | { action: "remove", id: Id }
+type Item = { id: Id, name: string }
+type AppEvent = 
+    { action: "add", name: string } | 
+    { action: "remove", id: Id } |
+    { action: "update", item: Item }
 const appEvents = L.bus<AppEvent>()
 ```
 
@@ -234,9 +210,10 @@ function reducer(items: TodoItem[], event: AppEvent): TodoItem[] {
   switch (event.action) {
     case "add": return items.concat(todoItem(event.name))
     case "remove": return items.filter(i => i.id !== event.id)
+    case "update": return items.map(i => i.id === event.item.id ? event.item : i)
   }
 }
-const allItems = appEvents.pipe(L.scan(initialItems, reducer, L.globalScope))
+const allItems: L.Property<TodoItem[]> = appEvents.pipe(L.scan(initialItems, reducer, L.globalScope))
 ```
 
 The `L.globalScope` parameter is used to specify the lifetime of the `allItems` property, i.e. how long it will be kept up-to-date. When using `globalScope` the property updates will never stop. See the [Stateful views and Lifetimes](#stateful-views-and-lifetimes) chapter for more.
@@ -253,9 +230,154 @@ interface TodoStore {
 
 ...so you have an encapsulation of this piece of application state, and you can pass this store to your UI components.
 
+### Bringing State Management patterns together with Lonna
+
+So now, whether you base your application state on Atoms or Events and Reducers, you'll have composable Properties that present your application state. Remember that Atoms are also Properties, with the added mutation methods `set` and `modify`.
+
+You can use both approaches and even combine them by creating *dependent atoms* that are based on a read-only Property and a way to dispatch changes upwards.
+
+For example, in the Todo Application above, if we wanted to create an Atom to represent the state of a Todo Item on the list, we create such a *dependent atom* thus:
+
+```typescript
+    function itemAtom(index: number, store: TodoStore): L.Atom<Item> {
+        const itemState: L.Property<TodoItem> = L.view(store.items, items => items[index])
+        const setItemState = (newState: TodoItem) => store.dispatch({ action: "update", item: newState})
+        return L.atom(itemState, setItemState)
+    }    
+```
+
+### Subscription lifecycle
+
+When you subscribe for the values of a `Property` or an `Atom` you may use the `forEach` method. In case your subscribing in essentially global code, you can leave it at that. If though you're subscribing in a Component that has a lifetime after which it is disposed, you'll need to pay attention. Just like for subscribing to any events using a method like [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener), there needs to be away of *un*subscribing.
+
+And indeed the `forEach` method provides a way to unsubscribe, by returning an `Unsub` function, like here:
+
+```typescript
+interface ForEach<V> {
+    forEach(observer: Observer<V>): Unsub;
+}
+type Unsub = () => void
+```
+
+So you can unsubscribe like this.
+
+```typescript
+const unsub: L.Unsub = numberOfFriends.forEach(n => console.log(`You have ${n} friends.`));
+// at some later phase we'll unsubscibe simply thus:
+
+unsub();
+```
+
+Not unsubscribing can lead to memory leaks as well as unwanted behavior, when Lonna calls your callbacks while the UI 
+component is already disposed.
+
+No panic. In most cases you don't need to worry about this.
+
+This is because you're likely to use Lonna with some helper facilities that will take care of subscription and unsubscription based on your UI components' lifecycle. For instance, with [Harmaja](https://github.com/raimohanska/harmaja) you
+will just embed Properties into your UI and Harmaja will take of subscription and unsubscription when your DOM elements are mounted and unmounted. Similarly you can use a React Hook to take care of (un)subscription as in this [example](https://codesandbox.io/s/react-hooks-contacts-app-lonna-or53l).
+
+### Abstractions
+
+There's a bunch of abstractions mentioned in the above chapters. Now's a good time to have a look at them and how they fit the picture. They all all defined in [abstractions.ts](https://github.com/raimohanska/lonna/blob/master/src/abstractions.ts) so you might want to take a look there as well.
+
+#### Observable
+
+All of the abstractions below have something in common and that's `Observable<V>`, a source that emits values of type `V`. Different Observable implementations below have a bit different semantics as to when a value is emitted. Slightly simplifying it looks like this.
+
+```typescript
+type Unsub = () => void
+
+interface Observable<V> {
+    forEach(observer: Observer<V>): Unsub;
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub;
+    log(message?: string): Unsub;
+}
+```
+
+TODO: add typedocs to source code and copy here as well.
+
+The interesting method is `forEach` for getting callbacks for all values emitted by this Observable. 
+
+The `subscribe` method provides a way to react to end-of-updates as well, which is not usually useful application programming, but more for internal use and building new transforms, such as `map`, `filter` and `flatMap`.
+
+Both subscription methods return an `Unsub` callback that you can use to stop listening for updates.
+
+#### Property
+
+A `Property<V>` is an `Observable<V>` that represents a read-only observable variable. A simplified representation looks like this:
+
+```typescript
+interface Propert<V> extends Observable<V> {
+    /** Get current value */
+    get(): V
+    /** Callback for changes and end-of-updates. Not called for initial value. */
+    onChange(onValue: Observer<V>, onEnd?: Observer<void> | undefined): Unsub;
+}
+```
+
+So you can read the value synchronously as well as register for updates. The essential differene between using `forEach` and `onChange` is that the former calls your callback immediately with current value, followed by any updates, while the latter provides the updates only.
+
+
+#### Atom
+
+`Atom<V>` further builds on `Atom<V>`, including the `set` and `modify` methods for mutation.
+
+```typescript
+type Atom<V> = Property<V> & {
+    set(newValue: V): void
+    modify(fn: (old: V) => V): void
+}
+```
+
+#### EventStream
+
+While a `Property<V>` represents an observable variable of type `V`, and `EventStream<V>` represents a source of Events of type `V`. The main difference is that an EventStream does not have a current value. Instead it's used for representing individual events, like mouse clicks or web socket messages.
+
+It does not add any methods to Observable, so it could be described as
+
+```typescript
+type EventStream<V> = Observable<V>;
+```
+
+#### Bus
+
+The `Bus<V>` is an `EventStream<V>` which also allows pushing events into it. So for what Atom is to Property, a Bus is to EventStream.
+
+```typescript
+interface Bus<V> extends EventStream<V> {
+    push(newValue: V): void
+    end(): void
+}
+```
+
+The interesting method here is `push`, while `end` is here mostly for completeness' sake - you can signal the end of the stream using it, so that subscribers implementing `onEnd` will be notified.
+
 ### Stateful views and Lifetimes
 
-TODO
+In Lonna, all stateful Properties have a *lifetime*, which was earlierly mentioned when dealing with `scan`. The lifetime determines the duration during which the observable will be kept up to date. This mechanism is needed to ensure that
+
+1. All stateful Properties are kept up to date (instead of having possible stale values)
+2. We also stop keeping them up to date when they are not needed (instead of leaking resources)
+
+So when you create a stateful Property using methods such as `scan` or `filter`, you'll either need to provide a `Scope` parameter such as `L.globalScope` or you'll end up with a `PropertySeed` instead of a Property. A PropertySeed is best described as an object that can be turned into a Property by applying a lifetime using `L.applyScope`. 
+
+When wouldn't I want to provide a Scope? In most cases it makes sense to provide a Scope, but sometimes you may find yourself building longer chains such as
+
+```typescript
+something.pipe(L.filter(f), L.flatmap(g), L.scan(h), L.applyScope(myScope));
+```
+
+In those cases it's both more convenient and performant to apply the scope at the end of the chain instead of applying it at every step.
+
+The built-in Scopes in Lonna are
+
+- `L.globalScope` that will keep your value up to date ad infinitum, i.e. for the whole lifetime of the Javascript runtime environment
+- `L.autoScope` that will keep your value up to date as long as there are subscribers to your value. This may sound convenient but is not a silver bullet because `get` cannot be called before there are subscribers and also it will go out of scope after subscribers are removed. If you add new subscribers after that, it'll throw an Error. This behavior is intentional because the alternative would be to emit possible stale values
+- `L.MutableScope` for a mutable scope object that you can manipulate with `start()` and `end()` methods
+- `L.mkScope(fn)` for building your own scopes. See [scope.ts](https://github.com/raimohanska/lonna/blob/master/src/scope.ts)
+
+In Harmaja, there is `componentScope()` for component lifetime.
+
 TODO: Lifetimes in React Applications is unproven ground at the moment. Write a Hooks POC for this.
 
 ### EventStream
