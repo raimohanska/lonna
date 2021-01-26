@@ -380,19 +380,9 @@ In Harmaja, there is `componentScope()` for component lifetime.
 
 TODO: Lifetimes in React Applications is unproven ground at the moment. Write a Hooks POC for this.
 
-### EventStream
+### Operations API
 
-TODO
-
-### Alternative Take: Events and Reducers
-
-For now, see [Unidirectional data flow](https://github.com/raimohanska/harmaja#unidirectional-data-flow) in Harmaja Readme.
-
-TODO
-
-### Combining Reducers and Atoms
-
-TODO
+TODO: documentation for all the operations like map, filter, flatMap, combine...
 
 ### Optimizing
 
