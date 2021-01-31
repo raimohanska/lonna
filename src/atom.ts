@@ -3,7 +3,7 @@ import { Dispatcher } from "./dispatcher";
 import { ObservableSeedImpl } from "./observable";
 import * as L from "./lens";
 import { PropertySourceImpl, StatefulProperty, PropertyBase } from "./property";
-import { globalScope } from "./scope";
+import { globalScope, scopedSubscribe } from "./scope";
 import { nop, toString } from "./util";
 
 type AtomEvents<V> = { "change": V }
@@ -68,19 +68,16 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
     }
 
     onChange(onValue: Observer<V>, onEnd?: Observer<void>) {
-        let current = uninitialized
-        const unsub = this._root.onChange(event => {
-            const value = this._lens.get(event)
-            if (value !== current) {
-                current = value
-                onValue(value)
-            }
-        }, onEnd)
-        this.getScope().subscribe(() => {
-            current = this.get()
-            return nop
+        return scopedSubscribe(this.getScope(), () => {
+            let current = this.get()
+            return this._root.onChange(event => {
+                const value = this._lens.get(event)
+                if (value !== current) {
+                    current = value
+                    onValue(value)
+                }
+            }, onEnd)
         })
-        return unsub
     }
 
     getScope() {

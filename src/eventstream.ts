@@ -2,8 +2,11 @@ import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEn
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
+import { scopedSubscribe } from "./scope";
 
 type StreamEvents<V> = { "value": V }
+
+// TODO: consider how scopes should affect streams
 
 export abstract class EventStreamBase<V> extends ObservableBase<V> implements EventStream<V> {
     observableType() { return "EventStream" }
@@ -48,8 +51,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
         super(seed.desc, scope)
         const source = seed.consume()
         scope.subscribe(
-            () => source.subscribe(v => this.dispatcher.dispatch("value", v), () => this.dispatcher.dispatchEnd("value")),
-            this.dispatcher            
+            () => source.subscribe(v => this.dispatcher.dispatch("value", v), () => this.dispatcher.dispatchEnd("value"))          
         )
     }
 }

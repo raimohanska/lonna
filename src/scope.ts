@@ -1,5 +1,6 @@
-import { Scope, ScopeFn, Unsub, valueEvent } from "./abstractions"
+import { Scope, ScopeFn, Unsub } from "./abstractions"
 import { Dispatcher } from "./dispatcher"
+import { nop } from "./util";
 
 export class MutableScope extends Scope {
     start: () => void;
@@ -57,35 +58,28 @@ export function createScope(): MutableScope {
     )
 }
 
-/**
- *  Subscribe to source when there are observers. Use with care! 
- **/
-export function autoScope(): Scope {
-    let d: Dispatcher<any> | null = null
-    return mkScope((onIn, dispatcher) => {
-        if (dispatcher) {
-            if (!d) {
-                d = dispatcher
-            } else {
-                if (d !== dispatcher) throw Error("Assertion failed")
-            }
-        }
-        if (!d) {
-           throw Error("Not in scope yet")
-        }
-        let unsub : Unsub | null = null 
-        if (d.hasObservers()) {
-            unsub = onIn()
-        }
-        let ended = false
-        d.onObserverCount(count => {
-            if (count > 0) {
-                if (ended) throw new Error("autoScope reactivation attempted")
-                unsub = onIn()
-            } else {
-                ended = true
-                unsub!()
-            }
+export function intersectionScope(scopes: Scope[]): Scope {
+    const nonGlobalScopes = [...new Set(scopes.filter(s => s !== globalScope))]
+    if (nonGlobalScopes.length === 0) return globalScope
+    if (nonGlobalScopes.length === 1) return nonGlobalScopes[0]
+    return mkScope((onIn: () => Unsub, dispatcher?: Dispatcher<any>) => {
+        let started = 0
+        let ended = 0
+        let onOut: Unsub | null = null
+        nonGlobalScopes.forEach(s => {
+            s.subscribe(() => {
+                started++
+                if (started === nonGlobalScopes.length) {
+                    onOut = onIn()
+                }
+                return () => {
+                    started--
+                    ended++
+                    if (ended == 1) {
+                        onOut!()
+                    }
+                }
+            })
         })
     })
 }
@@ -98,4 +92,23 @@ export function checkScope<V>(thing: any, value: V | OutOfScope): V {
     if (value === beforeScope) throw Error(`${thing} not in scope yet`);
     if (value === afterScope) throw Error(`${thing} not in scope any more`);
     return value as V
+}
+
+export function scopedSubscribe(scope: Scope, subscribe: () => Unsub) {
+    let unsub: Unsub = nop
+    let unsubscribed = false
+    
+    scope.subscribe(() => {
+        if (!unsubscribed) {
+            unsub = subscribe()
+        }
+        return () => {
+            unsub()
+        }
+    })        
+    return () => { 
+        unsubscribed = true
+        unsub() 
+        unsub = nop
+    }
 }

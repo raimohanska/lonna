@@ -1,4 +1,6 @@
+import { applyScope } from "./applyscope";
 import { combine, combineAsArray, constant, throttle, toProperty } from "./index";
+import { createScope, MutableScope } from "./scope";
 import { expectPropertyEvents, series } from "./test-utils";
 
 describe("combine", () => {
@@ -19,6 +21,18 @@ describe("combine", () => {
             expect(combine((x: number) => x * 2, [constant(1)]).get()).toEqual(2)        
             expect(combine([constant(1)], (x: number) => x * 2).get()).toEqual(2)        
         })
+    })
+
+    it("Subscribing before scope", () => {
+        let results: any[] = []
+        const src = constant(1)
+        const scope = createScope()
+        const scoped = src.pipe(applyScope(scope))
+        const combined = combine(scoped, x => x)
+        combined.forEach(v => results.push(v))
+        expect(results).toEqual([])
+        scope.start()
+        expect(results).toEqual([1])
     })
 
     describe("combines latest values of two properties, with given combinator function", () =>

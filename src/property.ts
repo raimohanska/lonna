@@ -1,11 +1,10 @@
 import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_SOURCE, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent, Desc } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
-import { afterScope, beforeScope, checkScope, OutOfScope } from "./scope";
+import { afterScope, beforeScope, checkScope, OutOfScope, scopedSubscribe } from "./scope";
 import { nop } from "./util";
 
 type PropertyEvents<V> = { "change": V, "end": void }
-const uninitialized = {}
 
 export abstract class PropertyBase<V> extends ObservableBase<V> implements Property<V>, PropertySeed<V>, PropertySource<V> {
     observableType() { return "Property" }
@@ -21,14 +20,11 @@ export abstract class PropertyBase<V> extends ObservableBase<V> implements Prope
 
     // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call
     subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {
-        const unsub = this.onChange(onValue, onEnd) // onChange call needs to be before get() call for autoScope to work.
-
-        this.getScope().subscribe(() => {
+        return scopedSubscribe(this.getScope(), () => {
+            const unsub = this.onChange(onValue, onEnd)
             onValue(this.get())
-            return nop
+            return unsub
         })
-        
-        return unsub
     }    
 }
 
@@ -45,19 +41,16 @@ export class StatelessProperty<V> extends PropertyBase<V> {
         this._scope = scope
     }
 
-    onChange(onValue: Observer<V>, onEnd: Observer<void> = nop) {
-        let current = uninitialized
-        const unsub = this._onChange(event => {
-            if (event !== current) {
-                current = event
-                onValue(event)
-            }
-        }, () => onEnd())
-        this.getScope().subscribe(() => {
-            current = this.get()
-            return nop
+    onChange(onValue: Observer<V>, onEnd: Observer<void> = nop) {        
+        return scopedSubscribe(this.getScope(), () => {
+            let current = this.get()
+            return this._onChange(event => {
+                if (event !== current) {
+                    current = event
+                    onValue(event)
+                }
+            }, () => onEnd())
         })        
-        return unsub
     }
 
     getScope() {
@@ -90,8 +83,7 @@ export class StatefulProperty<V> extends PropertyBase<V> {
                     this._value = afterScope; 
                     unsub!()
                 }
-            },
-            this._dispatcher
+            }
         );
     }
 

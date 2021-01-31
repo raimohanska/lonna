@@ -372,8 +372,7 @@ In those cases it's both more convenient and performant to apply the scope at th
 The built-in Scopes in Lonna are
 
 - `L.globalScope` that will keep your value up to date ad infinitum, i.e. for the whole lifetime of the Javascript runtime environment
-- `L.autoScope` that will keep your value up to date as long as there are subscribers to your value. This may sound convenient but is not a silver bullet because `get` cannot be called before there are subscribers and also it will go out of scope after subscribers are removed. If you add new subscribers after that, it'll throw an Error. This behavior is intentional because the alternative would be to emit possible stale values
-- `L.MutableScope` for a mutable scope object that you can manipulate with `start()` and `end()` methods
+- `L.createScope` for a mutable scope object that you can manipulate with `start()` and `end()` methods
 - `L.mkScope(fn)` for building your own scopes. See [scope.ts](https://github.com/raimohanska/lonna/blob/master/src/scope.ts)
 
 In Harmaja, there is `componentScope()` for component lifetime.
