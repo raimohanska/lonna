@@ -1,6 +1,7 @@
 import { applyScope, createScope, endEvent, Event, EventStream, EventStreamSeed, fromSubscribe, isEnd, isEventStream, isProperty, isValue, Observable, Property, PropertySeed, Scope, sequentially, StatefulEventStream, toEvent, valueEvent } from ".";
 import { map } from "./map";
 import GlobalScheduler, { setScheduler } from "./scheduler";
+import { globalScope } from "./scope";
 import TickScheduler from "./tickscheduler";
 import { nop } from "./util";
 
@@ -102,6 +103,18 @@ export const expectPropertyEvents = (srcF: () => Property<any> | PropertySeed<an
             done(undefined);
         });
     }), extraCheck)
+    it("Can be subscribed to before scope begins", () => {
+        const seed = srcF();
+        const src = isProperty(seed) 
+            ? seed.getScope() === globalScope
+                ? seed.applyScope(scope)
+                : seed
+            : applyScope(scope)(seed) as Property<any>
+        const values: any[] = []
+        const unsub = src.subscribe(v => values.push(v))
+        expect(values).toEqual([])
+        unsub()
+    })
 };
 
 const verifyPropertyWith = (description: string, srcF: () => Property<any> | PropertySeed<any>, expectedEvents: Event<any>[], collectF: (src: Property<any>, events: Event<any>[], done: () => void) => void, extraCheck: (Function | undefined) = undefined) => {
