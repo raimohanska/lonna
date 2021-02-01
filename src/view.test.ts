@@ -42,7 +42,7 @@ describe("Property.view", () => {
       )
     })
 
-    describe("maps property values by unary function", () => {
+    describe.only("maps property values by unary function", () => {
         expectPropertyEvents(
           () => B.view(constant(fooBar), v => v.foo + " lol"),
           ["bar lol"]

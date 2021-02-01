@@ -1,4 +1,4 @@
-import { Scope, ScopeFn, Unsub } from "./abstractions"
+import { Scope, ScopeFn, Subscribe, Unsub, Observer } from "./abstractions"
 import { Dispatcher } from "./dispatcher"
 import { nop } from "./util";
 
@@ -94,7 +94,7 @@ export function checkScope<V>(thing: any, value: V | OutOfScope): V {
     return value as V
 }
 
-export function scopedSubscribe(scope: Scope, subscribe: () => Unsub) {
+export function scopedSubscribe(scope: Scope, subscribe: () => Unsub): Unsub {
     let unsub: Unsub = nop
     let unsubscribed = false
     
@@ -110,5 +110,13 @@ export function scopedSubscribe(scope: Scope, subscribe: () => Unsub) {
         unsubscribed = true
         unsub() 
         unsub = nop
+    }
+}
+
+export function scopedSubscribe1<V>(scope: Scope, subscribe: Subscribe<V>): Subscribe<V> {
+    return (onValue: Observer<V>, onEnd?: Observer<void>) => {
+        return scopedSubscribe(scope, () => {
+            return subscribe(onValue, onEnd)
+        })
     }
 }

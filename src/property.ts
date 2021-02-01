@@ -6,7 +6,7 @@ import { nop } from "./util";
 
 type PropertyEvents<V> = { "change": V, "end": void }
 
-export abstract class PropertyBase<V> extends ObservableBase<V> implements Property<V>, PropertySeed<V>, PropertySource<V> {
+export abstract class PropertyBase<V, S extends Property<V>> extends ObservableBase<V, Property<V>> implements Property<V>, PropertySeed<V>, PropertySource<V> {
     observableType() { return "Property" }
     constructor(desc: Desc) {
         super(desc)
@@ -25,10 +25,14 @@ export abstract class PropertyBase<V> extends ObservableBase<V> implements Prope
             onValue(this.get())
             return unsub
         })
-    }    
+    }  
+    
+    applyScope(scope: Scope): S {
+        return new StatelessProperty<V, S>(this.desc, this.get.bind(this), this.onChange.bind(this), scope) as any
+    }
 }
 
-export class StatelessProperty<V> extends PropertyBase<V> {
+export class StatelessProperty<V, S extends Property<V>> extends PropertyBase<V, S> {
     _L: TypeBitfield = T_PROPERTY | T_SCOPED
     get: () => V;
     private _onChange: Subscribe<V>;
@@ -58,14 +62,14 @@ export class StatelessProperty<V> extends PropertyBase<V> {
     }
 }
 
-export class StatefulProperty<V> extends PropertyBase<V> {    
+export class StatefulProperty<V, S extends Property<V>> extends PropertyBase<V, S> {    
     _L: TypeBitfield = T_PROPERTY | T_SCOPED
     private _dispatcher = new Dispatcher<PropertyEvents<V>>();
     private _scope: Scope
     private _value: V | OutOfScope  = beforeScope
     protected _source: PropertySource<V>
 
-    constructor(seed: ObservableSeed<V, PropertySource<V> | Property<V>>, scope: Scope) {
+    constructor(seed: ObservableSeed<V, PropertySource<V> | Property<V>, Property<V>>, scope: Scope) {
         super(seed.desc)
         this._scope = scope
         this._source = seed.consume()
@@ -104,15 +108,19 @@ export class StatefulProperty<V> extends PropertyBase<V> {
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>> implements PropertySeed<V> {
+export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>, Property<V>> implements PropertySeed<V> {
     observableType() { return "PropertySeed" }
     _L: TypeBitfield = T_PROPERTY | T_SEED
     constructor(desc: Desc, get: () => V, onChange: Subscribe<V>) {
         super(new PropertySourceImpl(desc, get, onChange))
     }  
+
+    applyScope(scope: Scope): Property<V> { 
+        return new StatefulProperty(this, scope)
+    }
 }
 
-export class PropertySourceImpl<V> extends ObservableBase<V> implements PropertySource<V> {
+export class PropertySourceImpl<V> extends ObservableBase<V, Property<V>> implements PropertySource<V> {
     _L: TypeBitfield = T_PROPERTY | T_SOURCE
     observableType() { return "PropertySource" }
     private _started = false
@@ -147,4 +155,8 @@ export class PropertySourceImpl<V> extends ObservableBase<V> implements Property
         onValue(this.get())
         return unsub
     }       
+
+    applyScope(scope: Scope): Property<V> { 
+        return new StatefulProperty(this, scope)
+    }
 }

@@ -1,14 +1,14 @@
-import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_SOURCE, T_SCOPED, T_SEED, valueEvent, Desc } from "./abstractions";
+import { Atom, AtomSource, Event, isValue, ObservableSeed, Observer, Property, Scope, Subscribe, TypeBitfield, T_ATOM, T_SOURCE, T_SCOPED, T_SEED, valueEvent, Desc, Unsub } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
-import { ObservableSeedImpl } from "./observable";
+import { ObservableBase, ObservableSeedImpl } from "./observable";
 import * as L from "./lens";
-import { PropertySourceImpl, StatefulProperty, PropertyBase } from "./property";
+import { PropertySourceImpl, StatefulProperty, PropertyBase, StatelessProperty } from "./property";
 import { globalScope, scopedSubscribe } from "./scope";
 import { nop, toString } from "./util";
 
 type AtomEvents<V> = { "change": V }
 
-class RootAtom<V> extends PropertyBase<V> implements Atom<V> {    
+class RootAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {    
     observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
@@ -38,11 +38,15 @@ class RootAtom<V> extends PropertyBase<V> implements Atom<V> {
     getScope() {
         return globalScope
     }
+
+    applyScope(scope: Scope): Atom<V> {
+        return new ScopedAtom(this, scope)
+    }
 }
 
 const uninitialized = {}
 
-export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
+export class LensedAtom<R, V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
     observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _root: Atom<R>;
@@ -83,9 +87,13 @@ export class LensedAtom<R, V> extends PropertyBase<V> implements Atom<V> {
     getScope() {
         return this._root.getScope()
     }
+
+    applyScope(scope: Scope): Atom<V> {
+        return new ScopedAtom(this, scope)
+    }
 }
 
-class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
+class DependentAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
     observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _input: Property<V>;
@@ -113,13 +121,17 @@ class DependentAtom<V> extends PropertyBase<V> implements Atom<V> {
         return this._input.getScope()
     }
     
+    applyScope(scope: Scope): Atom<V> {
+        return new ScopedAtom(this, scope)
+    }    
 }
 
-export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Atom<V> {
+
+export class StatefulDependentAtom<V> extends StatefulProperty<V, Atom<V>> implements Atom<V> {
     observableType() { return "Atom" }
     _L: TypeBitfield = T_ATOM | T_SCOPED
 
-    constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>>, scope: Scope) {
+    constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>, Atom<V>>, scope: Scope) {
         super(seed, scope)        
         this.set = (this._source as AtomSource<V>).set.bind(this);
     }
@@ -129,18 +141,47 @@ export class StatefulDependentAtom<V> extends StatefulProperty<V> implements Ato
     modify(fn: (old: V) => V) {
         this.set(fn(this.get()))
     }
+
+    applyScope(scope: Scope): Atom<V> {
+        return new ScopedAtom(this, scope)
+    }    
+}
+
+class ScopedAtom<V> extends StatelessProperty<V, Atom<V>> implements Atom<V> {    
+    _src: Atom<V>
+    constructor(src: Atom<V>, scope: Scope) {
+        super(src.desc, src.get.bind(src), src.onChange.bind(src), scope) // StatelessProperty applies scope.
+        this._src = src
+    }
+
+    set(updatedValue: V) {
+        this._src.set(updatedValue)
+    }
+
+    modify(fn: (old: V) => V) {
+        this._src.modify(fn)
+    }
+
+    // TODO: repeating override in all Atom implementations (forget one and you'll get wrong return value!)
+    applyScope(scope: Scope): Atom<V> {
+        return new ScopedAtom(this, scope)
+    }
 }
 
 /**
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
+export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>, Atom<V>>{
     observableType() { return "AtomSeed" }
     _L: TypeBitfield = T_ATOM | T_SEED
     constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(new AtomSourceImpl(desc, get, subscribe, set))
     }  
+
+    applyScope(scope: Scope): Atom<V> { 
+        return new StatefulDependentAtom(this, scope)
+    }
 }
 
 
@@ -148,15 +189,52 @@ export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>>{
  *  Input source for a StatefulProperty. Returns initial value and supplies changes to observer.
  *  Must skip duplicates!
  **/
-export class AtomSourceImpl<V> extends PropertySourceImpl<V> implements AtomSource<V> {
-    observableType() { return "AtomSource" }
+export class AtomSourceImpl<V> extends ObservableBase<V, Atom<V>> implements AtomSource<V> {
+    // TODO: copypaste of AtomSource
+
     _L: TypeBitfield = T_ATOM | T_SOURCE
+    observableType() { return "AtomSource" }
+    private _started = false
+    private _subscribed = false
+    private _get: () => V
+
+    onChange_: Subscribe<V>;
     set: (updatedValue: V) => void;
+
+    get() {
+        if (this._started) throw Error("PropertySeed started already: " + this)
+        return this._get()
+    }
+
     constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
-        super(desc, get, subscribe)
+        super(desc)
+        this._get = get;
+        this.onChange_ = subscribe;
         this.set = set
     }
+
+    onChange(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {                
+        if (this._subscribed) throw Error("Multiple subscriptions not allowed to PropertySeed instance: " + this)
+        this._subscribed = true
+        return this.onChange_(event => {
+            this._started = true
+            onValue(event)
+        }, onEnd)
+    }
+
+    // In Properties and PropertySeeds the subscribe observer gets also the current value at time of call. For PropertySeeds, this is a once-in-a-lifetime opportunity though.
+    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub {        
+        const unsub = this.onChange(onValue, onEnd)
+        onValue(this.get())
+        return unsub
+    }       
+
+    applyScope(scope: Scope): Atom<V> { 
+        return new StatefulDependentAtom(this, scope)
+    }
 }
+
+
 
 export function atom<A>(initial: A): Atom<A>;
 /**

@@ -91,13 +91,9 @@ const verifyStreamWith = (description: string, srcF: () => EventStream<any> | Ev
         });
     });
 
-export const expectPropertyEvents = (src: () => Property<any> | PropertySeed<any>, expectedEvents: any[], param: any = {}) => {
+export const expectPropertyEvents = (srcF: () => Property<any> | PropertySeed<any>, expectedEvents: any[], param: any = {}) => {
     const { unstable, semiunstable, extraCheck } = param;
     expect(expectedEvents.length > 0).toEqual(true);
-    verifyPSingleSubscriber(src, expectedEvents, extraCheck);
-};
-
-var verifyPSingleSubscriber = (srcF: () => Property<any> | PropertySeed<any>, expectedEvents: Event<any>[], extraCheck: (Function | undefined) = undefined) =>
     verifyPropertyWith("(single subscriber)", srcF, expectedEvents, ((src: Property<any>, events: Event<any>[], done: (err: (Error | void)) => any) => {
         src.subscribe((value: any) => {
             events.push(value);
@@ -106,9 +102,9 @@ var verifyPSingleSubscriber = (srcF: () => Property<any> | PropertySeed<any>, ex
             done(undefined);
         });
     }), extraCheck)
-    ;
+};
 
-const verifyPropertyWith = (description: string, srcF: () => Property<any> | PropertySeed<any>, expectedEvents: Event<any>[], collectF: (src: Property<any>, events: Event<any>[], done: () => void) => void, extraCheck: (Function | undefined) = undefined) =>
+const verifyPropertyWith = (description: string, srcF: () => Property<any> | PropertySeed<any>, expectedEvents: Event<any>[], collectF: (src: Property<any>, events: Event<any>[], done: () => void) => void, extraCheck: (Function | undefined) = undefined) => {
     describe(description, () => {
         let src: Property<any>;
         const events: Event<any>[] = [];
@@ -120,7 +116,9 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
         beforeAll(done => collectF(src, events, done));
         it("is a Property", () => expect(isProperty(src)).toEqual(true));
         it("outputs expected events in order", () => expect(toValues(events)).toEqual(toValues(expectedEvents)));
-        it("has correct final state", () => verifyFinalState(src, expectedEvents[expectedEvents.length - 1]));
+        if (expectedEvents.length > 0) {
+            it("has correct final state", () => verifyFinalState(src, expectedEvents[expectedEvents.length - 1]));
+        }
         it("cleans up observers", () => {
             scope.end()
             verifyCleanup();
@@ -129,7 +127,7 @@ const verifyPropertyWith = (description: string, srcF: () => Property<any> | Pro
             extraCheck();
         }
     })
-    ;
+}
 
 var verifyFinalState = (property: Property<any>, value: any) => {
     verifyExhausted(property)

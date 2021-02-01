@@ -91,7 +91,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   const desc = ["combine", [properties, combinator]] as Desc
   if (properties.length === 0 || isProperty(properties[0])) {    
     const scope = intersectionScope(properties.map(p => p.getScope()))
-    return new StatelessProperty<Out>(desc, get, subscribe, scope);
+    return new StatelessProperty<Out, Property<Out>>(desc, get, subscribe, scope);
   } else {
     return new PropertySeedImpl<Out>(desc, get, subscribe)
   } 

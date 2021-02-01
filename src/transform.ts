@@ -59,19 +59,19 @@ export type StatefulUnaryTransformResultScopedFor<O, A> = O extends AtomSeed<any
 
 
 export interface GenericTransformOp {
-    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResult<O>;    
+    <A, O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResult<O>;    
 }
 
 export interface GenericTransformOpScoped {
-    <A, O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScoped<O>;
+    <A, O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultScoped<O>;
 }
 
 export interface BinaryTransformOp<A, B> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulTransformResult<B, O>;
+    <O extends ObservableSeed<A, any, any>>(o: O): StatefulTransformResult<B, O>;
 }
 
 export interface BinaryTransformOpScoped<A, B> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulTransformResultScoped<B, O>;
+    <O extends ObservableSeed<A, any, any>>(o: O): StatefulTransformResultScoped<B, O>;
 }
 
 export interface StreamTransformOp<A, B> {
@@ -83,11 +83,11 @@ export interface StreamTransformOpScoped<A, B> {
 }
 
 export interface UnaryTransformOp<A, B extends A = A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultFor<O, B>;
+    <O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultFor<O, B>;
 }
 
 export interface UnaryTransformOpScoped<A, B extends A = A> {
-    <O extends ObservableSeed<A, any>>(o: O): StatefulUnaryTransformResultScopedFor<O, B>;
+    <O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultScopedFor<O, B>;
 }
 
 export const IdentityTransformer = {        
@@ -103,7 +103,7 @@ export function transform<A, B>(desc: MethodDesc, transformer: StreamTransformer
 export function transform<A, B>(desc: MethodDesc, transformer: StreamTransformer<A, B>, scope: Scope): StreamTransformOpScoped<A, B>
 
 export function transform<A, B>(methodCallDesc: MethodDesc, transformer: Transformer<A, B> | StreamTransformer<A, B>, scope?: Scope): any {    
-    return (x: ObservableSeed<any, any>) => {
+    return (x: ObservableSeed<any, any, any>) => {
         const desc = composeDesc(x, methodCallDesc)
         if (isEventStreamSeed<A>(x)) {
             let transformFn = (transformer instanceof Function) ? transformer : transformer.changes

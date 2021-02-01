@@ -2,16 +2,19 @@ import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEn
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
-import { scopedSubscribe } from "./scope";
+import { scopedSubscribe, scopedSubscribe1 } from "./scope";
 
 type StreamEvents<V> = { "value": V }
 
 // TODO: consider how scopes should affect streams
 
-export abstract class EventStreamBase<V> extends ObservableBase<V> implements EventStream<V> {
+export abstract class EventStreamBase<V> extends ObservableBase<V, EventStream<V>> implements EventStream<V> {
     observableType() { return "EventStream" }
     _L: TypeBitfield = T_STREAM | T_SCOPED
     abstract getScope(): Scope
+    applyScope(scope: Scope): EventStream<V> { 
+        return new StatelessEventStream(this.desc, scopedSubscribe1(scope, this.subscribe.bind(this)), scope)
+    }
 }
 
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
@@ -38,6 +41,7 @@ export class StatelessEventStream<V> extends EventStreamBase<V> {
     constructor(desc: Desc, subscribe: Subscribe<V>, scope: Scope) {
         super(desc) 
         this._scope = scope
+        // No need to wrap subscribe with scope in EventStreams as there's no `get` method to protect unlike in Properties
         this.subscribe = subscribe
     }
 
@@ -47,7 +51,7 @@ export class StatelessEventStream<V> extends EventStreamBase<V> {
 }
 
 export class SeedToStream<V> extends StatefulEventStream<V> {
-    constructor(seed: ObservableSeed<V, EventStreamSource<V>>, scope: Scope) { 
+    constructor(seed: ObservableSeed<V, EventStreamSource<V>, EventStream<V>>, scope: Scope) { 
         super(seed.desc, scope)
         const source = seed.consume()
         scope.subscribe(
@@ -56,7 +60,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
     }
 }
 
-export class EventStreamSourceImpl<V> extends ObservableBase<V> {
+export class EventStreamSourceImpl<V> extends ObservableBase<V, EventStream<V>> {
     observableType() { return "EventStreamSource" }
     _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: Subscribe<V>
@@ -65,13 +69,21 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V> {
         super(desc)
         this.subscribe = subscribe
     }
+
+    applyScope(scope: Scope): EventStream<V> { 
+        return new SeedToStream(this, scope)
+    }
 }
 
 
-export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>> implements EventStreamSeed<V> {
+export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>, EventStream<V>> implements EventStreamSeed<V> {
     observableType() { return "EventStreamSeed" }
     _L: TypeBitfield = T_STREAM | T_SEED
     constructor(desc: Desc, subscribe: Subscribe<V>) {
         super(new EventStreamSourceImpl(desc, subscribe))
+    }
+
+    applyScope(scope: Scope): EventStream<V> { 
+        return new SeedToStream(this, scope)
     }
 }

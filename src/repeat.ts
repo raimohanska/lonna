@@ -3,11 +3,11 @@ import { applyScopeMaybe } from "./applyscope";
 import { fromSubscribe } from "./fromsubscribe";
 import { nop, rename } from "./util";
 
-export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined): EventStreamSeed<V>;
-export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined, scope: Scope): EventStream<V>;
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any, any>  | undefined): EventStreamSeed<V>;
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any, any>  | undefined, scope: Scope): EventStream<V>;
 
 
-export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any>  | undefined, scope?: Scope): any {
+export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, any, any>  | undefined, scope?: Scope): any {
     var index = 0;
 
     return applyScopeMaybe(rename("repeat(fn)", fromSubscribe<V>(function(onValue: Observer<V>, onEnd: Observer<void> = nop) {
@@ -23,7 +23,7 @@ export function repeat<V>(generator: (iteration: number) => ObservableSeed<V, an
         }
       }
       function subscribeNext() {
-        var next: ObservableSeed<V, any> | undefined;
+        var next: ObservableSeed<V, any, any> | undefined;
         flag = true;
         while (flag) {
           next = generator(index++);

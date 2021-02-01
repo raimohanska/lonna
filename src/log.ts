@@ -12,7 +12,7 @@ export type LogResult<O> = O extends Property<infer A>
                 : never
 
 export interface LogOp {
-    <O extends ObservableSeed<any, any>>(o: O): LogResult<O>
+    <O extends ObservableSeed<any, any, any>>(o: O): LogResult<O>
 }
 export function log(...prefixes: any[]): LogOp {
     return tap((x: any) => console.log(...prefixes, x)) as LogOp

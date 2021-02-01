@@ -26,7 +26,7 @@ export function remove<A>(xs: A[], x: A) {
     }
 }
 
-export function rename<A extends ObservableSeed<any, any>>(desc: Desc, observable: A): A {
+export function rename<A extends ObservableSeed<any, any, any>>(desc: Desc, observable: A): A {
     observable.desc = new Description(desc)
     return observable
 }

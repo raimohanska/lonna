@@ -1,8 +1,8 @@
-import { Desc, Description, Observable, ObservableSeed, Observer, TypeBitfield, Unsub, valueObserver } from "./abstractions"
+import { Desc, Description, Observable, ObservableSeed, Observer, Scope, ScopedObservable, TypeBitfield, Unsub, valueObserver } from "./abstractions"
 import { Pipeable } from "./pipeable"
 import { nop } from "./util"
 
-export abstract class ObservableSeedBase<V, O extends Observable<any>> extends Pipeable implements ObservableSeed<V, O> {
+export abstract class ObservableSeedBase<V, C extends Observable<V>, O extends ScopedObservable<V>> extends Pipeable implements ObservableSeed<V, C, O> {
     abstract _L: TypeBitfield
     abstract observableType(): string
     desc: Description
@@ -12,7 +12,9 @@ export abstract class ObservableSeedBase<V, O extends Observable<any>> extends P
         this.desc = new Description(desc)
     }
 
-    abstract consume(): O;
+    abstract consume(): C;
+
+    abstract applyScope(scope: Scope): O;
 
     toString(): string {
         return this.observableType() + " " + (this.desc)
@@ -27,7 +29,7 @@ export abstract class ObservableSeedBase<V, O extends Observable<any>> extends P
     }
 }
 
-export abstract class ObservableBase<V> extends ObservableSeedBase<V, Observable<V>> {
+export abstract class ObservableBase<V, O extends ScopedObservable<V>> extends ObservableSeedBase<V, Observable<V>, O> {
     abstract _L: TypeBitfield
     constructor(desc: Desc) {
         super(desc)
@@ -44,15 +46,15 @@ export abstract class ObservableBase<V> extends ObservableSeedBase<V, Observable
     }
 }
 
-export abstract class ObservableSeedImpl<V, O extends Observable<any>> extends ObservableSeedBase<V, O> {
-    private _source: O | null
+export abstract class ObservableSeedImpl<V, C extends Observable<V>, O extends ScopedObservable<V>> extends ObservableSeedBase<V, C, O> {
+    private _source: C | null
 
-    constructor(source: O) {
+    constructor(source: C) {
         super(source.desc)
         this._source = source
     }
 
-    consume(): O {
+    consume(): C {
         if (this._source === null) throw Error(`Seed ${this.toString()} already consumed`)
         const result = this._source
         this._source = null

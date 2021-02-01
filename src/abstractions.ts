@@ -30,7 +30,7 @@ export function isAtom<V>(e: any): e is Atom<V> { return matchFlags(e, T_SCOPED
 export function isAtomSeed<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SEED | T_ATOM) }
 export function isAtomSource<V>(e: any): e is AtomSeed<V> { return matchFlags(e, T_SOURCE | T_ATOM) }
 
-export function isObservableSeed<V, O extends Observable<any>>(e: any): e is ObservableSeed<V, O> { 
+export function isObservableSeed<V, C extends Observable<any>, O extends ScopedObservable<any>>(e: any): e is ObservableSeed<V, C, O> { 
     return e._L !== undefined
 }
 
@@ -135,8 +135,9 @@ export type Observable<V> = ObservableIdentifiers & ForEach<V> & {
     subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub;
 }
 
-export interface ObservableSeed<V, O extends Observable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
-    consume(): O;
+export interface ObservableSeed<V, C extends Observable<any>, O extends ScopedObservable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
+    consume(): C;
+    applyScope(scope: Scope): O
 }
 
 export type ScopedObservable<V> = Observable<V> & {
@@ -150,18 +151,18 @@ export interface PropertyMethods<V> {
 
 export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V>
 export type Property<V> = ScopedObservable<V> & PropertySource<V> & PropertyMethods<V>
-export type PropertySeed<V> = ObservableSeed<V, PropertySource<V>>
+export type PropertySeed<V> = ObservableSeed<V, PropertySource<V>, Property<V>>
 
 
 export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
 export type EventStream<V> = ScopedObservable<V> & EventStreamSource<V>
-export type EventStreamSeed<V> = ObservableSeed<V, EventStreamSource<V>>
+export type EventStreamSeed<V> = ObservableSeed<V, EventStreamSource<V>, EventStream<V>>
 
 
 export type AtomSource<V> = PropertySource<V> & PropertySeed<V> & AtomSeed<V> & {
     set(updatedValue: V): void;
 }
-export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>>
+export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>, Atom<V>>
 
 export type Atom<V> = Property<V> & AtomSource<V> & {
     set(newValue: V): void
