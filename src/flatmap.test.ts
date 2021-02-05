@@ -1,4 +1,5 @@
 import { constant, flatMap, never } from ".";
+import { fromArray } from "./fromarray";
 import { expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util";
 
@@ -12,6 +13,15 @@ describe("EventStream.flatMap", function() {
       },
       [1, 2, 1, 2])
   );
+  describe("works in combination with fromArray", () =>
+    expectStreamEvents(
+      () => {
+        const op = flatMap((value: number) => fromArray([value, value]))
+        const s = series(1, [1, 2]).pipe(op)
+        return s
+      },
+      [1, 1, 2, 2])
+  );  
   describe("Works also when f returns a Property instead of an EventStream", () =>
     expectStreamEvents(
       () => flatMap(constant)(series(1, [1,2])),
