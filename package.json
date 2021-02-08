@@ -23,7 +23,7 @@
   },
   "peerDependencies": {},
   "engines": {
-    "node": ">13.0"
+    "node": "14.x"
   },
   "scripts": {
     "build": "concurrently \"yarn build:esm\" \"yarn build:cjs\"",
