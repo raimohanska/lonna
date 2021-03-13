@@ -61,6 +61,8 @@ export function combine<V, R>(fn: (...values: V[]) => R, Propertys: PropertySeed
 
 export function combine<Out>(...args: any[]): PropertyLike<Out> {
   let [properties, combinator] = argumentsToObservablesAndFunction<Out, Property<Out>>(args);
+  const seeds = !(properties.length === 0 || isProperty(properties[0]))
+
   combinator = cached(combinator)
 
   function getCurrentArray(): any[] {
@@ -68,31 +70,51 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   }
   
   const get = () => combinator(...getCurrentArray())
-  function subscribe(onValue: Observer<Out>, onEnd: Observer<void> = nop) {
-    let endCount = 0
-    const unsubs = properties.map((src, i) => {
-      return src.onChange(value => {
-        currentArray[i] = value
-        onValue(combinator(...currentArray))
-      }, () => {
-        endCount++
-        if (endCount == properties.length) {
-          onEnd()
-        }
-      })
-    })        
-    let currentArray = getCurrentArray()
-    
-    return () => {
-        unsubs.forEach(f => f())
-    }    
-  }
+  const subscribe = (seeds ? subscribeSeeds : subscribeProps)(properties, getCurrentArray, combinator)
 
   const desc = ["combine", [properties, combinator]] as Desc
-  if (properties.length === 0 || isProperty(properties[0])) {    
+  if (!seeds) {    
     const scope = intersectionScope(properties.map(p => p.getScope()))
     return new StatelessProperty<Out, Property<Out>>(desc, get, subscribe, scope);
   } else {
     return new PropertySeedImpl<Out>(desc, get, subscribe)
   } 
 };
+
+const subscribeProps = <Out>(properties: Property<Out>[], getCurrentArray: () => any[], combinator: (...args: any[]) => Out) => (onValue: Observer<Out>, onEnd: Observer<void> = nop) => {
+  let endCount = 0
+  const unsubs = properties.map((src, i) => {
+    return src.onChange(() => {
+      onValue(combinator(...getCurrentArray()))
+    }, () => {
+      endCount++
+      if (endCount == properties.length) {
+        onEnd()
+      }
+    })
+  })        
+  
+  return () => {
+      unsubs.forEach(f => f())
+  }    
+}
+
+const subscribeSeeds = <Out>(properties: Property<Out>[], getCurrentArray: () => any[], combinator: (...args: any[]) => Out) => (onValue: Observer<Out>, onEnd: Observer<void> = nop) => {
+  let endCount = 0
+  const unsubs = properties.map((src, i) => {
+    return src.onChange(value => {
+      currentArray[i] = value
+      onValue(combinator(...currentArray))
+    }, () => {
+      endCount++
+      if (endCount == properties.length) {
+        onEnd()
+      }
+    })
+  })        
+  let currentArray = getCurrentArray()
+  
+  return () => {
+      unsubs.forEach(f => f())
+  }    
+}

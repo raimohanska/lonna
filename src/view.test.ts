@@ -1,7 +1,9 @@
 import * as B from ".";
+import * as L from ".";
 import { later } from "./later";
-import { expectPropertyEvents, expectStreamEvents } from "./test-utils";
+import { expectPropertyEvents, expectStreamEvents, series, testScope } from "./test-utils";
 import { constant } from "./index";
+import { toProperty } from "./toproperty";
 
 describe("Atom.view", () => {
     describe("Array index lenses", () => {
@@ -71,6 +73,19 @@ describe("Property.view", () => {
           () => B.view(constant(fooBar), constant("hello"), (v, h) => h + " " + v.foo + " lol"),
           ["hello bar lol"]
         )
+    })
+
+    describe("No glitches in diamond-shaped setup", () => {
+      expectPropertyEvents(
+        () => {
+          const root = series(1, [{ a: "a1", b: "b1" }]).pipe(toProperty({ a: "a0", b: "b0" }, testScope()))
+          const combined = L.view(L.view(root, "a"), L.view(root, "b"), (a, b) => a+b)
+          return combined
+        },
+        [
+          "a0b0", "a1b1"
+        ]
+      )
     })
   
     it("toString", () => {
