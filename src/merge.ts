@@ -13,8 +13,8 @@ export function merge<A, B>(a: EventStreamSeed<A>, b: EventStreamSeed<B>): Even
 export function merge<A, B, C>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>): EventStreamSeed<A | B | C>;
 export function merge<A, B, C, D>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>, d: EventStreamSeed<D>): EventStreamSeed<A | B | C | D>;
 export function merge<A, B, C, D, E>(a: EventStreamSeed<A>, b: EventStreamSeed<B>, c: EventStreamSeed<C>, d: EventStreamSeed<D>, e: EventStreamSeed<E>): EventStreamSeed<A | B | C | D | E>;
-export function merge<A>(streams: EventStreamSeed<A>[]): EventStreamSeed<A>
 export function merge<A>(streams: EventStream<A>[]): EventStream<A>
+export function merge<A>(streams: EventStreamSeed<A>[]): EventStreamSeed<A>
 export function merge<A>(...args: any[]) {
     let streams: (EventStream<any> | EventStreamSeed<any>)[]
     if (args[0] instanceof Array) {
