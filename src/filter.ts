@@ -21,6 +21,7 @@ function filterT<A>(fn: Predicate<A>): Transformer<A, A> {
             }, onEnd),
         init: (value: A) => {
             if (!fn(value)) {
+                console.error("Initial value", value, "not matching filter", fn)
                 throw Error(`Initial value not matching filter`)
             }
             return value
