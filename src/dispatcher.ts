@@ -10,23 +10,25 @@ export class Dispatcher<E extends Dict> {
     private _count = 0
     private _ended = false
     
-    dispatch<X extends keyof E & string>(key: X, value: E[X]) {
-        // TODO: observers may be mutated while in this loop!
-        if (this._observers[key]) for (const s of this._observers[key]!) {
+    // TODO: what to do with dispatch calls during dispatch? 
+    // Relatedly, observer removal is not fully optimized (mutation is okay unless dispatching)
+    dispatch<X extends keyof E & string>(key: X, value: E[X]) {        
+        const observers = this._observers[key]
+        if (observers) for (const s of observers) {
             s[0](value)
         }
     }
 
     dispatchEnd<X extends keyof E & string>(key: X) {
-        // TODO: observers may be mutated while in this loop!
-        if (this._observers[key]) for (const s of this._observers[key]!) {
+        const observers = this._observers[key]
+        if (observers) for (const s of observers) {
             s[1] && s[1]()
         }
         this._ended = true
     }
 
     on<X extends keyof E & string>(key: X, onValue: Observer<E[X]>, onEnd: Observer<void> = nop): Unsub {
-        if (!this._observers[key]) this._observers[key] = [];
+        if (!this._observers[key]) this._observers[key] = [];        
         const pair = [onValue, onEnd] as [Observer<any>, Observer<void>]
         if (this._ended) {
             onEnd()
@@ -40,12 +42,15 @@ export class Dispatcher<E extends Dict> {
                 }
             }
             return () => {
-                if (!this._observers[key]) return;
-                const index = this._observers[key]!.indexOf(pair);
+                let observers = this._observers[key]
+                if (!observers) return;
+                const index = observers.indexOf(pair);
                 if (index >= 0) {
-                    this._observers[key]!.splice(index, 1);
-                    if (this._observers.key?.length === 0) {
+                    observers = [...observers.slice(0, index), ...observers.slice(index + 1)]
+                    if (observers.length === 0) {
                         delete this._observers[key]
+                    } else {
+                        this._observers[key] = observers
                     }
                     if (key !== meta) {
                         this._count--
@@ -53,7 +58,7 @@ export class Dispatcher<E extends Dict> {
                             this.dispatch(meta, 0 as any)
                         }
                     }
-                }        
+                }    
             }
         }
     }
