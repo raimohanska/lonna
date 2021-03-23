@@ -2,9 +2,9 @@ import { EventStream, EventStreamSeed, Scope } from "./abstractions";
 import { GenericTransformOp, Transformer, transform, GenericTransformOpScoped } from "./transform"
 import { nop } from "./util";
 
-export function takeUntil<A>(stopper: EventStreamSeed<any>): GenericTransformOp
-export function takeUntil<A>(stopper: EventStreamSeed<any>, scope: Scope): GenericTransformOpScoped
-export function takeUntil<A>(stopper: EventStreamSeed<any>, scope?: Scope): any {
+export function takeUntil(stopper: EventStreamSeed<any>): GenericTransformOp
+export function takeUntil(stopper: EventStreamSeed<any>, scope: Scope): GenericTransformOpScoped
+export function takeUntil(stopper: EventStreamSeed<any>, scope?: Scope): any {
     return transform(["takeUntil", [stopper]], takeUntilT(stopper), scope as Scope)
 }
 

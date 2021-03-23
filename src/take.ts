@@ -3,9 +3,9 @@ import { applyScopeMaybe } from "./applyscope";
 import { transform, Transformer, GenericTransformOp, GenericTransformOpScoped } from "./transform";
 import { nop } from "./util";
 
-export function take<A>(count: number): GenericTransformOp
-export function take<A>(count: number, scope: Scope): GenericTransformOpScoped
-export function take<A>(count: number, scope?: Scope): any {
+export function take(count: number): GenericTransformOp
+export function take(count: number, scope: Scope): GenericTransformOpScoped
+export function take(count: number, scope?: Scope): any {
     return transform(["take", [count]], takeT(count), scope as Scope)
 }
 
