@@ -89,8 +89,13 @@ export const afterScope = {}
 export type OutOfScope = (typeof beforeScope) | (typeof afterScope)
 
 export function checkScope<V>(thing: any, value: V | OutOfScope): V {
-    if (value === beforeScope) throw Error(`${thing} not in scope yet`);
-    if (value === afterScope) throw Error(`${thing} not in scope any more`);
+    if (value === beforeScope) {
+        throw Error(`${thing} not in scope yet`);
+    }
+    if (value === afterScope) {
+        debugger
+        throw Error(`${thing} not in scope any more`);
+    }
     return value as V
 }
 
