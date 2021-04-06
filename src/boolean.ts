@@ -10,6 +10,8 @@ export function and(left: Property<boolean>, right: Property<boolean>): Property
     return combine(left, right, (x, y) => x && y)
 }
 
+// TODO: rename result, test
+
 export function not(prop: Property<boolean>): Property<boolean> {
     return map(x => !x)(prop)
 }

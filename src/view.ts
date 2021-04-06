@@ -65,7 +65,7 @@ export function view<A, B>(...args: any[]): any {
             return rename(desc, o)
         } else {
             const fn = args[args.length - 1]
-            return combine(properties, fn)
+            return rename(["view", [...properties, fn]], combine(properties, fn))
         }        
     } else {
         // property/atom + lens
