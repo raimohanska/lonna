@@ -9,7 +9,7 @@ type StreamEvents<V> = { "value": V }
 // TODO: consider how scopes should affect streams
 
 export abstract class EventStreamBase<V> extends ObservableBase<V, EventStream<V>> implements EventStream<V> {
-    observableType() { return "EventStream" }
+    observableType(): "EventStream" | "Bus" { return "EventStream" }
     _L: TypeBitfield = T_STREAM | T_SCOPED
     abstract getScope(): Scope
     applyScope(scope: Scope): EventStream<V> { 
@@ -35,6 +35,7 @@ export class StatefulEventStream<V> extends EventStreamBase<V> {
 }
 
 export class StatelessEventStream<V> extends EventStreamBase<V> {
+    observableType() { return "EventStream" as const }
     private _scope: Scope;
     subscribe: Subscribe<V>;
 
@@ -51,6 +52,7 @@ export class StatelessEventStream<V> extends EventStreamBase<V> {
 }
 
 export class SeedToStream<V> extends StatefulEventStream<V> {
+    observableType() { return "EventStream" as const }
     constructor(seed: ObservableSeed<V, EventStreamSource<V>, EventStream<V>>, scope: Scope) { 
         super(seed.desc, scope)
         const source = seed.consume()
@@ -61,7 +63,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 }
 
 export class EventStreamSourceImpl<V> extends ObservableBase<V, EventStream<V>> {
-    observableType() { return "EventStreamSource" }
+    observableType() { return "EventStreamSource" as const }
     _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: Subscribe<V>
 
@@ -77,7 +79,7 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V, EventStream<V>> 
 
 
 export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>, EventStream<V>> implements EventStreamSeed<V> {
-    observableType() { return "EventStreamSeed" }
+    observableType() { return "EventStreamSeed" as const }
     _L: TypeBitfield = T_STREAM | T_SEED
     constructor(desc: Desc, subscribe: Subscribe<V>) {
         super(new EventStreamSourceImpl(desc, subscribe))

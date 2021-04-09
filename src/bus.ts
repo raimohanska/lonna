@@ -8,7 +8,7 @@ export function bus<V>(): Bus<V> {
 
 // Note that we could use a Dispatcher as Bus, except for prototype inheritance of EventStream on the way
 class BusImpl<V> extends StatefulEventStream<V> implements Bus<V> {
-    observableType() { return "Bus" }
+    observableType() { return "Bus" as const }
     constructor() {
         super("bus", globalScope)
         this.push = this.push.bind(this)

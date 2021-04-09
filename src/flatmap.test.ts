@@ -1,4 +1,4 @@
-import { constant, flatMap, never } from ".";
+import { flatMap, never } from ".";
 import { fromArray } from "./fromarray";
 import { expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util";
@@ -22,10 +22,12 @@ describe("EventStream.flatMap", function() {
       },
       [1, 1, 2, 2])
   );  
+  /*
   describe("Works also when f returns a Property instead of an EventStream", () =>
     expectStreamEvents(
       () => flatMap(constant)(series(1, [1,2])),
       [1,2])
   );
+  */
   it("toString", () => expect(flatMap(nop as any)(never()).toString()).toEqual("EventStreamSeed never.flatMap(fn)"));
 });

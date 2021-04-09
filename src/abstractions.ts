@@ -136,6 +136,7 @@ export type Observable<V> = ObservableIdentifiers & ForEach<V> & {
 }
 
 export interface ObservableSeed<V, C extends Observable<any>, O extends ScopedObservable<any>> extends Pipeable, ObservableIdentifiers, ForEach<V> {
+    observableType(): string
     consume(): C;
     applyScope(scope: Scope): O
 }
@@ -149,22 +150,38 @@ export interface PropertyMethods<V> {
     onChange(onValue: Observer<V>, onEnd?: Observer<void> | undefined): Unsub;
 }
 
-export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V>
-export type Property<V> = ScopedObservable<V> & PropertySource<V> & PropertyMethods<V>
-export type PropertySeed<V> = ObservableSeed<V, PropertySource<V>, Property<V>>
+export type PropertySource<V> = Observable<V> & PropertySeed<V> & PropertyMethods<V> & {
+    observableType(): "PropertySource" | "Property" | "AtomSource" | "Atom"    
+}
+export type Property<V> = ScopedObservable<V> & PropertySource<V> & PropertyMethods<V> & {
+    observableType(): "Property" | "Atom"    
+}
+export type PropertySeed<V> = ObservableSeed<V, PropertySource<V>, Property<V>> & {
+    observableType(): "PropertySeed" | "PropertySource" | "Property" | "AtomSeed" | "AtomSource" | "Atom"
+}
 
 
-export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V>
-export type EventStream<V> = ScopedObservable<V> & EventStreamSource<V>
-export type EventStreamSeed<V> = ObservableSeed<V, EventStreamSource<V>, EventStream<V>>
+export type EventStreamSource<V> = Observable<V> & EventStreamSeed<V> & {
+    observableType(): "EventStreamSource" | "EventStream" | "Bus"
+}
+export type EventStream<V> = ScopedObservable<V> & EventStreamSource<V> & {
+    observableType(): "EventStream" | "Bus"
+}
+export type EventStreamSeed<V> = ObservableSeed<V, EventStreamSource<V>, EventStream<V>> & {
+    observableType(): "EventStreamSeed" | "EventStreamSource" | "EventStream" | "Bus"       
+}
 
 
 export type AtomSource<V> = PropertySource<V> & PropertySeed<V> & AtomSeed<V> & {
+    observableType(): "AtomSource" | "Atom"
     set(updatedValue: V): void;
 }
-export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>, Atom<V>>
+export type AtomSeed<V> = ObservableSeed<V, AtomSource<V>, Atom<V>> & {
+    observableType(): "AtomSeed" | "AtomSource" | "Atom"
+}
 
 export type Atom<V> = Property<V> & AtomSource<V> & {
+    observableType(): "Atom"
     set(newValue: V): void
     modify(fn: (old: V) => V): void
 }

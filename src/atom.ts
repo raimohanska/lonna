@@ -9,7 +9,7 @@ import { nop, toString } from "./util";
 type AtomEvents<V> = { "change": V }
 
 class RootAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {    
-    observableType() { return "Atom" }
+    observableType() { return "Atom" as const }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _dispatcher = new Dispatcher<AtomEvents<V>>();
     private _value: V
@@ -47,7 +47,7 @@ class RootAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
 const uninitialized = {}
 
 export class LensedAtom<R, V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
-    observableType() { return "Atom" }
+    observableType() { return "Atom" as const }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _root: Atom<R>;
     private _lens: L.Lens<R, V>;
@@ -94,7 +94,7 @@ export class LensedAtom<R, V> extends PropertyBase<V, Atom<V>> implements Atom<V
 }
 
 class DependentAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
-    observableType() { return "Atom" }
+    observableType() { return "Atom" as const }
     _L: TypeBitfield = T_ATOM | T_SCOPED
     private _input: Property<V>;
     set: (updatedValue: V) => void;
@@ -128,7 +128,7 @@ class DependentAtom<V> extends PropertyBase<V, Atom<V>> implements Atom<V> {
 
 
 export class StatefulDependentAtom<V> extends StatefulProperty<V, Atom<V>> implements Atom<V> {
-    observableType() { return "Atom" }
+    observableType() { return "Atom" as const }
     _L: TypeBitfield = T_ATOM | T_SCOPED
 
     constructor(seed: ObservableSeed<V, AtomSource<V> | Atom<V>, Atom<V>>, scope: Scope) {
@@ -148,7 +148,7 @@ export class StatefulDependentAtom<V> extends StatefulProperty<V, Atom<V>> imple
 }
 
 class ScopedAtom<V> extends StatelessProperty<V, Atom<V>> implements Atom<V> {    
-    _src: Atom<V>
+    _src: Atom<V>    
     constructor(src: Atom<V>, scope: Scope) {
         super(src.desc, src.get.bind(src), src.onChange.bind(src), scope) // StatelessProperty applies scope.
         this._src = src
@@ -166,6 +166,7 @@ class ScopedAtom<V> extends StatelessProperty<V, Atom<V>> implements Atom<V> {
     applyScope(scope: Scope): Atom<V> {
         return new ScopedAtom(this, scope)
     }
+    observableType() { return "Atom" as const }
 }
 
 /**
@@ -173,7 +174,7 @@ class ScopedAtom<V> extends StatelessProperty<V, Atom<V>> implements Atom<V> {
  *  Must skip duplicates!
  **/
 export class AtomSeedImpl<V> extends ObservableSeedImpl<V, AtomSource<V>, Atom<V>>{
-    observableType() { return "AtomSeed" }
+    observableType() { return "AtomSeed" as const }
     _L: TypeBitfield = T_ATOM | T_SEED
     constructor(desc: Desc, get: () => V, subscribe: Subscribe<V>, set: (updatedValue: V) => void) {
         super(new AtomSourceImpl(desc, get, subscribe, set))
@@ -193,7 +194,7 @@ export class AtomSourceImpl<V> extends ObservableBase<V, Atom<V>> implements Ato
     // TODO: copypaste of AtomSource
 
     _L: TypeBitfield = T_ATOM | T_SOURCE
-    observableType() { return "AtomSource" }
+    observableType() { return "AtomSource" as const }
     private _started = false
     private _subscribed = false
     private _get: () => V
