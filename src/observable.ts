@@ -55,7 +55,7 @@ export abstract class ObservableSeedImpl<V, C extends Observable<V>, O extends S
     }
 
     consume(): C {
-        if (this._source === null) throw Error(`Seed ${this.toString()} already consumed`)
+        if (this._source === null) throw Error(`Seed ${this.toString()} already consumed. Consider applying a suitable scope by calling .pipe(L.applyScope(...))`)
         const result = this._source
         this._source = null
         return result
