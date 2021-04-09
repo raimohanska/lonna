@@ -1,4 +1,7 @@
 import { constant, flatMapLatest, never, toProperty } from ".";
+import { applyScope } from "./applyscope";
+import { atom } from "./atom";
+import { globalScope } from "./scope";
 import { expectPropertyEvents, expectStreamEvents, series } from "./test-utils";
 import { nop } from "./util";
 
@@ -25,5 +28,20 @@ describe("Property.flatMapLatest", function() {
       }, 
       ["0.0", "0.1", "1.0", "1.1", "2.0", "2.1", "2.2"])
   );
+  describe("with constants", () =>
+    expectPropertyEvents(
+      () => {          
+          const spawner = (value: number) => constant(value)
+          const property = series(3, [1, 2]).pipe(toProperty(0), flatMapLatest(spawner))
+          return property
+      }, 
+      [0, 1, 2])
+  );  
+  it("With atoms and constants", () => {
+    const root = atom("hello")
+    const result = root.pipe(flatMapLatest((v: string) => {
+      return constant(v)
+    }), applyScope(globalScope))
+  })
   it("toString", () => expect(flatMapLatest(nop as any)(constant(1)).toString()).toEqual("PropertySeed constant(1).flatMapLatest(fn)"));
 })

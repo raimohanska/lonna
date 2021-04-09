@@ -47,12 +47,13 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
             initializing = false
             return unsub
         }
-        const [children, subscribe] = flatMapSubscribe(subscribeWithInitial, fn, options)
+        const [getLatestChild, subscribe] = flatMapSubscribe(subscribeWithInitial, fn, options)
         const get = () => {
-            if (children.length != 1) {
-                throw Error("Unexpected child count: " + children.length)
+            const child = getLatestChild()
+            if (!child) {
+                throw Error("Assertion failed: No child created")
             }
-            const observable = children[0].observable
+            const observable = child.observable
             if (isProperty(observable) || isPropertySource(observable)) {
                 return (observable as Property<B>).get()
             } else {
@@ -67,9 +68,11 @@ export class FlatMapPropertySeed<A, B> extends PropertySeedImpl<B> {
     }
 }
 
-function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<B, Observable<B>, any>>, options: FlatMapOptions): [FlatMapChild<Observable<B>>[], Subscribe<B>] {
+function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, ObservableSeed<B, Observable<B>, any>>, options: FlatMapOptions): [() => FlatMapChild<Observable<B>> | null, Subscribe<B>] {
     const children: FlatMapChild<Observable<B>>[] = []
-    return [children, (onValue: Observer<B>, onEnd: Observer<void> = nop) => {            
+    let latestChild: FlatMapChild<Observable<B>> | null = null
+    const getLatestChild = () => latestChild
+    return [getLatestChild, (onValue: Observer<B>, onEnd: Observer<void> = nop) => {            
         let rootEnded = false
         const unsubThis = subscribe(rootEvent => {
             if (options.latest) {
@@ -79,6 +82,7 @@ function flatMapSubscribe<A, B>(subscribe: Subscribe<A>, fn: Spawner<A, Observab
                 children.splice(0)
             }
             const child = { observable: fn(rootEvent).consume() } as FlatMapChild<Observable<B>>
+            latestChild = child
             children.push(child)
             let ended = false
             child.unsub = child.observable.subscribe(onValue, () => {
