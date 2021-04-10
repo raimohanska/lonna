@@ -17,6 +17,7 @@ git pull --ff-only --no-rebase origin
 echo "2. Building and testing"
 yarn install
 yarn test
+yarn tsd
 yarn build
 
 echo "3. Setting version info to descriptor files"
