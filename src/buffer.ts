@@ -10,6 +10,8 @@ export type VoidFunction = () => void
  */
 export type DelayFunction = (f: VoidFunction) => any
 
+// TODO: scoped versions
+
 export function bufferWithTime<V>(delay: number | DelayFunction): (src: EventStream<V> | EventStreamSeed<V>) => EventStreamSeed<V[]> {
   return src => bufferWithTimeOrCount(["bufferWithTime", [delay]], src, delay, Number.MAX_VALUE)
 };

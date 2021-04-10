@@ -13,7 +13,7 @@ export const globalScope: Scope = mkScope((onIn) => {
 })
 
 export function mkScope(scopeFn: ScopeFn): Scope {
-    const result = ((seed: ObservableSeed<any, any, any>) => seed.applyScope(result)) as Scope;
+    const result = ((seed: ObservableSeed<any, any, any>) => seed.applyScope(result)) as any as Scope;
     result.subscribe = scopeFn
     result._L = T_SCOPE
     return result

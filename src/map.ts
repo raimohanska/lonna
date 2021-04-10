@@ -4,6 +4,7 @@ import { StatelessEventStream } from "./eventstream";
 import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
 import { StatelessProperty } from "./property";
+import { In } from "./transform";
 
 export type MapResult<A, B, O> = O extends Property<any> 
     ? Property<B>
@@ -14,7 +15,7 @@ export type MapResult<A, B, O> = O extends Property<any>
             : EventStreamSeed<B>;
 
 export interface MapOp<A, B> {
-    <O extends Property<A> | PropertySeed<A> | EventStream<A> | EventStreamSeed<A>>(o: O): MapResult<A, B, O>
+    <O>(o: In<O, A>): MapResult<A, B, O>
 }
 export function map<A, B>(fn: (value: A) => B): MapOp<A, B>
 export function map<A, B>(sampledProperty: Property<B>): MapOp<A, B>

@@ -11,12 +11,6 @@ expectType<L.PropertySeed<number>>(seed)
 
 expectType<L.PropertySeed<number>>(L.constant(1 as number | null).pipe(L.filter(nonNull)))
 
-
-
-
-
-
-
 function nonNull<A>(x: A | null): x is A {
     return x !== null
 }

@@ -60,19 +60,19 @@ export type StatefulUnaryTransformResultScopedFor<O, A> = O extends AtomSeed<any
 
 
 export interface GenericTransformOp {
-    <A, O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResult<O>;    
+    <A, O>(o: In<O, A>): StatefulUnaryTransformResult<O>;    
 }
 
 export interface GenericTransformOpScoped {
-    <A, O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultScoped<O>;
+    <A, O>(o: In<O, A>): StatefulUnaryTransformResultScoped<O>;
 }
 
 export interface BinaryTransformOp<A, B> {
-    <O extends ObservableSeed<A, any, any>>(o: O): StatefulTransformResult<B, O>;
+    <O>(o: In<O, A>): StatefulTransformResult<B, O>;
 }
 
 export interface BinaryTransformOpScoped<A, B> {
-    <O extends ObservableSeed<A, any, any>>(o: O): StatefulTransformResultScoped<B, O>;
+    <O>(o: In<O, A>): StatefulTransformResultScoped<B, O>;
 }
 
 export interface StreamTransformOp<A, B> {
