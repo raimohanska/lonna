@@ -2,6 +2,7 @@ import { expectPropertyEvents, series, testScope } from "./test-utils"
 import * as L from "./index"
 import { globalScope } from "./scope"
 import { isProperty, isPropertySeed } from "./abstractions"
+import { applyScope } from "./applyscope"
 
 describe("cached", () => {
     describe("wraps a property", () => {

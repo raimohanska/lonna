@@ -1,10 +1,9 @@
 import { ObservableSeed, Scope } from "./abstractions";
 import { GenericTransformOpScoped } from "./transform";
 
+// TODO: deprecated
 export function applyScope(scope: Scope): GenericTransformOpScoped {
-    return ((seed: ObservableSeed<any, any, any>) => {
-        return seed.applyScope(scope)
-    }) as any
+    return scope
 }
 
 /** @hidden */

@@ -1,6 +1,7 @@
 import { Dispatcher } from "./dispatcher";
 import { Pipeable } from "./pipeable";
 import { toString } from "./tostring";
+import { GenericTransformOpScoped } from "./transform";
 
 export type TypeBitfield = number
 
@@ -192,13 +193,9 @@ export interface Bus<V> extends EventStream<V> {
 }
 
 export type ScopeFn = (onIn: () => Unsub) => void;
-
-export class Scope {
-    _L: TypeBitfield = T_SCOPE
+export type Scope = GenericTransformOpScoped & {
+    _L: typeof T_SCOPE
     subscribe: ScopeFn
-    constructor(fn: ScopeFn) {
-        this.subscribe = fn
-    }
 }
 
 export function isScope(x: any): x is Scope {

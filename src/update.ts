@@ -7,7 +7,7 @@ import { toString } from "./tostring"
 import { rename } from "./util"
 
 export type UpdateTrigger<T> = EventStream<T> | EventStreamSeed<T>
-export type UpdateParam<T> = UpdateTrigger<T> | Property<T>
+type UpdateParam<T> = UpdateTrigger<T> | Property<T>
 
 /**
  *  [Update](#update) pattern consisting of a single EventStream and a accumulator function.

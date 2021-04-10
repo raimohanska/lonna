@@ -1,5 +1,5 @@
 import { EventStream, EventStreamSeed, Observer, Property, PropertySeed, Event, isValue, valueEvent, AtomSeed, Subscribe, isProperty, isEventStream, isEventStreamSeed, isPropertySeed, Desc } from "./abstractions";
-import { cached } from "./cached";
+import { cachedFn } from "./cachedFn";
 import { StatelessEventStream } from "./eventstream";
 import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
@@ -28,11 +28,11 @@ export function map<A, B>(x: ((value: A) => B) | Property<B>): any {
             const source = o.consume()
             return new EventStreamSeedImpl(desc, mapSubscribe(source.subscribe.bind(source), fn))
         } else if (isProperty<A>(o)) {
-            fn = cached(fn)
+            fn = cachedFn(fn)
             return new StatelessProperty(desc, () => fn(o.get()), mapSubscribe(o.onChange.bind(o), fn), o.getScope())
         } else if (isPropertySeed<A>(o)) {
             const source = o.consume()
-            fn = cached(fn)
+            fn = cachedFn(fn)
             return new PropertySeedImpl(desc, () => fn(source.get()), mapSubscribe(source.onChange.bind(source), fn))    
         }
         throw Error("Unknown observable")    

@@ -1,15 +1,11 @@
-import { Scope, ScopeFn, Subscribe, Unsub, Observer } from "./abstractions"
+import { Scope, ScopeFn, Subscribe, Unsub, Observer, ObservableSeed, T_SCOPE } from "./abstractions"
 import { Dispatcher } from "./dispatcher"
+import { GenericTransformOpScoped } from "./transform";
 import { nop } from "./util";
 
-export class MutableScope extends Scope {
+export type MutableScope = Scope & {
     start: () => void;
     end: () => void;
-    constructor(fn: ScopeFn, start: () => void, end: () => void) {
-        super(fn)
-        this.start = start
-        this.end = end
-    }
 }
 
 export const globalScope: Scope = mkScope((onIn) => {
@@ -17,7 +13,10 @@ export const globalScope: Scope = mkScope((onIn) => {
 })
 
 export function mkScope(scopeFn: ScopeFn): Scope {
-    return new Scope(scopeFn)
+    const result = ((seed: ObservableSeed<any, any, any>) => seed.applyScope(result)) as Scope;
+    result.subscribe = scopeFn
+    result._L = T_SCOPE
+    return result
 }
 
 type OnIn = () => Unsub
@@ -28,34 +27,34 @@ export function createScope(): MutableScope {
     let ended = false
     const ins: OnIn[] = []
     const outs: OnOut[] = []
-    
-    return new MutableScope(
-        (onIn: OnIn, dispatcher?: Dispatcher<any>) => {
-            let onOut : Unsub | null = null
-            if (started) {
-                onOut = onIn()
-                outs.push(onOut)
-            } else {
-                ins.push(onIn)                
-            }
-                    
-        },        
-        () => {
-            started = true
-            for (let i of ins) {
-                outs.push(i())
-            }
-            ins.splice(0)            
-        },
-        () => {
-            started = false
-            ended = true
-            for (let o of outs) {
-                o()
-            }
-            outs.splice(0)            
+
+    const fn = (onIn: OnIn) => {
+        let onOut : Unsub | null = null
+        if (started) {
+            onOut = onIn()
+            outs.push(onOut)
+        } else {
+            ins.push(onIn)                
+        }                
+    }
+    const scope = mkScope(fn) as MutableScope
+
+    scope.start = () => {
+        started = true
+        for (let i of ins) {
+            outs.push(i())
         }
-    )
+        ins.splice(0)   
+    }
+    scope.end = () => {
+        started = false
+        ended = true
+        for (let o of outs) {
+            o()
+        }
+        outs.splice(0) 
+    }
+    return scope
 }
 
 export function intersectionScope(scopes: Scope[]): Scope {

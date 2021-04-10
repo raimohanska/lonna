@@ -11,6 +11,11 @@ describe("applyScope", () => {
         const x = later(0, 1).pipe(applyScope(globalScope))
         expect(isEventStream(x)).toEqual(true)
     })
+    
+    it("Using method", () => {
+        const x = later(0, 1).applyScope(globalScope)
+        expect(isEventStream(x)).toEqual(true)
+    })
 
     it("scopes an Existing EventStream", () => {
         const s = bus<string>()

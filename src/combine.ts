@@ -4,6 +4,7 @@ import { globalScope, intersectionScope } from "./scope";
 import { argumentsToObservablesAndFunction } from "./argumentstoobservables"
 import { cached } from "./cached";
 import { nop, rename, toString } from "./util";
+import { cachedFn } from "./cachedFn";
 
 /**
   Combines given *n* Properties and
@@ -63,7 +64,7 @@ export function combine<Out>(...args: any[]): PropertyLike<Out> {
   let [properties, combinator] = argumentsToObservablesAndFunction<Out, Property<Out>>(args);
   const seeds = !(properties.length === 0 || isProperty(properties[0]))
 
-  combinator = cached(combinator)
+  combinator = cachedFn(combinator)
 
   function getCurrentArray(): any[] {
     return properties.map(s => s.get())
