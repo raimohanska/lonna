@@ -30,7 +30,7 @@ describe("cached", () => {
             counter++
             return x
         }
-        const p = a.pipe(L.map(mapper), L.cached<number>(), L.applyScope(globalScope))
+        const p = a.pipe(L.map(mapper), L.cached(), L.applyScope(globalScope))
         p.get()
         expect(p.get()).toEqual(1)
         expect(counter).toEqual(1)

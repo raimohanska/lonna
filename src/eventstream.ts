@@ -1,6 +1,7 @@
 import { Event, EventLike, EventStream, EventStreamSeed, EventStreamSource, isEnd, ObservableSeed, Observer, Scope, Subscribe, toEvents, TypeBitfield, T_SOURCE, T_SCOPED, T_SEED, T_STREAM, Unsub, Desc } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { Dispatcher } from "./dispatcher";
+import { HKT } from "./hkt";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
 import { scopedSubscribe, scopedSubscribe1 } from "./scope";
 
@@ -9,6 +10,7 @@ type StreamEvents<V> = { "value": V }
 // TODO: consider how scopes should affect streams
 
 export abstract class EventStreamBase<V> extends ObservableBase<V, EventStream<V>> implements EventStream<V> {
+    public [HKT]!: EventStream<V>
     observableType(): "EventStream" | "Bus" { return "EventStream" }
     _L: TypeBitfield = T_STREAM | T_SCOPED
     abstract getScope(): Scope
@@ -63,6 +65,7 @@ export class SeedToStream<V> extends StatefulEventStream<V> {
 }
 
 export class EventStreamSourceImpl<V> extends ObservableBase<V, EventStream<V>> {
+    public [HKT]!: EventStreamSource<V>
     observableType() { return "EventStreamSource" as const }
     _L: TypeBitfield = T_STREAM | T_SOURCE
     subscribe: Subscribe<V>
@@ -79,6 +82,7 @@ export class EventStreamSourceImpl<V> extends ObservableBase<V, EventStream<V>> 
 
 
 export class EventStreamSeedImpl<V> extends ObservableSeedImpl<V, EventStreamSource<V>, EventStream<V>> implements EventStreamSeed<V> {
+    public [HKT]!: EventStreamSeed<V>
     observableType() { return "EventStreamSeed" as const }
     _L: TypeBitfield = T_STREAM | T_SEED
     constructor(desc: Desc, subscribe: Subscribe<V>) {

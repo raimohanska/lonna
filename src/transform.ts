@@ -1,8 +1,9 @@
-import { Atom, AtomSeed, composeDesc, Desc, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed, isPropertySeed, MethodDesc, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
+import { Atom, AtomSeed, composeDesc, Desc, EventStream, EventStreamSeed, isAtomSeed, isEventStreamSeed,ScopedObservable, isPropertySeed, MethodDesc, Observable, ObservableSeed, Observer, Property, PropertySeed, Scope, Subscribe } from "./abstractions";
 import { applyScopeMaybe } from "./applyscope";
 import { EventStreamSeedImpl } from "./eventstream";
 import { PropertySeedImpl } from "./property";
 import { AtomSeedImpl } from "./atom";
+import { HKT } from "./hkt";
 
 export type SubscriptionTransformer<A, B> = (subscribe: Subscribe<A>) => Subscribe<B>
 
@@ -82,12 +83,14 @@ export interface StreamTransformOpScoped<A, B> {
     (seed: EventStreamSeed<A> | EventStream<A>): EventStream<B>
 }
 
-export interface UnaryTransformOp<A, B extends A = A> {
-    <O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultFor<O, B>;
+export type In<ObsType, ValueType> = HKT<ObsType> & ObservableSeed<ValueType, any, any>
+
+export interface UnaryTransformOp<A, B = A> {
+    <O>(o: In<O, A>): StatefulUnaryTransformResultFor<O, B>;
 }
 
 export interface UnaryTransformOpScoped<A, B extends A = A> {
-    <O extends ObservableSeed<A, any, any>>(o: O): StatefulUnaryTransformResultScopedFor<O, B>;
+    <O>(o: In<O, A>): StatefulUnaryTransformResultScopedFor<O, B>;
 }
 
 export const IdentityTransformer = {        

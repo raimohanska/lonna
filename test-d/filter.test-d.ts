@@ -1,9 +1,22 @@
 import * as L from "../src/index"
 import { expectType } from "tsd"
 
-// This ok
+
 expectType<L.PropertySeed<number>>(L.constant(1).pipe(L.filter(n => n == 0)))
-// This fails. The only difference is the introduction of the const
+
+expectType<L.Property<number>>(L.constant(1).pipe(L.filter(n => n == 0, L.globalScope)))
+
 const seed = L.constant(1).pipe(L.filter(n => n == 0))
 expectType<L.PropertySeed<number>>(seed)
-// Restoring TypeGuards in filter.ts will cause more breakage
+
+expectType<L.PropertySeed<number>>(L.constant(1 as number | null).pipe(L.filter(nonNull)))
+
+
+
+
+
+
+
+function nonNull<A>(x: A | null): x is A {
+    return x !== null
+}

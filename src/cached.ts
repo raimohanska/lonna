@@ -1,8 +1,8 @@
 import { Scope } from "./abstractions";
-import { IdentityTransformer, transform, UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
+import { GenericTransformOp, GenericTransformOpScoped, IdentityTransformer, transform, UnaryTransformOp, UnaryTransformOpScoped } from "./transform";
 
-export function cached<A>(scope: Scope): UnaryTransformOpScoped<A>
-export function cached<A>(): UnaryTransformOp<A>
+export function cached(scope: Scope): GenericTransformOpScoped
+export function cached(): GenericTransformOp
 
 export function cached(f?: Scope): any {
     // cache for observables

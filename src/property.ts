@@ -1,5 +1,6 @@
 import { Event, isValue, ObservableSeed, Observer, Property, PropertySeed, PropertySource, Scope, Subscribe, TypeBitfield, T_SOURCE, T_PROPERTY, T_SCOPED, T_SEED, Unsub, valueEvent, Desc } from "./abstractions";
 import { Dispatcher } from "./dispatcher";
+import { HKT } from "./hkt";
 import { ObservableBase, ObservableSeedImpl } from "./observable";
 import { afterScope, beforeScope, checkScope, OutOfScope, scopedSubscribe } from "./scope";
 import { nop } from "./util";
@@ -7,6 +8,7 @@ import { nop } from "./util";
 type PropertyEvents<V> = { "change": V, "end": void }
 
 export abstract class PropertyBase<V, S extends Property<V>> extends ObservableBase<V, Property<V>> implements Property<V>, PropertySeed<V>, PropertySource<V> {
+    public [HKT]!: Property<V>
     observableType(): "Property" | "Atom" { return "Property" }
     constructor(desc: Desc) {
         super(desc)
@@ -109,6 +111,7 @@ export class StatefulProperty<V, S extends Property<V>> extends PropertyBase<V, 
  *  Must skip duplicates!
  **/
 export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>, Property<V>> implements PropertySeed<V> {
+    public [HKT]!: PropertySeed<V>
     observableType() { return "PropertySeed" as const }
     _L: TypeBitfield = T_PROPERTY | T_SEED
     constructor(desc: Desc, get: () => V, onChange: Subscribe<V>) {
@@ -121,6 +124,7 @@ export class PropertySeedImpl<V> extends ObservableSeedImpl<V, PropertySource<V>
 }
 
 export class PropertySourceImpl<V> extends ObservableBase<V, Property<V>> implements PropertySource<V> {
+    public [HKT]!: PropertySource<V>
     _L: TypeBitfield = T_PROPERTY | T_SOURCE
     observableType() { return "PropertySource" as const }
     private _started = false

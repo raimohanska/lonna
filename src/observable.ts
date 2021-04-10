@@ -1,4 +1,5 @@
 import { Desc, Description, Observable, ObservableSeed, Observer, Scope, ScopedObservable, TypeBitfield, Unsub, valueObserver } from "./abstractions"
+import { HKT } from "./hkt"
 import { Pipeable } from "./pipeable"
 import { nop } from "./util"
 
