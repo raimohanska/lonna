@@ -1,6 +1,6 @@
-import { bus } from "./bus";
-import { log } from "./index";
-import { nop } from "./util";
+import { bus } from "./bus"
+import { log } from "./index"
+import { nop } from "./util"
 
 describe("Property.log", () => {
   it("Calls given function for values", () => {
@@ -14,9 +14,12 @@ describe("Property.log", () => {
 
       b.push(1)
       b.push(2)
-      expect(logs).toEqual([["msg", 1], ["msg", 2]])  
+      expect(logs).toEqual([
+        ["msg", 1],
+        ["msg", 2],
+      ])
     } finally {
       console.log(origLog)
     }
   })
-});
+})

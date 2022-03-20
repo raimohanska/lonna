@@ -1,8 +1,8 @@
-import { EventStream } from "./abstractions";
-import { StatelessEventStream } from "./eventstream";
-import { toFlexibleObserver } from "./fromsubscribe";
-import { globalScope } from "./scope";
-import { toString } from "./tostring";
+import { EventStream } from "./abstractions"
+import { StatelessEventStream } from "./eventstream"
+import { toFlexibleObserver } from "./fromsubscribe"
+import { globalScope } from "./scope"
+import { toString } from "./tostring"
 export type EventSourceFn = (binder: Function, listener: Function) => any
 
 function isEventSourceFn(x: any): x is EventSourceFn {
@@ -31,26 +31,30 @@ function isEventSourceFn(x: any): x is EventSourceFn {
 // Returns EventStream
 /** @hidden */
 var eventMethods = [
-  ["addEventListener","removeEventListener"],
+  ["addEventListener", "removeEventListener"],
   ["addListener", "removeListener"],
   ["on", "off"],
-  ["bind", "unbind"]
-];
+  ["bind", "unbind"],
+]
 
-var findHandlerMethods = function(target: any): [Function, Function] {
-  var pair;
+var findHandlerMethods = function (target: any): [Function, Function] {
+  var pair
   for (var i = 0; i < eventMethods.length; i++) {
-    pair = eventMethods[i];
-    var methodPair = [target[pair[0]], target[pair[1]]];
-    if (methodPair[0] && methodPair[1]) { return <any>methodPair; }
+    pair = eventMethods[i]
+    var methodPair = [target[pair[0]], target[pair[1]]]
+    if (methodPair[0] && methodPair[1]) {
+      return <any>methodPair
+    }
   }
   for (var j = 0; j < eventMethods.length; j++) {
-    pair = eventMethods[j];
-    var addListener = target[pair[0]];
-    if (addListener) { return [addListener, function() {}]; }
+    pair = eventMethods[j]
+    var addListener = target[pair[0]]
+    if (addListener) {
+      return [addListener, function () {}]
+    }
   }
-  throw new Error("No suitable event methods in " + target);
-};
+  throw new Error("No suitable event methods in " + target)
+}
 
 /**
  creates an EventStream from events
@@ -82,16 +86,23 @@ var findHandlerMethods = function(target: any): [Function, Function] {
  @typeparam V Type of stream elements
 
  */
-export function fromEvent<V>(target: any, eventSource: string | EventSourceFn): EventStream<V> {
-  var [sub, unsub] = findHandlerMethods(target);
-  return new StatelessEventStream(["fromEvent", [target, eventSource]], (onValue, onEnd) => {
-    const handler = toFlexibleObserver(onValue, onEnd)
-    if (isEventSourceFn(eventSource)) {
-      eventSource(sub.bind(target), handler);
-      return () => eventSource(unsub.bind(target), handler);
-    } else {
-      sub.call(target, eventSource, handler);
-      return () => unsub.call(target, eventSource, handler);
-    }
-  }, globalScope)
+export function fromEvent<V>(
+  target: any,
+  eventSource: string | EventSourceFn
+): EventStream<V> {
+  var [sub, unsub] = findHandlerMethods(target)
+  return new StatelessEventStream(
+    ["fromEvent", [target, eventSource]],
+    (onValue, onEnd) => {
+      const handler = toFlexibleObserver(onValue, onEnd)
+      if (isEventSourceFn(eventSource)) {
+        eventSource(sub.bind(target), handler)
+        return () => eventSource(unsub.bind(target), handler)
+      } else {
+        sub.call(target, eventSource, handler)
+        return () => unsub.call(target, eventSource, handler)
+      }
+    },
+    globalScope
+  )
 }

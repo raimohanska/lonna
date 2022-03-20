@@ -1,14 +1,14 @@
 import * as L from "../dist/index.js"
 
-const id = x => x
+const id = (x) => x
 const root = L.bus()
 const view = L.view(root, id, id, id, id, id, id, id, id, id, id, id, id)
-view.forEach(x => {})
+view.forEach((x) => {})
 
 const rounds = 1000000
 const start = new Date().getTime()
 for (let i = 0; i < rounds; i++) {
-    root.push("HELLO")
+  root.push("HELLO")
 }
 const now = new Date().getTime()
 const elapsed = now - start

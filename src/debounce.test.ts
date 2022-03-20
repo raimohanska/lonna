@@ -1,37 +1,54 @@
-import { applyScope, constant, debounce, isEventStream, never, toProperty } from ".";
-import { expectPropertyEvents, expectStreamEvents, expectStreamTimings, series, testScope } from "./test-utils";
+import {
+  applyScope,
+  constant,
+  debounce,
+  isEventStream,
+  never,
+  toProperty,
+} from "."
+import {
+  expectPropertyEvents,
+  expectStreamEvents,
+  expectStreamTimings,
+  series,
+  testScope,
+} from "./test-utils"
 
 describe("EventStream.debounce(delay)", function () {
-    describe("throttles input by given delay", () =>
-        expectStreamEvents(
-            () => {
-                const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7))
-                return s
-            },
-            [2])
-    );
-    describe("waits for a quiet period before outputing anything", () =>
-        expectStreamTimings(
-            () => series(2, [1, 2, 3, 4]).pipe(debounce(3)),
-            [[11, 4]])
-    );
+  describe("throttles input by given delay", () =>
+    expectStreamEvents(() => {
+      const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7))
+      return s
+    }, [2]))
+  describe("waits for a quiet period before outputing anything", () =>
+    expectStreamTimings(
+      () => series(2, [1, 2, 3, 4]).pipe(debounce(3)),
+      [[11, 4]]
+    ))
 
-    it ("Scoped debounce", () => {
-        const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7, testScope()))
-        expect(isEventStream(s)).toEqual(true)
-    })
+  it("Scoped debounce", () => {
+    const s = series(2, [1, 1, 1, 1, 2]).pipe(debounce(7, testScope()))
+    expect(isEventStream(s)).toEqual(true)
+  })
 
-    it("toString", () => expect(debounce(1)(never()).toString()).toEqual("EventStreamSeed never.debounce(1)"));
-});
+  it("toString", () =>
+    expect(debounce(1)(never()).toString()).toEqual(
+      "EventStreamSeed never.debounce(1)"
+    ))
+})
 
 describe("Property.debounce", function () {
-    describe("throttles changes, but not initial value", () =>
-        expectPropertyEvents(
-            () => {
-                const p = series(1, [1, 2, 3]).pipe(debounce(4), toProperty(0), applyScope(testScope()))
-                return p
-            },
-            [0, 3])
-    );
-    it("toString", () => expect(debounce(1)(constant(0)).toString()).toEqual("PropertySeed constant(0).debounce(1)"));
-});
+  describe("throttles changes, but not initial value", () =>
+    expectPropertyEvents(() => {
+      const p = series(1, [1, 2, 3]).pipe(
+        debounce(4),
+        toProperty(0),
+        applyScope(testScope())
+      )
+      return p
+    }, [0, 3]))
+  it("toString", () =>
+    expect(debounce(1)(constant(0)).toString()).toEqual(
+      "PropertySeed constant(0).debounce(1)"
+    ))
+})

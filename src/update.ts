@@ -1,9 +1,18 @@
-import { Scope, EventStream, EventStreamSeed, isEventStreamSeed, isPropertySeed, Property, PropertySeed, isScope } from "./abstractions"
+import {
+  Scope,
+  EventStream,
+  EventStreamSeed,
+  isEventStreamSeed,
+  isPropertySeed,
+  Property,
+  PropertySeed,
+  isScope,
+} from "./abstractions"
 import { merge } from "./merge"
 import { scan } from "./scan"
 import { map } from "./map"
 import { applyScopeMaybe } from "./applyscope"
-import { toString } from "./tostring"
+import { toString } from "./tostring"
 import { rename } from "./util"
 
 export type UpdateTrigger<T> = EventStream<T> | EventStreamSeed<T>
@@ -12,38 +21,71 @@ type UpdateParam<T> = UpdateTrigger<T> | Property<T>
 /**
  *  [Update](#update) pattern consisting of a single EventStream and a accumulator function.
  */
-export type UpdatePattern1<I1,O> = [UpdateTrigger<I1>, O | ((acc: O, a: I1) => O)]
+export type UpdatePattern1<I1, O> = [
+  UpdateTrigger<I1>,
+  O | ((acc: O, a: I1) => O)
+]
 /**
  *  [Update](#update) pattern consisting of 2 Observables and an accumulrator function.
  */
-export type UpdatePattern2<I1,I2,O> = [UpdateTrigger<I1>, Property<I1>, O | ((acc: O, a: I1, b: I2) => O)]
+export type UpdatePattern2<I1, I2, O> = [
+  UpdateTrigger<I1>,
+  Property<I1>,
+  O | ((acc: O, a: I1, b: I2) => O)
+]
 /**
  *  [Update](#update) pattern consisting of 3 Observables and an accumulrator function.
  */
-export type UpdatePattern3<I1,I2,I3,O> = [UpdateTrigger<I1>, Property<I1>, Property<I3>, O | ((acc: O, a: I1, b: I2, c: I3) => O)]
+export type UpdatePattern3<I1, I2, I3, O> = [
+  UpdateTrigger<I1>,
+  Property<I1>,
+  Property<I3>,
+  O | ((acc: O, a: I1, b: I2, c: I3) => O)
+]
 /**
  *  [Update](#update) pattern consisting of 4 Observables and an accumulrator function.
  */
-export type UpdatePattern4<I1,I2,I3,I4,O> = [UpdateTrigger<I1>, Property<I1>, Property<I3>, Property<I4>, O | ((acc: O, a: I1, b: I2, c: I3, d: I4) => O)]
+export type UpdatePattern4<I1, I2, I3, I4, O> = [
+  UpdateTrigger<I1>,
+  Property<I1>,
+  Property<I3>,
+  Property<I4>,
+  O | ((acc: O, a: I1, b: I2, c: I3, d: I4) => O)
+]
 /**
  *  [Update](#update) pattern consisting of 5 Observables and an accumulrator function.
  */
-export type UpdatePattern5<I1,I2,I3,I4,I5,O> = [UpdateTrigger<I1>, Property<I1>, Property<I3>, Property<I4>, Property<I5>, O | ((acc: O, a: I1, b: I2, c: I3, d: I4, e: I5) => O)]
+export type UpdatePattern5<I1, I2, I3, I4, I5, O> = [
+  UpdateTrigger<I1>,
+  Property<I1>,
+  Property<I3>,
+  Property<I4>,
+  Property<I5>,
+  O | ((acc: O, a: I1, b: I2, c: I3, d: I4, e: I5) => O)
+]
 /**
  *  [Update](#update) pattern consisting of 6 Observables and an accumulrator function.
  */
-export type UpdatePattern6<I1,I2,I3,I4,I5,I6,O> = [UpdateTrigger<I1>, Property<I1>, Property<I3>, Property<I4>, Property<I5>, Property<I6>, O | ((acc: O, a: I1, b: I2, c: I3, d: I4, e: I5, f: I6) => O)]
+export type UpdatePattern6<I1, I2, I3, I4, I5, I6, O> = [
+  UpdateTrigger<I1>,
+  Property<I1>,
+  Property<I3>,
+  Property<I4>,
+  Property<I5>,
+  Property<I6>,
+  O | ((acc: O, a: I1, b: I2, c: I3, d: I4, e: I5, f: I6) => O)
+]
 
 /**
  *  [Update](#update) pattern type, allowing up to 6 sources per pattern.
  */
 export type UpdatePattern<O> =
-  UpdatePattern1<any, O> |
-  UpdatePattern2<any, any, O> |
-  UpdatePattern3<any, any, any, O> |
-  UpdatePattern4<any, any, any, any, O> |
-  UpdatePattern5<any, any, any, any, any, O> |
-  UpdatePattern6<any, any, any, any, any, any, O>
+  | UpdatePattern1<any, O>
+  | UpdatePattern2<any, any, O>
+  | UpdatePattern3<any, any, any, O>
+  | UpdatePattern4<any, any, any, any, O>
+  | UpdatePattern5<any, any, any, any, any, O>
+  | UpdatePattern6<any, any, any, any, any, any, O>
 
 /**
  Creates a Property from an initial value and updates the value based on multiple inputs.
@@ -81,46 +123,69 @@ export type UpdatePattern<O> =
  * @param {UpdatePattern<Out>} patterns
  * @returns {Property<Out>}
  */
-export function update<Out>(initial: Out, ...patterns: UpdatePattern<Out>[]): PropertySeed<Out>;
-export function update<Out>(scope: Scope, initial: Out, ...patterns: UpdatePattern<Out>[]): Property<Out>;
+export function update<Out>(
+  initial: Out,
+  ...patterns: UpdatePattern<Out>[]
+): PropertySeed<Out>
+export function update<Out>(
+  scope: Scope,
+  initial: Out,
+  ...patterns: UpdatePattern<Out>[]
+): Property<Out>
 
 export function update<Out>(...args: any[]): any {
-    let scope: Scope | undefined;
-    let initial: Out;
-    let patterns: UpdatePattern<Out>[];
-    if (isScope(args[0])) {
-        scope = args[0]
-        initial = args[1]
-        patterns = args.slice(2)
-    } else {
-        scope = undefined;
-        initial = args[0]
-        patterns = args.slice(1)
-    }
-    
-    let mutators: EventStreamSeed<Mutation<Out>>[] = patterns.map(pattern => {
-        if (pattern.length < 2) throw Error(`Illegal pattern ${pattern}, length must be >= 2`)
-        let sources: UpdateParam<Out>[] = pattern.slice(0, pattern.length - 1) as any
-        const trigger = sources[0]
-        if (!isEventStreamSeed(trigger)) throw Error(`Illegal pattern ${pattern}, must contain one EventStream`)
-        const properties = sources.slice(1) as Property<any>[]
-        for (let prop of properties) {
-            if (!isPropertySeed(prop)) throw Error(`Illegal pattern ${pattern}. After one EventStream the rest on the observables must be Properties`)
-        }
-        let combinator = pattern[pattern.length - 1] as (...args: any) => Out
-        if (!(combinator instanceof Function)) {
-            const constantValue = combinator
-            combinator = () => constantValue
-        }
-        return map((v1 => {
-            return (state: Out) => {
-                const propValues = properties.map(p => p.get())
-                return combinator(state, v1, ...propValues)
-            }
-        }))(trigger as EventStreamSeed<any>)
-    })
+  let scope: Scope | undefined
+  let initial: Out
+  let patterns: UpdatePattern<Out>[]
+  if (isScope(args[0])) {
+    scope = args[0]
+    initial = args[1]
+    patterns = args.slice(2)
+  } else {
+    scope = undefined
+    initial = args[0]
+    patterns = args.slice(1)
+  }
 
-    return rename(["update", [initial, patterns]], applyScopeMaybe(scan<Mutation<Out>, Out>(initial, (state, mutation) => mutation(state))(merge(mutators)), scope))
+  let mutators: EventStreamSeed<Mutation<Out>>[] = patterns.map((pattern) => {
+    if (pattern.length < 2)
+      throw Error(`Illegal pattern ${pattern}, length must be >= 2`)
+    let sources: UpdateParam<Out>[] = pattern.slice(
+      0,
+      pattern.length - 1
+    ) as any
+    const trigger = sources[0]
+    if (!isEventStreamSeed(trigger))
+      throw Error(`Illegal pattern ${pattern}, must contain one EventStream`)
+    const properties = sources.slice(1) as Property<any>[]
+    for (let prop of properties) {
+      if (!isPropertySeed(prop))
+        throw Error(
+          `Illegal pattern ${pattern}. After one EventStream the rest on the observables must be Properties`
+        )
+    }
+    let combinator = pattern[pattern.length - 1] as (...args: any) => Out
+    if (!(combinator instanceof Function)) {
+      const constantValue = combinator
+      combinator = () => constantValue
+    }
+    return map((v1) => {
+      return (state: Out) => {
+        const propValues = properties.map((p) => p.get())
+        return combinator(state, v1, ...propValues)
+      }
+    })(trigger as EventStreamSeed<any>)
+  })
+
+  return rename(
+    ["update", [initial, patterns]],
+    applyScopeMaybe(
+      scan<Mutation<Out>, Out>(initial, (state, mutation) => mutation(state))(
+        merge(mutators)
+      ),
+      scope
+    )
+  )
 }
 
 type Mutation<V> = (prev: V) => V

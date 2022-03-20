@@ -18,7 +18,8 @@
     "ts-jest": "^26.4.0",
     "tsc-watch": "^4.2.9",
     "tsd": "^0.14.0",
-    "typescript": "^4.2"
+    "typescript": "^4.2",
+    "prettier": "^2.2.1"
   },
   "dependencies": {
     "optics-ts": "^1.2.0"
@@ -33,6 +34,7 @@
     "test:watch": "jest --watchAll",
     "tsd": "tsd",
     "tsd:watch": "nodemon --exec 'yarn tsd' --watch test-d --watch src -e ts",
-    "prepublishOnly": "rm -rf dist && yarn build"
+    "prepublishOnly": "rm -rf dist && yarn build",
+    "format": "prettier --write ."
   }
 }

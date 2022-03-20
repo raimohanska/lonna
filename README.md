@@ -19,7 +19,7 @@ Then there's a whole application written with Harmaja and Lonna.
 
 ## Tutorial
 
-I assume you can read TypeScript, which I'm using the examples and which also is the native language of Lonna. 
+I assume you can read TypeScript, which I'm using the examples and which also is the native language of Lonna.
 For clarity, I'll be using a lot of explicit types, while in practice TypeScript can infer a lot of them for you.
 
 As the Tutorial here is quite incomplete, I urge you to check out [Harmaja Readme](https://github.com/raimohanska/harmaja) for applied usage of Lonna.
@@ -40,34 +40,40 @@ type Atom<A> = {
 You can use an Atom like this.
 
 ```typescript
-import * as L from "lonna";
+import * as L from "lonna"
 type Person = {
-    nick: string,
-    name: string
+  nick: string
+  name: string
 }
 type State = {
-    user: Person;
-    friends: Person[]
+  user: Person
+  friends: Person[]
 }
-const state: L.Atom<State> = L.atom<State>({ user: { nick: "raimohanska", name: "Juha" }, friends: [] });
+const state: L.Atom<State> = L.atom<State>({
+  user: { nick: "raimohanska", name: "Juha" },
+  friends: [],
+})
 state.get() // returns current state
-state.set({ user: { nick: "raimohanska", name: "Juha" }, friends: [{ nick: "akheron", name: "Petri" }] });
-state.forEach((s : State) => {
-    // render your UI here
-    // This callback is called immediately for the initial value,
-    // as well as each time the value changes.
+state.set({
+  user: { nick: "raimohanska", name: "Juha" },
+  friends: [{ nick: "akheron", name: "Petri" }],
+})
+state.forEach((s: State) => {
+  // render your UI here
+  // This callback is called immediately for the initial value,
+  // as well as each time the value changes.
 })
 ```
 
 ### Decomposing State with Views
 
 Application UIs tend to be built from components. In a component you are like to be dealing with some "slice" of the application's state and often would prefer to have abstractions that expose only the desired part of application state
-to your component. With Lonna Atoms, you can create a *view* into your state to gain a read-write
+to your component. With Lonna Atoms, you can create a _view_ into your state to gain a read-write
 `Atom` representing a state slice. In the previous example the way I updated `friends` was clumsy in the way that I had to
 replace the whole atom state instead of dealing with friends only. Instead I can do
 
 ```typescript
-const friends: L.Atom<Person[]> = L.view(state, "friends"); // Yes, this is fully type-safe even though using a string.
+const friends: L.Atom<Person[]> = L.view(state, "friends") // Yes, this is fully type-safe even though using a string.
 friends.set([{ nick: "akheron", name: "Petri" }])
 ```
 
@@ -77,44 +83,44 @@ When I set a new value to the view Atom, the original Atom's value will be repla
 In addition to field names as strings, numeric indices can be used to access array elements:
 
 ```typescript
-const bestFriend: L.Atom<Person> = L.view(friends, 0);
+const bestFriend: L.Atom<Person> = L.view(friends, 0)
 const bestFriendName: L.Atom<string> = L.view(bestFriend, "name")
 const currentValueOfName: string = bestFriendName.get()
 ```
 
-For advanced read-write views into data, you can replace string keys and numeric indices with *Lenses* as defined in [Lens.ts](https://github.com/raimohanska/lonna/blob/master/src/lens.ts). [Optics-ts Lenses and Isomorphisms](https://github.com/akheron/optics-ts) are also supported out of the box.
+For advanced read-write views into data, you can replace string keys and numeric indices with _Lenses_ as defined in [Lens.ts](https://github.com/raimohanska/lonna/blob/master/src/lens.ts). [Optics-ts Lenses and Isomorphisms](https://github.com/akheron/optics-ts) are also supported out of the box.
 
 ### Read-only views for calculated values
 
-Sometimes you may want to have a *calculated value* that depends on one or more of other dynamic values. You'll of course
+Sometimes you may want to have a _calculated value_ that depends on one or more of other dynamic values. You'll of course
 want to be able to observe changes to this value and reflect it in your UI just like with Atom. You can do also this
 with `L.view` by proving a function like this:
 
 ```typescript
-const friends: L.Atom<Person[]>;
-const numberOfFriends: L.Property<number> = L.view(friends, f => f.length);
+const friends: L.Atom<Person[]>
+const numberOfFriends: L.Property<number> = L.view(friends, (f) => f.length)
 ```
 
 The type of these read-only calculated values is `Property` which is like an `Atom` but lacks the `set` and `modify` methods. In fact, [`Atom<A> extends Property<A>`](https://github.com/raimohanska/lonna/blob/master/src/abstractions.ts#L166). Just like with Atoms, you can react to changes in a Property using `forEach`:
 
 ```typescript
-numberOfFriends.forEach(n => console.log(`You have ${n} friends.`));
+numberOfFriends.forEach((n) => console.log(`You have ${n} friends.`))
 ```
 
 Duplicate values are automatically skipped, so if the contents of the `friends` array above changes but the length remains the
-same, your side-effects are not run for these duplicate values. 
+same, your side-effects are not run for these duplicate values.
 
 You can also create calculated values based on multiple `Atoms` or `Properties`:
 
 ```typescript
-const friends: L.Property<Person[]>;
-const myName: L.Property<string>;
+const friends: L.Property<Person[]>
+const myName: L.Property<string>
 const namesakes: L.Property<Person[]> = L.view(myName, friends, (n, fs) => {
-    return fs.filter(f => f.name === n)
+  return fs.filter((f) => f.name === n)
 })
 ```
 
-The views that are based on multiple inputs are, of course, updated when any of the inputs is changed. Then your "combinator function" is run for the new values. 
+The views that are based on multiple inputs are, of course, updated when any of the inputs is changed. Then your "combinator function" is run for the new values.
 
 Duplicates in the result value are skipped just like for any Properties and Atoms. Lonna checks for equality using `===` internally. If you want to skip duplicates with a custom equality operator, such as deep equality, you can do so by using [`skipDuplicates`](https://github.com/raimohanska/lonna/blob/master/src/skipDuplicates.ts) like `value.pipe(T.skipDuplicates(equals))` assuming you had [equals](https://ramdajs.com/docs/#equals) imported from from Ramda.
 
@@ -137,12 +143,12 @@ Hence, for values based on events, you may want to consider using `L.toStateless
 an observable Property:
 
 ```typescript
-const scrollPos: L.Property<number> = L.fromEvent(window, "scroll")
-    .pipe(L.toStatelessProperty(() => Math.floor(window.scrollY)))
-
+const scrollPos: L.Property<number> = L.fromEvent(window, "scroll").pipe(
+  L.toStatelessProperty(() => Math.floor(window.scrollY))
+)
 ```
 
-To break this down a bit, we start with `L.fromEvent(window, "scroll")` which gives us an `L.EventStream` that represents the 
+To break this down a bit, we start with `L.fromEvent(window, "scroll")` which gives us an `L.EventStream` that represents the
 Window "scroll" events as an observable stream. See the [EventStream](#eventstream) chapter for more. Then we use `L.toStatelessProperty` which creates a
 Property that's updated each time an event occurs in the given EventStream and gets it's current value using the given function. In this case the value is got from `window.scrollY`.
 
@@ -150,21 +156,21 @@ Now because the Property created by `L.toStatelessProperty` is stateless and ext
 
 ### Unidirectional data flow
 
-Unidirectional data flow, popularized by Redux, is a leading state management pattern in web frontends today. In short, it means that you have a (usually essentially) global data *store* or stores that represent pretty much the entire application state. Changes to this state are not effected directly by UI components but instead by dispacthing *events* or *actions* which then are processed by *reducers* and applied to the global state. The state is treated as an immutable object and every time the reducers applies a new change to state, it effectively creates an entire new state object. 
+Unidirectional data flow, popularized by Redux, is a leading state management pattern in web frontends today. In short, it means that you have a (usually essentially) global data _store_ or stores that represent pretty much the entire application state. Changes to this state are not effected directly by UI components but instead by dispacthing _events_ or _actions_ which then are processed by _reducers_ and applied to the global state. The state is treated as an immutable object and every time the reducers applies a new change to state, it effectively creates an entire new state object.
 
 In Typescript, you could represent these concepts in the context of a Todo App like this:
 
 ```typescript
-type Item = { id: Id, name: string }
-type AppEvent = 
-    { action: "add", name: string } | 
-    { action: "remove", id: Id } |
-    { action: "update", item: Item }
-type State = {items: Item[]}
+type Item = { id: Id; name: string }
+type AppEvent =
+  | { action: "add"; name: string }
+  | { action: "remove"; id: Id }
+  | { action: "update"; item: Item }
+type State = { items: Item[] }
 type Reducer = (currentState: State, event: AppEvent) => State
 interface Store {
-    dispatch(event: AppEvent)
-    subscribe(observer: (event: AppEvent) => void)
+  dispatch(event: AppEvent)
+  subscribe(observer: (event: AppEvent) => void)
 }
 ```
 
@@ -176,7 +182,7 @@ The benefits are (to many, nowadays) obvious. These come from the top of my mind
 - The immutable global state object makes persisting and restoring application state easier, and makes it possible to create and audit trail of all events and state history. It also makes it easier to pass the application state for browser-side hydration after a server-side render.
 - Generally, reasoning about application logic is easier if there is a pattern, instead of a patchwork of ad hoc solutions
 
-Implementations such as Redux allow components to *react* to a select part of global state (instead of all changes) to avoid expensive updates. With React hooks, you can conveniently just `useSelector(state => pick interesting parts)` and you're done.
+Implementations such as Redux allow components to _react_ to a select part of global state (instead of all changes) to avoid expensive updates. With React hooks, you can conveniently just `useSelector(state => pick interesting parts)` and you're done.
 
 It's not a silver bullet though. Especially when using a single global store with React / Redux
 
@@ -189,16 +195,16 @@ Other interesting examples of Unidirectional data flow include [Elm](https://elm
 
 ### Unidirectional data flow with Lonna
 
-In Lonna, you can implement Unidirectional data flow too. Sticking with the Todo App example, you define your events as [*buses*](https://github.com/raimohanska/lonna/blob/master/src/abstractions.ts#L145):
+In Lonna, you can implement Unidirectional data flow too. Sticking with the Todo App example, you define your events as [_buses_](https://github.com/raimohanska/lonna/blob/master/src/abstractions.ts#L145):
 
 ```typescript
 import * as L from "lonna"
 
-type Item = { id: Id, name: string }
-type AppEvent = 
-    { action: "add", name: string } | 
-    { action: "remove", id: Id } |
-    { action: "update", item: Item }
+type Item = { id: Id; name: string }
+type AppEvent =
+  | { action: "add"; name: string }
+  | { action: "remove"; id: Id }
+  | { action: "update"; item: Item }
 const appEvents = L.bus<AppEvent>()
 ```
 
@@ -208,23 +214,28 @@ The bus objects allow you to dispatch an event by calling their `push` method. F
 const initialItems: TodoItem[] = []
 function reducer(items: TodoItem[], event: AppEvent): TodoItem[] {
   switch (event.action) {
-    case "add": return items.concat(todoItem(event.name))
-    case "remove": return items.filter(i => i.id !== event.id)
-    case "update": return items.map(i => i.id === event.item.id ? event.item : i)
+    case "add":
+      return items.concat(todoItem(event.name))
+    case "remove":
+      return items.filter((i) => i.id !== event.id)
+    case "update":
+      return items.map((i) => (i.id === event.item.id ? event.item : i))
   }
 }
-const allItems: L.Property<TodoItem[]> = appEvents.pipe(L.scan(initialItems, reducer, L.globalScope))
+const allItems: L.Property<TodoItem[]> = appEvents.pipe(
+  L.scan(initialItems, reducer, L.globalScope)
+)
 ```
 
 The `L.globalScope` parameter is used to specify the lifetime of the `allItems` property, i.e. how long it will be kept up-to-date. When using `globalScope` the property updates will never stop. See the [Stateful views and Lifetimes](#stateful-views-and-lifetimes) chapter for more.
-When creating statetul Properties within [Harmaja](https://github.com/raimohanska/harmaja) components, you can also use `componentScope()` from `import { componentScope } from "harmaja"`, to stop updates after the components has been unmounted.
+When creating statetul Properties within [Harmaja](https://github.com/raimohanska/harmaja) components, you can also use `componentScope()` from `import { componentScope } from "harmaja"`, to stop updates after the components has been unmounted.
 
 You can, if you like, then encapsulate all this into something like
 
 ```typescript
 interface TodoStore {
-    dispatch: (action: AppEvent) => void
-    items: L.Property<TodoItem[]>
+  dispatch: (action: AppEvent) => void
+  items: L.Property<TodoItem[]>
 }
 ```
 
@@ -234,16 +245,20 @@ interface TodoStore {
 
 So now, whether you base your application state on Atoms or Events and Reducers, you'll have composable Properties that present your application state. Remember that Atoms are also Properties, with the added mutation methods `set` and `modify`.
 
-You can use both approaches and even combine them by creating *dependent atoms* that are based on a read-only Property and a way to dispatch changes upwards.
+You can use both approaches and even combine them by creating _dependent atoms_ that are based on a read-only Property and a way to dispatch changes upwards.
 
-For example, in the Todo Application above, if we wanted to create an Atom to represent the state of a Todo Item on the list, we create such a *dependent atom* thus:
+For example, in the Todo Application above, if we wanted to create an Atom to represent the state of a Todo Item on the list, we create such a _dependent atom_ thus:
 
 ```typescript
-    function itemAtom(index: number, store: TodoStore): L.Atom<Item> {
-        const itemState: L.Property<TodoItem> = L.view(store.items, items => items[index])
-        const setItemState = (newState: TodoItem) => store.dispatch({ action: "update", item: newState})
-        return L.atom(itemState, setItemState)
-    }    
+function itemAtom(index: number, store: TodoStore): L.Atom<Item> {
+  const itemState: L.Property<TodoItem> = L.view(
+    store.items,
+    (items) => items[index]
+  )
+  const setItemState = (newState: TodoItem) =>
+    store.dispatch({ action: "update", item: newState })
+  return L.atom(itemState, setItemState)
+}
 ```
 
 ### Subscription lifecycle
@@ -254,7 +269,7 @@ And indeed the `forEach` method provides a way to unsubscribe, by returning an `
 
 ```typescript
 interface ForEach<V> {
-    forEach(observer: Observer<V>): Unsub;
+  forEach(observer: Observer<V>): Unsub
 }
 type Unsub = () => void
 ```
@@ -262,13 +277,15 @@ type Unsub = () => void
 So you can unsubscribe like this.
 
 ```typescript
-const unsub: L.Unsub = numberOfFriends.forEach(n => console.log(`You have ${n} friends.`));
+const unsub: L.Unsub = numberOfFriends.forEach((n) =>
+  console.log(`You have ${n} friends.`)
+)
 // at some later phase we'll unsubscibe simply thus:
 
-unsub();
+unsub()
 ```
 
-Not unsubscribing can lead to memory leaks as well as unwanted behavior, when Lonna calls your callbacks while the UI 
+Not unsubscribing can lead to memory leaks as well as unwanted behavior, when Lonna calls your callbacks while the UI
 component is already disposed.
 
 No panic. In most cases you don't need to worry about this.
@@ -288,15 +305,15 @@ All of the abstractions below have something in common and that's `Observable<V>
 type Unsub = () => void
 
 interface Observable<V> {
-    forEach(observer: Observer<V>): Unsub;
-    subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub;
-    log(message?: string): Unsub;
+  forEach(observer: Observer<V>): Unsub
+  subscribe(onValue: Observer<V>, onEnd?: Observer<void>): Unsub
+  log(message?: string): Unsub
 }
 ```
 
 TODO: add typedocs to source code and copy here as well.
 
-The interesting method is `forEach` for getting callbacks for all values emitted by this Observable. 
+The interesting method is `forEach` for getting callbacks for all values emitted by this Observable.
 
 The `subscribe` method provides a way to react to end-of-updates as well, which is not usually useful application programming, but more for internal use and building new transforms, such as `map`, `filter` and `flatMap`.
 
@@ -308,15 +325,14 @@ A `Property<V>` is an `Observable<V>` that represents a read-only observable var
 
 ```typescript
 interface Propert<V> extends Observable<V> {
-    /** Get current value */
-    get(): V
-    /** Callback for changes and end-of-updates. Not called for initial value. */
-    onChange(onValue: Observer<V>, onEnd?: Observer<void> | undefined): Unsub;
+  /** Get current value */
+  get(): V
+  /** Callback for changes and end-of-updates. Not called for initial value. */
+  onChange(onValue: Observer<V>, onEnd?: Observer<void> | undefined): Unsub
 }
 ```
 
 So you can read the value synchronously as well as register for updates. The essential differene between using `forEach` and `onChange` is that the former calls your callback immediately with current value, followed by any updates, while the latter provides the updates only.
-
 
 #### Atom
 
@@ -324,8 +340,8 @@ So you can read the value synchronously as well as register for updates. The ess
 
 ```typescript
 type Atom<V> = Property<V> & {
-    set(newValue: V): void
-    modify(fn: (old: V) => V): void
+  set(newValue: V): void
+  modify(fn: (old: V) => V): void
 }
 ```
 
@@ -336,7 +352,7 @@ While a `Property<V>` represents an observable variable of type `V`, and `EventS
 It does not add any methods to Observable, so it could be described as
 
 ```typescript
-type EventStream<V> = Observable<V>;
+type EventStream<V> = Observable<V>
 ```
 
 #### Bus
@@ -345,8 +361,8 @@ The `Bus<V>` is an `EventStream<V>` which also allows pushing events into it. So
 
 ```typescript
 interface Bus<V> extends EventStream<V> {
-    push(newValue: V): void
-    end(): void
+  push(newValue: V): void
+  end(): void
 }
 ```
 
@@ -354,17 +370,17 @@ The interesting method here is `push`, while `end` is here mostly for completene
 
 ### Stateful views and Lifetimes
 
-In Lonna, all stateful Properties have a *lifetime*, which was earlierly mentioned when dealing with `scan`. The lifetime determines the duration during which the observable will be kept up to date. This mechanism is needed to ensure that
+In Lonna, all stateful Properties have a _lifetime_, which was earlierly mentioned when dealing with `scan`. The lifetime determines the duration during which the observable will be kept up to date. This mechanism is needed to ensure that
 
 1. All stateful Properties are kept up to date (instead of having possible stale values)
 2. We also stop keeping them up to date when they are not needed (instead of leaking resources)
 
-So when you create a stateful Property using methods such as `scan` or `filter`, you'll either need to provide a `Scope` parameter such as `L.globalScope` or you'll end up with a `PropertySeed` instead of a Property. A PropertySeed is best described as an object that can be turned into a Property by applying a lifetime using `L.applyScope`. 
+So when you create a stateful Property using methods such as `scan` or `filter`, you'll either need to provide a `Scope` parameter such as `L.globalScope` or you'll end up with a `PropertySeed` instead of a Property. A PropertySeed is best described as an object that can be turned into a Property by applying a lifetime using `L.applyScope`.
 
 When wouldn't I want to provide a Scope? In most cases it makes sense to provide a Scope, but sometimes you may find yourself building longer chains such as
 
 ```typescript
-something.pipe(L.filter(f), L.flatmap(g), L.scan(h), L.applyScope(myScope));
+something.pipe(L.filter(f), L.flatmap(g), L.scan(h), L.applyScope(myScope))
 ```
 
 In those cases it's both more convenient and performant to apply the scope at the end of the chain instead of applying it at every step.
@@ -387,10 +403,9 @@ TODO: documentation for all the operations like map, filter, flatMap, combine...
 
 By default, Lonna views into Properties and Atoms are stateless. In practice this means that whenever the value is accessed using `get` or in a `forEach` or `onChange` callback, the value is calculated using whatever mapping/combinator functions you've provided in your `L.view` calls. IMO this is generally a good strategy in the sense that it guarantees that the values are always fresh (no cached stale values). However, if there are any expensive computations in the chain, you may want to optimize. This can be done using [`cached`](https://github.com/raimohanska/lonna/blob/master/src/cached.ts) like so.
 
-
 ```typescript
-const v: L.Property<A>;
-const vCached: L.Property<A> = v.pipe(L.cached<A>(scope));
+const v: L.Property<A>
+const vCached: L.Property<A> = v.pipe(L.cached<A>(scope))
 ```
 
 Caching is of course stateful so you'll need to provide a Scope to get a Property, as above. Without a Scope you'll get a `PropertySeed` which can be later scoped into a `Property` as described in the Stateful views and Lifetimes chapter.
@@ -402,10 +417,10 @@ Here are the essential differences to Bacon.js.
 - Stateful Properties and EventStreams have an explicit `scope` which guarantees that they stay up-to-date for the required period. Scope can be global (active forever) or more limited, such as a GUI component lifetime. Access outside the explicit scope will cause thrown Errors.
 - `EventStreamSeed` and `PropertySeed` abstractions for streams and properties that don't have a `scope`. These can be mapped, filtered etc, but need to be scoped before accessing the value. They are very lightweight which may prove to be a major performance improvement: when creating temporary streams in flatMap, for instance, there's no need to create a Dispatcher for everything.
 - The `scope` decouples subscribers from EventStream/Property activation. This means that "cold observables" like `Bacon.once` cannot be EventStreams in Lonna. They will be `EventStreamSeeds` (what should I call it?) and can be used in constructs like `flatMap` as intermediary Observables.
-- `get<A>(p: Property<A>):A` method for reliable synchronous access to current value. Also, a Property *always* has a value. This is possible because `scope` guarantees freshness.
-- More flexible Property interface that makes it easy to create properties that, for instance, extract their current value from the DOM or other external synchrnous source. 
+- `get<A>(p: Property<A>):A` method for reliable synchronous access to current value. Also, a Property _always_ has a value. This is possible because `scope` guarantees freshness.
+- More flexible Property interface that makes it easy to create properties that, for instance, extract their current value from the DOM or other external synchrnous source.
 - Properties and Atoms always automatically skip duplicates, so no need for `.skipDuplicates` like in Bacon
-- No Error events. I've found them quite counterproductive in my use cases. 
+- No Error events. I've found them quite counterproductive in my use cases.
 - Simpler dispatch system, no Atomic Updates. However, when decomposition using map/combine is stateless which in itself guarantees that composed/decomposed state remains in sync
 - Atoms included for read-write state, similarly Bus for read-write streams. Rudimentary lens system included for decomposing state.
 - API consists of static methods instead of prototype methods. Is tree-shakable and easier to extend.

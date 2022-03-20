@@ -1,14 +1,11 @@
-import { valueEvent } from "./abstractions";
-import { fromPoll } from "./frompoll";
-import { take } from "./take";
-import { expectStreamEvents } from "./test-utils";
+import { valueEvent } from "./abstractions"
+import { fromPoll } from "./frompoll"
+import { take } from "./take"
+import { expectStreamEvents } from "./test-utils"
 
 describe("Bacon.fromPoll", () => {
   describe("repeatedly polls given function for values", () =>
-    expectStreamEvents(
-      () => take(2)(fromPoll(1, (() => "lol"))),
-      ["lol", "lol"])
-  );
+    expectStreamEvents(() => take(2)(fromPoll(1, () => "lol")), ["lol", "lol"]))
   /*
   describe("supports returning Event objects", () =>
     expectStreamEvents(
@@ -21,5 +18,8 @@ describe("Bacon.fromPoll", () => {
       [1, 1])
   );
   */
-  it("toString", () => expect(fromPoll(1, (() => {})).toString()).toEqual("EventStreamSeed fromPoll(1,fn)"));
-});
+  it("toString", () =>
+    expect(fromPoll(1, () => {}).toString()).toEqual(
+      "EventStreamSeed fromPoll(1,fn)"
+    ))
+})
