@@ -16,9 +16,10 @@ type Dict = { [key: string]: any }
 type ObserverPair = [Observer<any>, Observer<void>]
 
 // TODO: there's likely a lot of room for optimization here
+type ObserverList = ObserverPair[]
 function DispatchList() {
-  let _observers: ObserverPair[] = []
-  let dispatching = 0
+  let _observers: ObserverList = []
+  let dispatching: ObserverList | null = null
   let todos: Callback[] = []
   let removed: Set<ObserverPair> = new Set()
   function dispatch(index: number, value: any) {
@@ -26,38 +27,41 @@ function DispatchList() {
       todos.push(() => dispatch(index, value))
       return
     }
-    dispatching++
-    const observers = _observers
-    if (observers)
-      for (const pair of observers) {
+    dispatching = _observers
+    if (dispatching)
+      for (const pair of dispatching) {
         if (removed.has(pair)) {
-          // Skip these. TODO: smarter
+          // Skip observers removed during dispatch
         } else {
           pair[index] && pair[index](value)
         }
       }
     removed.clear()
-    dispatching--
+    dispatching = null
     const leftOvers = todos
     todos = []
     leftOvers.forEach((f) => f())
   }
+  function cloneIfNecessary() {
+    if (dispatching === _observers) {
+      _observers = [..._observers]
+    }
+  }
   function remove(pair: ObserverPair) {
+    cloneIfNecessary()
     const index = _observers.indexOf(pair)
     if (index >= 0) {
       if (dispatching) {
         removed.add(pair)
       }
-      _observers = [
-        ..._observers.slice(0, index),
-        ..._observers.slice(index + 1),
-      ]
+      _observers.splice(index, 1)
       return true
     }
     return false
   }
   function add(pair: ObserverPair) {
-    _observers = [..._observers, pair]
+    cloneIfNecessary()
+    _observers.push(pair)
   }
   return {
     dispatch,
