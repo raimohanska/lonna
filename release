@@ -21,8 +21,6 @@ yarn test
 echo "3. Setting version info to descriptor files"
 sed -i "" 's/\("version".*:.*\)".*"/\1"'$version'"/' $files
 
-exit 0
-
 echo "4. Commit and tag"
 git add .
 git commit -m "release $version"
