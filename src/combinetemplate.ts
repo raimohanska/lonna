@@ -147,7 +147,7 @@ function processTemplate<T, Prop>(
     return ctxStack[ctxStack.length - 1]
   }
   function setValue(ctxStack: Ctx[], key: any, value: any) {
-    ;(<any>current(ctxStack))[key] = value
+    (<any>current(ctxStack))[key] = value
     return value
   }
   function applyStreamValue(key: any, index: number) {
