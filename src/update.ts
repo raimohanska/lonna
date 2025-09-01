@@ -147,10 +147,10 @@ export function update<Out>(...args: any[]): any {
     patterns = args.slice(1)
   }
 
-  let mutators: EventStreamSeed<Mutation<Out>>[] = patterns.map((pattern) => {
+  const mutators: EventStreamSeed<Mutation<Out>>[] = patterns.map((pattern) => {
     if (pattern.length < 2)
       throw Error(`Illegal pattern ${pattern}, length must be >= 2`)
-    let sources: UpdateParam<Out>[] = pattern.slice(
+    const sources: UpdateParam<Out>[] = pattern.slice(
       0,
       pattern.length - 1
     ) as any
@@ -158,7 +158,7 @@ export function update<Out>(...args: any[]): any {
     if (!isEventStreamSeed(trigger))
       throw Error(`Illegal pattern ${pattern}, must contain one EventStream`)
     const properties = sources.slice(1) as Property<any>[]
-    for (let prop of properties) {
+    for (const prop of properties) {
       if (!isPropertySeed(prop))
         throw Error(
           `Illegal pattern ${pattern}. After one EventStream the rest on the observables must be Properties`

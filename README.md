@@ -425,3 +425,36 @@ Here are the essential differences to Bacon.js.
 - Atoms included for read-write state, similarly Bus for read-write streams. Rudimentary lens system included for decomposing state.
 - API consists of static methods instead of prototype methods. Is tree-shakable and easier to extend.
 - No global state, no `instanceof` checks => no problems even when running two Lonna instances in the same application (as long as there are no breaking changes between versions)
+
+## Development
+
+This project uses ESLint and Prettier to maintain code quality and consistency.
+
+### Code Quality Scripts
+
+- **`yarn lint`** - Run ESLint to check for code issues
+- **`yarn lint:fix`** - Run ESLint and automatically fix issues where possible
+- **`yarn format`** - Format all code using Prettier
+- **`yarn format:check`** - Check if code is properly formatted (fails if formatting is needed)
+
+### Running Before Commits
+
+To ensure code quality, run both linting and formatting:
+
+```bash
+yarn lint:fix
+yarn format
+yarn test
+```
+
+ESLint is configured with TypeScript-compatible rules and will catch common issues like:
+
+- Unused variables and imports
+- Use of `var` instead of `let`/`const`
+- Basic code style issues
+
+Prettier is configured with standard formatting rules including:
+
+- No semicolons
+- Double quotes
+- ES5 trailing commas

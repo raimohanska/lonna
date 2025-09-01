@@ -38,7 +38,7 @@ let seqs: StatefulEventStream<any>[] = []
 
 const verifyCleanup = () => {
   try {
-    for (let seq of seqs) {
+    for (const seq of seqs) {
       expect(hasObservers(seq)).toEqual(false)
     }
   } finally {

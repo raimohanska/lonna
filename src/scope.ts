@@ -50,7 +50,7 @@ export function createScope(): MutableScope {
 
   scope.start = () => {
     started = true
-    for (let i of ins) {
+    for (const i of ins) {
       outs.push(i())
     }
     ins.splice(0)
@@ -58,7 +58,7 @@ export function createScope(): MutableScope {
   scope.end = () => {
     started = false
     ended = true
-    for (let o of outs) {
+    for (const o of outs) {
       o()
     }
     outs.splice(0)

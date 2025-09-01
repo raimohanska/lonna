@@ -1,6 +1,6 @@
-package.json
-yarn.lock
-dist/
 node_modules/
+dist/
 coverage/
+*.js
+!jest.config.js
 .cache

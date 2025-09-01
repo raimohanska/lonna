@@ -76,7 +76,7 @@ class Buffer<V> {
       this.scheduled = null
     }
     if (this.values.length > 0) {
-      var valuesToPush = this.values
+      const valuesToPush = this.values
       this.values = []
       this.onValue(valuesToPush)
       if (this.ended) {
@@ -106,7 +106,7 @@ function toDelayFunction(
     return undefined
   }
   if (typeof delay === "number") {
-    var delayMs = delay
+    const delayMs = delay
     return function (f) {
       return GlobalScheduler.scheduler.setTimeout(f, delayMs)
     }
@@ -125,7 +125,7 @@ function buffer<V>(
   const transformer: StreamTransformer<V, V[]> =
     (subscribe) =>
     (onValue, onEnd = nop) => {
-      var buffer = new Buffer<V>(onFlush, onInput)
+      const buffer = new Buffer<V>(onFlush, onInput)
       buffer.onValue = onValue
       buffer.onEnd = onEnd
       return subscribe(

@@ -41,7 +41,7 @@ describe("combine", () => {
   })
 
   it("Subscribing before scope", () => {
-    let results: any[] = []
+    const results: any[] = []
     const src = constant(1)
     const scope = createScope()
     const scoped = src.pipe(applyScope(scope))

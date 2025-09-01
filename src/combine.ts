@@ -308,7 +308,7 @@ const subscribeSeeds =
         }
       )
     })
-    let currentArray = getCurrentArray()
+    const currentArray = getCurrentArray()
 
     return () => {
       unsubs.forEach((f) => f())

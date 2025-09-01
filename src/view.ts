@@ -185,7 +185,7 @@ export function view<A, B>(...args: any[]): any {
     // property/atom + lens
     const atom = args[0]
     const view = args[1]
-    let lens = keyOrLens2Lens(view)
+    const lens = keyOrLens2Lens(view)
     const desc = [atom, "view", [view]] as Desc
     if (isAtom<A>(atom)) {
       return new LensedAtom<A, B>(desc, atom, lens)

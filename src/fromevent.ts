@@ -30,25 +30,25 @@ function isEventSourceFn(x: any): x is EventSourceFn {
 //
 // Returns EventStream
 /** @hidden */
-var eventMethods = [
+const eventMethods = [
   ["addEventListener", "removeEventListener"],
   ["addListener", "removeListener"],
   ["on", "off"],
   ["bind", "unbind"],
 ]
 
-var findHandlerMethods = function (target: any): [Function, Function] {
-  var pair
-  for (var i = 0; i < eventMethods.length; i++) {
+const findHandlerMethods = function (target: any): [Function, Function] {
+  let pair
+  for (let i = 0; i < eventMethods.length; i++) {
     pair = eventMethods[i]
-    var methodPair = [target[pair[0]], target[pair[1]]]
+    const methodPair = [target[pair[0]], target[pair[1]]]
     if (methodPair[0] && methodPair[1]) {
       return <any>methodPair
     }
   }
-  for (var j = 0; j < eventMethods.length; j++) {
+  for (let j = 0; j < eventMethods.length; j++) {
     pair = eventMethods[j]
-    var addListener = target[pair[0]]
+    const addListener = target[pair[0]]
     if (addListener) {
       return [addListener, function () {}]
     }
@@ -90,7 +90,7 @@ export function fromEvent<V>(
   target: any,
   eventSource: string | EventSourceFn
 ): EventStream<V> {
-  var [sub, unsub] = findHandlerMethods(target)
+  const [sub, unsub] = findHandlerMethods(target)
   return new StatelessEventStream(
     ["fromEvent", [target, eventSource]],
     (onValue, onEnd) => {

@@ -60,7 +60,7 @@ describe("Property.view", () => {
 
   it("maps property values by unary function chain, skipping duplicates on every step", () => {
     let calls = 0
-    let values: boolean[] = []
+    const values: boolean[] = []
     const a = B.atom(0)
     const result = B.view(
       a,
