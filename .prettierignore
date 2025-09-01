@@ -1,2 +1,5 @@
 package.json
-/dist
+yarn.lock
+dist/
+node_modules/
+coverage/

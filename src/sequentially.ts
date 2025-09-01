@@ -34,12 +34,12 @@ export function sequentially<V>(
   values: (V | Event<V>)[],
   scope?: Scope
 ): any {
-  var index = 0
+  let index = 0
   return applyScopeMaybe(
     rename(
       ["sequentially", [delay, values]],
       fromPoll<V>(delay, () => {
-        var value = values[index++]
+        const value = values[index++]
         if (index < values.length) {
           return value
         } else if (index === values.length) {

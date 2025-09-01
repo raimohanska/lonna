@@ -225,7 +225,7 @@ function containsObservables(
     value &&
     (value.constructor == Object || value.constructor == Array)
   ) {
-    for (var key in value) {
+    for (const key in value) {
       if (Object.prototype.hasOwnProperty.call(value, key)) {
         const child = value[key]
         if (containsObservables(child, match)) return true
@@ -235,9 +235,9 @@ function containsObservables(
 }
 
 export function each<A>(xs: any, f: (key: string, x: A) => any) {
-  for (var key in xs) {
+  for (const key in xs) {
     if (Object.prototype.hasOwnProperty.call(xs, key)) {
-      var value = xs[key]
+      const value = xs[key]
       f(key, value)
     }
   }

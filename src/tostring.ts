@@ -1,7 +1,7 @@
 import { ObservableSeedBase, ObservableSeedImpl } from "./observable"
 
 export function toString(obj: any): string {
-  var hasProp = {}.hasOwnProperty
+  const hasProp = {}.hasOwnProperty
   try {
     recursionDepth++
     if (obj instanceof ObservableSeedBase) {
@@ -21,10 +21,10 @@ export function toString(obj: any): string {
       if (recursionDepth > 5) {
         return "{..}"
       }
-      var results: string[] = []
+      const results: string[] = []
       for (var key in obj) {
         if (!hasProp.call(obj, key)) continue
-        let value = (function () {
+        const value = (function () {
           try {
             return obj[key]
           } catch (error) {

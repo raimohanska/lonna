@@ -156,7 +156,7 @@ export function transform<A, B>(
   return (x: ObservableSeed<any, any, any>) => {
     const desc = composeDesc(x, methodCallDesc)
     if (isEventStreamSeed<A>(x)) {
-      let transformFn =
+      const transformFn =
         transformer instanceof Function ? transformer : transformer.changes
       const source = x.consume()
       return applyScopeMaybe(

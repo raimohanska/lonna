@@ -141,7 +141,7 @@ function flatMapSubscribe<A, B>(
       const unsubThis = subscribe(
         (rootEvent) => {
           if (options.latest) {
-            for (let child of children) {
+            for (const child of children) {
               child.unsub!()
             }
             children.splice(0)

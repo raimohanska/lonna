@@ -27,9 +27,9 @@ describe("Atom", () => {
 
 describe("Dependent Atom", () => {
   it("Works", () => {
-    var b = B.bus()
-    var prop = B.toProperty("1", B.globalScope)(b)
-    var atom = B.atom(prop, (newValue) => b.push(newValue))
+    const b = B.bus()
+    const prop = B.toProperty("1", B.globalScope)(b)
+    const atom = B.atom(prop, (newValue) => b.push(newValue))
     expect(atom.get()).toEqual("1")
     atom.set("2")
     expect(atom.get()).toEqual("2")

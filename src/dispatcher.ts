@@ -21,7 +21,7 @@ function DispatchList() {
   let _observers: ObserverList = []
   let dispatching: ObserverList | null = null
   let todos: Callback[] = []
-  let removed: Set<ObserverPair> = new Set()
+  const removed: Set<ObserverPair> = new Set()
   function dispatch(index: number, value: any) {
     if (dispatching) {
       todos.push(() => dispatch(index, value))
@@ -111,7 +111,7 @@ export class Dispatcher<E extends Dict> {
         }
       }
       return () => {
-        let list = this._observers[key]
+        const list = this._observers[key]
         if (!list) return
         if (list.remove(pair)) {
           if (key !== meta) {

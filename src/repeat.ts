@@ -24,7 +24,7 @@ export function repeat<V>(
   generator: (iteration: number) => ObservableSeed<V, any, any> | undefined,
   scope?: Scope
 ): any {
-  var index = 0
+  let index = 0
 
   return applyScopeMaybe(
     rename(
@@ -33,9 +33,9 @@ export function repeat<V>(
         onValue: Observer<V>,
         onEnd: Observer<void> = nop
       ) {
-        var flag = false
+        let flag = false
 
-        var unsub = function () {}
+        let unsub = function () {}
 
         function handleEnd() {
           if (!flag) {
@@ -45,7 +45,7 @@ export function repeat<V>(
           }
         }
         function subscribeNext() {
-          var next: ObservableSeed<V, any, any> | undefined
+          let next: ObservableSeed<V, any, any> | undefined
           flag = true
           while (flag) {
             next = generator(index++)
